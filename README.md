@@ -21,3 +21,8 @@
 ## 0710
 
 1. 理解 Proxy 与 Reflect
+
+## 0711
+
+1. git rebase -i --root
+2. git push -f
