@@ -1,27 +1,20 @@
 import { effect } from './effect'
 import { reactive } from './reactive'
 
-type Target = Record<'foo' | 'bar', boolean>
+type Target = Record<'foo', number>
 
 const proxy: Target = reactive({
-  foo: true,
-  bar: true,
+  foo: 0,
 })
 
-let temp1, temp2
+// let temp1, temp2
 effect(() => {
-  console.log('effect1 run')
-
-  effect(() => {
-    console.log('effect2 run')
-    temp2 = proxy.bar
-  })
-
-  temp1 = proxy.foo
+  // debugger
+  proxy.foo = proxy.foo + 1
 })
 
 setTimeout(() => {
-  proxy.bar = false
+  // proxy.bar = false
 }, 1000)
 
 setTimeout(() => {}, 2000)
