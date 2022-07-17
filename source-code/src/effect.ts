@@ -4,15 +4,24 @@ type ReactiveEffect = {
 }
 type Dep = Set<ReactiveEffect>
 type KeyToDepMap = Map<any, Dep>
+
 const targetMap = new WeakMap<any, KeyToDepMap>()
 
 let activeEffect: ReactiveEffect | undefined
+let effectStack: ReactiveEffect[] = []
+
 export function effect(fn: () => any) {
   const effectFn: ReactiveEffect = () => {
     console.log('包装副作用函数执行')
     cleanup(effectFn)
     activeEffect = effectFn
+    // 在调用副作用函数前 把当前副作用函数压入栈
+    effectStack.push(effectFn)
     fn()
+    // 在当前副作用函数执行完毕后，将当前副作用函数弹出栈
+    effectStack.pop()
+    // 并把activeEffect还原为之前的值
+    activeEffect = effectStack[effectStack.length - 1]
   }
   effectFn.deps = []
   effectFn()

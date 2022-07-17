@@ -8,12 +8,20 @@ const proxy: Target = reactive({
   bar: true,
 })
 
+let temp1, temp2
 effect(() => {
-  document.body.innerText = proxy.foo.toString()
+  console.log('effect1 run')
+
+  effect(() => {
+    console.log('effect2 run')
+    temp2 = proxy.bar
+  })
+
+  temp1 = proxy.foo
 })
 
 setTimeout(() => {
-  proxy.foo = false
+  proxy.bar = false
 }, 1000)
 
 setTimeout(() => {}, 2000)
