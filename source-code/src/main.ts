@@ -8,13 +8,18 @@ const proxy: Target = reactive({
 })
 
 // let temp1, temp2
-effect(() => {
-  // debugger
-  proxy.foo = proxy.foo + 1
-})
+effect(
+  () => {
+    // debugger
+    console.log(proxy.foo)
+  },
+  {
+    scheduler(fn) {
+      setTimeout(fn)
+    },
+  }
+)
 
-setTimeout(() => {
-  // proxy.bar = false
-}, 1000)
+proxy.foo++
 
-setTimeout(() => {}, 2000)
+console.log('end')
