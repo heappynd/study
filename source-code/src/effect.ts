@@ -1,6 +1,7 @@
 type ReactiveEffect = {
   (): any
   deps: Dep[]
+  options: Options
 }
 type Dep = Set<ReactiveEffect>
 type KeyToDepMap = Map<any, Dep>
@@ -10,7 +11,10 @@ const targetMap = new WeakMap<any, KeyToDepMap>()
 let activeEffect: ReactiveEffect | undefined
 let effectStack: ReactiveEffect[] = []
 
-export function effect(fn: () => any) {
+type Options = {
+  scheduler?: (fn: () => void) => any
+}
+export function effect(fn: () => any, options: Options = {}) {
   const effectFn: ReactiveEffect = () => {
     console.log('包装副作用函数执行')
     cleanup(effectFn)
@@ -23,6 +27,8 @@ export function effect(fn: () => any) {
     // 并把activeEffect还原为之前的值
     activeEffect = effectStack[effectStack.length - 1]
   }
+  // 将options挂载到effectFn上
+  effectFn.options = options
   effectFn.deps = []
   effectFn()
 }
@@ -64,5 +70,13 @@ export function trigger(target: any, key: string) {
         effectsToRun.add(effectFn)
       }
     })
-  effectsToRun.forEach((fn) => fn())
+  effectsToRun.forEach((fn) => {
+    // 如果一个副作用函数存在调度器 则调用调度器 并将副作用函数作为参数传递
+    if (fn.options.scheduler) {
+      fn.options.scheduler(fn)
+    } else {
+      // 否则直接执行副作用函数 （默认）
+      fn()
+    }
+  })
 }
