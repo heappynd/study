@@ -1,25 +1,27 @@
 import { effect } from './effect'
+import { flushJob, jobQueue } from './other'
 import { reactive } from './reactive'
 
 type Target = Record<'foo', number>
 
 const proxy: Target = reactive({
-  foo: 0,
+  foo: 1,
 })
 
-// let temp1, temp2
 effect(
   () => {
-    // debugger
+    debugger
     console.log(proxy.foo)
   },
   {
     scheduler(fn) {
-      setTimeout(fn)
+      jobQueue.add(fn)
+      flushJob()
     },
   }
 )
 
+proxy.foo++
 proxy.foo++
 
 console.log('end')
