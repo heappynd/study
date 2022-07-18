@@ -13,6 +13,9 @@ watch(
   () => proxy.foo,
   (newValue, oldValue) => {
     console.log('data change', newValue, oldValue)
+  },
+  {
+    immediate: true,
   }
 )
 
