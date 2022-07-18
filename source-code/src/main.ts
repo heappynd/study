@@ -11,8 +11,8 @@ const proxy: Target = reactive({
 
 watch(
   () => proxy.foo,
-  () => {
-    console.log('data change')
+  (newValue, oldValue) => {
+    console.log('data change', newValue, oldValue)
   }
 )
 

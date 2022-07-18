@@ -1,6 +1,6 @@
 import { effect } from './effect'
 
-export function watch(source: any, cb: () => any) {
+export function watch(source: any, cb: (newVal: any, oldValue: any) => any) {
   let getter: any
 
   if (typeof source === 'function') {
@@ -9,11 +9,19 @@ export function watch(source: any, cb: () => any) {
     getter = () => traverse(source)
   }
 
-  effect(() => getter(), {
+  let oldValue: any, newVal: any
+  const effectFn = effect(() => getter(), {
     scheduler() {
-      cb()
+      // 重新执行副作用函数拿到新值
+      newVal = effectFn()
+      cb(newVal, oldValue)
+      // 更新旧值不然下一次会拿到错误的旧值
+      oldValue = newVal
     },
+    lazy: true,
   })
+  // 手动调用副作用函数 拿到旧值
+  oldValue = effectFn()
 }
 
 function traverse(value: any, seen = new Set()) {
