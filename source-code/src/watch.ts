@@ -1,6 +1,10 @@
 import { effect } from './effect'
 
-export function watch(source: any, cb: (newVal: any, oldValue: any) => any) {
+type Options = {
+  immediate?: boolean
+}
+
+export function watch(source: any, cb: (newVal: any, oldValue: any) => any, options: Options = {}) {
   let getter: any
 
   if (typeof source === 'function') {
@@ -10,18 +14,28 @@ export function watch(source: any, cb: (newVal: any, oldValue: any) => any) {
   }
 
   let oldValue: any, newVal: any
+
+  // 提取scheduler函数为独立的job函数
+  const job = () => {
+    // 重新执行副作用函数拿到新值
+    newVal = effectFn()
+    cb(newVal, oldValue)
+    // 更新旧值不然下一次会拿到错误的旧值
+    oldValue = newVal
+  }
+
   const effectFn = effect(() => getter(), {
-    scheduler() {
-      // 重新执行副作用函数拿到新值
-      newVal = effectFn()
-      cb(newVal, oldValue)
-      // 更新旧值不然下一次会拿到错误的旧值
-      oldValue = newVal
-    },
+    scheduler: job,
     lazy: true,
   })
-  // 手动调用副作用函数 拿到旧值
-  oldValue = effectFn()
+
+  // 当immediate为true立即执行job
+  if (options.immediate) {
+    job()
+  } else {
+    // 手动调用副作用函数 拿到旧值
+    oldValue = effectFn()
+  }
 }
 
 function traverse(value: any, seen = new Set()) {
