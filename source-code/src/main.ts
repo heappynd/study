@@ -1,6 +1,7 @@
 import { computed } from './computed'
 import { effect } from './effect'
 import { reactive } from './reactive'
+import { watch } from './watch'
 
 type Target = Record<'foo', number>
 
@@ -8,14 +9,8 @@ const proxy: Target = reactive({
   foo: 10,
 })
 
-const doubleFoo = computed(() => {
-  return proxy.foo * 3
+watch(proxy, () => {
+  console.log('data change')
 })
 
-effect(() => {
-  console.log('-->', doubleFoo.value)
-})
-
-proxy.foo = 100
-
-console.log('end')
+proxy.foo++
