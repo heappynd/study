@@ -1,5 +1,3 @@
-import { computed } from './computed'
-import { effect } from './effect'
 import { reactive } from './reactive'
 import { watch } from './watch'
 
@@ -9,14 +7,35 @@ const proxy: Target = reactive({
   foo: 10,
 })
 
+let finalData: any
+function fetchMock(url: string) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve('data1' + url)
+    }, 1000)
+  })
+}
+
 watch(
   () => proxy.foo,
-  (newValue, oldValue) => {
-    console.log('data change', newValue, oldValue)
+  async (newValue, oldValue, onInvalidate) => {
+    let expired = false
+    onInvalidate(() => {
+      expired = true
+    })
+    const res = await fetchMock('/api/users' + newValue)
+    if (!expired) {
+      finalData = res
+    }
   },
-  {
-    immediate: true,
-  }
+  {}
 )
 
-proxy.foo++
+proxy.foo = 20
+setTimeout(() => {
+  proxy.foo = 30
+}, 200)
+
+setTimeout(() => {
+  console.log(finalData)
+}, 4000)

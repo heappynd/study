@@ -2,10 +2,10 @@ import { effect } from './effect'
 
 type Options = {
   immediate?: boolean
-  flush: 'post' | 'sync' | 'pre'
+  flush?: 'post' | 'sync' | 'pre'
 }
 
-export function watch(source: any, cb: (newVal: any, oldValue: any) => any, options: Options = { flush: 'sync' }) {
+export function watch(source: any, cb: (newVal: any, oldValue: any, onInvalidate: any) => any, options: Options) {
   let getter: any
 
   if (typeof source === 'function') {
@@ -16,11 +16,22 @@ export function watch(source: any, cb: (newVal: any, oldValue: any) => any, opti
 
   let oldValue: any, newVal: any
 
+  // 用来存储用户注册的过期回调
+  let cleanup: any
+  // 定义onInvalidate 函数
+  function onInvalidate(fn: () => any) {
+    cleanup = fn
+  }
+
   // 提取scheduler函数为独立的job函数
   const job = () => {
     // 重新执行副作用函数拿到新值
     newVal = effectFn()
-    cb(newVal, oldValue)
+    // 在调用过期回调cb之前 先调用过期回调
+    if (cleanup) {
+      cleanup()
+    }
+    cb(newVal, oldValue, onInvalidate)
     // 更新旧值不然下一次会拿到错误的旧值
     oldValue = newVal
   }
