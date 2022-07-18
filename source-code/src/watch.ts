@@ -2,9 +2,10 @@ import { effect } from './effect'
 
 type Options = {
   immediate?: boolean
+  flush: 'post' | 'sync' | 'pre'
 }
 
-export function watch(source: any, cb: (newVal: any, oldValue: any) => any, options: Options = {}) {
+export function watch(source: any, cb: (newVal: any, oldValue: any) => any, options: Options = { flush: 'sync' }) {
   let getter: any
 
   if (typeof source === 'function') {
@@ -25,7 +26,15 @@ export function watch(source: any, cb: (newVal: any, oldValue: any) => any, opti
   }
 
   const effectFn = effect(() => getter(), {
-    scheduler: job,
+    scheduler: () => {
+      if (options.flush === 'post') {
+        // 如果是post放到微任务队列中执行
+        const p = Promise.resolve()
+        p.then(job)
+      } else {
+        job()
+      }
+    },
     lazy: true,
   })
 
