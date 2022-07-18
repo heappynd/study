@@ -22,11 +22,14 @@ export function effect(fn: () => any, options: Options = {}) {
     activeEffect = effectFn
     // 在调用副作用函数前 把当前副作用函数压入栈
     effectStack.push(effectFn)
-    fn()
+    // 将fn的执行结果存储到res中
+    const res = fn()
     // 在当前副作用函数执行完毕后，将当前副作用函数弹出栈
     effectStack.pop()
     // 并把activeEffect还原为之前的值
     activeEffect = effectStack[effectStack.length - 1]
+    // 将res作为effectfn的返回值
+    return res
   }
   // 将options挂载到effectFn上
   effectFn.options = options

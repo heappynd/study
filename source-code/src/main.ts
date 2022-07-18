@@ -1,24 +1,23 @@
-import { effect } from './effect'
-import { flushJob, jobQueue } from './other'
+import { computed } from './computed'
 import { reactive } from './reactive'
 
 type Target = Record<'foo', number>
 
 const proxy: Target = reactive({
-  foo: 1,
+  foo: 10,
 })
 
-const effectFn = effect(
-  () => {
-    console.log(proxy.foo)
-  },
-  {
-    lazy: true,
-  }
-)
+const doubleFoo = computed(() => {
+  debugger
+  return proxy.foo * 3
+})
 
-// effectFn()
+console.log(doubleFoo.value)
+console.log(doubleFoo.value)
+console.log(doubleFoo.value)
 
-proxy.foo = 2
+proxy.foo = 100
+
+console.log(doubleFoo.value)
 
 console.log('end')
