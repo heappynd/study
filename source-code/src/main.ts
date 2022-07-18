@@ -9,8 +9,11 @@ const proxy: Target = reactive({
   foo: 10,
 })
 
-watch(proxy, () => {
-  console.log('data change')
-})
+watch(
+  () => proxy.foo,
+  () => {
+    console.log('data change')
+  }
+)
 
 proxy.foo++
