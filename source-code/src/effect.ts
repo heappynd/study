@@ -13,6 +13,7 @@ let effectStack: ReactiveEffect[] = []
 
 type Options = {
   scheduler?: (fn: () => void) => any
+  lazy?: boolean
 }
 export function effect(fn: () => any, options: Options = {}) {
   const effectFn: ReactiveEffect = () => {
@@ -30,7 +31,12 @@ export function effect(fn: () => any, options: Options = {}) {
   // 将options挂载到effectFn上
   effectFn.options = options
   effectFn.deps = []
-  effectFn()
+  // 只有非lazy才执行副作用函数
+  if (!options.lazy) {
+    effectFn()
+  }
+  // 将副作用函数作为返回值
+  return effectFn
 }
 
 function cleanup(effectFn: ReactiveEffect) {

@@ -8,20 +8,17 @@ const proxy: Target = reactive({
   foo: 1,
 })
 
-effect(
+const effectFn = effect(
   () => {
-    debugger
     console.log(proxy.foo)
   },
   {
-    scheduler(fn) {
-      jobQueue.add(fn)
-      flushJob()
-    },
+    lazy: true,
   }
 )
 
-proxy.foo++
-proxy.foo++
+// effectFn()
+
+proxy.foo = 2
 
 console.log('end')
