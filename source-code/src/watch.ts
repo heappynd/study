@@ -1,7 +1,15 @@
 import { effect } from './effect'
 
 export function watch(source: any, cb: () => any) {
-  effect(() => traverse(source), {
+  let getter: any
+
+  if (typeof source === 'function') {
+    getter = source
+  } else {
+    getter = () => traverse(source)
+  }
+
+  effect(() => getter(), {
     scheduler() {
       cb()
     },
@@ -9,7 +17,6 @@ export function watch(source: any, cb: () => any) {
 }
 
 function traverse(value: any, seen = new Set()) {
-  debugger
   // 如果读取的是原始值 或者已经读取了 那么什么都不做
   if (typeof value !== 'object' || value === null || seen.has(value)) {
     return
