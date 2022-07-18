@@ -26,3 +26,7 @@
 
 1. git rebase -i --root
 2. git push -f
+
+## 0718
+
+1. [Call Signatures](https://www.typescriptlang.org/docs/handbook/2/functions.html#call-signatures)
