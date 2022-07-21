@@ -1,3 +1,5 @@
+import { ITERATE_KEY } from './reactive'
+
 type ReactiveEffect = {
   (): any
   deps: Dep[]
@@ -65,12 +67,20 @@ export function track(target: any, key: string) {
   activeEffect.deps.push(deps)
 }
 
-export function trigger(target: any, key: string) {
+export enum TriggerType {
+  ADD,
+  SET,
+  DELETE,
+}
+
+export function trigger(target: any, key: string, type: TriggerType) {
   const depsMap = targetMap.get(target)
   if (!depsMap) {
     return
   }
+  // 取得与key相关联的副作用函数
   const effects = depsMap.get(key)
+
   const effectsToRun: Dep = new Set()
   effects &&
     effects.forEach((effectFn) => {
@@ -79,6 +89,16 @@ export function trigger(target: any, key: string) {
         effectsToRun.add(effectFn)
       }
     })
+  if (type === TriggerType.ADD || type === TriggerType.DELETE) {
+    // 取得与iterate_key相关联的副作用函数
+    const iterateEffects = depsMap.get(ITERATE_KEY)
+    iterateEffects &&
+      iterateEffects.forEach((effectFn) => {
+        if (effectFn !== activeEffect) {
+          effectsToRun.add(effectFn)
+        }
+      })
+  }
   effectsToRun.forEach((fn) => {
     // 如果一个副作用函数存在调度器 则调用调度器 并将副作用函数作为参数传递
     if (fn.options.scheduler) {
