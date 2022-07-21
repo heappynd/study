@@ -5,7 +5,7 @@ export function reactive<T extends object>(obj: T) {
     get(target, p: string, receiver) {
       track(target, p)
 
-      return target[p]
+      return Reflect.get(target, p, receiver)
     },
     set(target, p: string, value, receiver) {
       target[p] = value

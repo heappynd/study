@@ -1,41 +1,21 @@
+import { effect } from './effect'
 import { reactive } from './reactive'
 import { watch } from './watch'
 
-type Target = Record<'foo', number>
+type Target = Record<'foo' | 'bar', number>
 
 const proxy: Target = reactive({
   foo: 10,
+
+  get bar() {
+    return this.foo
+  },
 })
 
-let finalData: any
-function fetchMock(url: string) {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      resolve('data1' + url)
-    }, 1000)
-  })
-}
-
-watch(
-  () => proxy.foo,
-  async (newValue, oldValue, onInvalidate) => {
-    let expired = false
-    onInvalidate(() => {
-      expired = true
-    })
-    const res = await fetchMock('/api/users' + newValue)
-    if (!expired) {
-      finalData = res
-    }
-  },
-  {}
-)
-
-proxy.foo = 20
-setTimeout(() => {
-  proxy.foo = 30
-}, 200)
+effect(() => {
+  console.log(proxy.bar)
+})
 
 setTimeout(() => {
-  console.log(finalData)
-}, 4000)
+  proxy.foo = 20
+}, 1000)
