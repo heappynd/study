@@ -4,16 +4,16 @@ import { watch } from './watch'
 
 type Target = Record<'foo', number>
 
-const proxy: Target = reactive({
-  foo: 10,
-})
+const obj = {}
+const proto = { bar: 1 }
+const child = reactive(obj)
+const parent = reactive(proto)
+Object.setPrototypeOf(child, parent)
 
 effect(() => {
-  for (const key in proxy) {
-    console.log(key)
-  }
+  console.log(child.bar)
 })
 
 setTimeout(() => {
-  proxy.bar = 200
+  child.bar = 2
 }, 1000)

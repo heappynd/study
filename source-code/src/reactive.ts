@@ -5,15 +5,24 @@ export const ITERATE_KEY = Symbol()
 export function reactive<T extends object>(obj: T) {
   return new Proxy(obj, {
     get(target, p: string, receiver) {
+      if (p === 'raw') {
+        return target
+      }
       track(target, p)
 
       return Reflect.get(target, p, receiver)
     },
-    set(target, p: string, value, receiver) {
+    set(target, p: string, newVal, receiver) {
+      // 先获取旧值
+      const oldVal = target[p]
       const type = Object.prototype.hasOwnProperty.call(target, p) ? TriggerType.SET : TriggerType.ADD
-      const res = Reflect.set(target, p, value, receiver)
-      // 新增一个type参数
-      trigger(target, p, type)
+      const res = Reflect.set(target, p, newVal, receiver)
+      // 新增一个type参数 解决全等缺陷NaN
+      if (target === receiver.raw) {
+        if (oldVal !== newVal && (oldVal === oldVal || newVal === newVal)) {
+          trigger(target, p, type)
+        }
+      }
       return res
     },
     has(target, p) {
