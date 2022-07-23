@@ -8,14 +8,24 @@ export function reactive<T extends object>(obj: T) {
 export function shallowReactive<T extends object>(obj: T) {
   return createReactive(obj, true)
 }
+export function readonly<T extends object>(obj: T) {
+  return createReactive(obj, false, true)
+}
+export function shallowReadonly<T extends object>(obj: T) {
+  return createReactive(obj, true, true)
+}
 
-function createReactive(obj: object, isShallow = false) {
+function createReactive(obj: object, isShallow = false, isReadonly = false) {
   return new Proxy(obj, {
     get(target, p: string, receiver) {
       if (p === 'raw') {
         return target
       }
-      track(target, p)
+      // 非只读的时候才需要追踪
+      if (!isReadonly) {
+        track(target, p)
+      }
+
       const res = Reflect.get(target, p, receiver)
 
       // 如果是浅响应直接返回原始值
@@ -24,12 +34,16 @@ function createReactive(obj: object, isShallow = false) {
       }
 
       if (typeof res === 'object' && res !== null) {
-        return reactive(res)
+        return isReadonly ? readonly(res) : reactive(res)
       }
 
       return res
     },
     set(target, p: string, newVal, receiver) {
+      if (isReadonly) {
+        console.warn(`属性${p}是只读的`)
+        return true
+      }
       // 先获取旧值
       const oldVal = target[p]
       const type = Object.prototype.hasOwnProperty.call(target, p) ? TriggerType.SET : TriggerType.ADD
@@ -51,6 +65,10 @@ function createReactive(obj: object, isShallow = false) {
       return Reflect.ownKeys(target)
     },
     deleteProperty(target, p) {
+      if (isReadonly) {
+        console.warn(`属性${p}是只读的`)
+        return true
+      }
       // 检查被操作的属性是否是对象自己的属性
       const hadKey = Object.prototype.hasOwnProperty.call(target, p)
       const res = Reflect.deleteProperty(target, p)

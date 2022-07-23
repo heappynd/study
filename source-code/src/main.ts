@@ -1,8 +1,8 @@
 import { effect } from './effect'
-import { reactive, shallowReactive } from './reactive'
+import { reactive, readonly, shallowReactive, shallowReadonly } from './reactive'
 import { watch } from './watch'
 
-const obj = shallowReactive({
+const obj = shallowReadonly({
   foo: {
     bar: 1,
   },
