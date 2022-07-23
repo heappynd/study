@@ -1,19 +1,17 @@
 import { effect } from './effect'
-import { reactive } from './reactive'
+import { reactive, shallowReactive } from './reactive'
 import { watch } from './watch'
 
-type Target = Record<'foo', number>
-
-const obj = {}
-const proto = { bar: 1 }
-const child = reactive(obj)
-const parent = reactive(proto)
-Object.setPrototypeOf(child, parent)
+const obj = shallowReactive({
+  foo: {
+    bar: 1,
+  },
+})
 
 effect(() => {
-  console.log(child.bar)
+  console.log(obj.foo.bar)
 })
 
 setTimeout(() => {
-  child.bar = 2
+  obj.foo.bar = 200
 }, 1000)

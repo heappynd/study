@@ -3,14 +3,31 @@ import { track, trigger, TriggerType } from './effect'
 export const ITERATE_KEY = Symbol()
 
 export function reactive<T extends object>(obj: T) {
+  return createReactive(obj)
+}
+export function shallowReactive<T extends object>(obj: T) {
+  return createReactive(obj, true)
+}
+
+function createReactive(obj: object, isShallow = false) {
   return new Proxy(obj, {
     get(target, p: string, receiver) {
       if (p === 'raw') {
         return target
       }
       track(target, p)
+      const res = Reflect.get(target, p, receiver)
 
-      return Reflect.get(target, p, receiver)
+      // 如果是浅响应直接返回原始值
+      if (isShallow) {
+        return res
+      }
+
+      if (typeof res === 'object' && res !== null) {
+        return reactive(res)
+      }
+
+      return res
     },
     set(target, p: string, newVal, receiver) {
       // 先获取旧值
