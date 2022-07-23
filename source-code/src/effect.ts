@@ -1,4 +1,4 @@
-import { ITERATE_KEY } from './reactive'
+import { ITERATE_KEY, shouldTrack } from './reactive'
 
 type ReactiveEffect = {
   (): any
@@ -52,7 +52,8 @@ function cleanup(effectFn: ReactiveEffect) {
 }
 
 export function track(target: any, key: string) {
-  if (!activeEffect) return
+  // 当禁止追踪时 直接返回
+  if (!activeEffect || !shouldTrack) return
   let depsMap = targetMap.get(target)
   if (!depsMap) {
     depsMap = new Map()
@@ -73,7 +74,7 @@ export enum TriggerType {
   DELETE,
 }
 
-export function trigger(target: any, key: string, type: TriggerType) {
+export function trigger(target: any, key: string, type: TriggerType, newVal: any) {
   const depsMap = targetMap.get(target)
   if (!depsMap) {
     return
@@ -99,6 +100,31 @@ export function trigger(target: any, key: string, type: TriggerType) {
         }
       })
   }
+  // 当操作类型为ADD 且目标对象是数组时 应该取出那些与length属性相关联的副作用函数
+  if (type === TriggerType.ADD && Array.isArray(target)) {
+    const lengthEffects = depsMap.get('length')
+    lengthEffects &&
+      lengthEffects.forEach((effectFn) => {
+        if (effectFn !== activeEffect) {
+          effectsToRun.add(effectFn)
+        }
+      })
+  }
+  // 如果目标是数组 且修改了数组的length属性
+  if (Array.isArray(target) && key === 'length') {
+    // 对于索引值大于或等于新的length值的属性
+    // 需要把所有相关联的副作用函数取出 并添加到effectsRun中待执行
+    depsMap.forEach((effects, key) => {
+      if (key >= newVal) {
+        effects.forEach((effectFn) => {
+          if (effectFn !== activeEffect) {
+            effectsToRun.add(effectFn)
+          }
+        })
+      }
+    })
+  }
+
   effectsToRun.forEach((fn) => {
     // 如果一个副作用函数存在调度器 则调用调度器 并将副作用函数作为参数传递
     if (fn.options.scheduler) {
