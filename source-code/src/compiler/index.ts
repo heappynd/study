@@ -1,6 +1,6 @@
 import type { VNode } from './vnode'
 
-type RendererOptions = {
+export type RendererOptions = {
   createElement: (type: string) => any
   insert: (el: any, parent: any, anchor?: any) => void
   setElementText: (el: any, text: string) => void
