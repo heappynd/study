@@ -30,3 +30,10 @@
 ## 0718
 
 1. [Call Signatures](https://www.typescriptlang.org/docs/handbook/2/functions.html#call-signatures)
+
+## 0726
+
+1. 规范 GIT 代码提交信息
+
+- https://jelly.jd.com/article/5f51aa34da524a0147e9529d
+- https://www.ruanyifeng.com/blog/2016/01/commit_message_change_log.html
