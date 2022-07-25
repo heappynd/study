@@ -1,15 +1,15 @@
-import { effect } from './effect'
-import { reactive, readonly, shallowReactive, shallowReadonly } from './reactive'
-import { watch } from './watch'
+import { effect, ref } from '@vue/reactivity'
 
-const arr = reactive([])
+function renderer(domString: string, container: HTMLElement) {
+  container.innerHTML = domString
+}
 
-effect(() => {
-  arr.push(1)
-})
+const count = ref(1)
 
 effect(() => {
-  arr.push(1)
+  renderer(`<h1>${count.value}</h1>`, document.getElementById('app')!)
 })
 
-setTimeout(() => {}, 1000)
+setTimeout(() => {
+  count.value++
+}, 1000)
