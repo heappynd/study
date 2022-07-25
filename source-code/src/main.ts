@@ -1,15 +1,20 @@
-import { effect, ref } from '@vue/reactivity'
+import { createRenderer } from './compiler'
+import { VNode } from './compiler/vnode'
 
-function renderer(domString: string, container: HTMLElement) {
-  container.innerHTML = domString
+const vnode: VNode = {
+  type: 'h1',
+  children: 'hello',
 }
 
-const count = ref(1)
-
-effect(() => {
-  renderer(`<h1>${count.value}</h1>`, document.getElementById('app')!)
+const renderer = createRenderer({
+  createElement(tag) {
+    return document.createElement(tag)
+  },
+  setElementText(el: HTMLElement, text) {
+    el.textContent = text
+  },
+  insert(el: HTMLElement, parent: HTMLElement, anchor = null) {
+    parent.insertBefore(el, anchor)
+  },
 })
-
-setTimeout(() => {
-  count.value++
-}, 1000)
+renderer.render(vnode, document.querySelector('#app'))
