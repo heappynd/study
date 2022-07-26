@@ -15,6 +15,12 @@ const vnode: VNode = {
       type: 'button',
       props: {
         disabled: '',
+        class: [
+          'foo bar',
+          {
+            baz: true,
+          },
+        ],
       },
       children: 'ok',
     },

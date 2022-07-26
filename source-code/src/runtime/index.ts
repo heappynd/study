@@ -36,6 +36,10 @@ export function createRenderer() {
     if (vnode.props) {
       for (const key in vnode.props) {
         const value = vnode.props[key]
+        if (key === 'class') {
+          // todo normalizeClass
+          el.className = value || ''
+        }
         if (shouldSetAsProps(el, key, value)) {
           const type = typeof el[key]
           if (typeof type === 'boolean' && value === '') {
