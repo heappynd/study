@@ -25,10 +25,22 @@ export function createRenderer(options: RendererOptions) {
   }
 
   function mountElement(vnode: VNode, container: any) {
-    const el = createElement(vnode.type)
+    const el = createElement(vnode.type) as HTMLElement
     if (typeof vnode.children === 'string') {
       setElementText(el, vnode.children)
+    } else if (Array.isArray(vnode.children)) {
+      vnode.children.forEach((child) => {
+        patch(null, child, el)
+      })
     }
+
+    if (vnode.props) {
+      for (const key in vnode.props) {
+        // el.setAttribute(key, vnode.props[key])
+        // el[key] = vnode.props[key]
+      }
+    }
+
     insert(el, container)
   }
 

@@ -2,8 +2,16 @@ import { createRenderer, RendererOptions } from './compiler'
 import { VNode } from './compiler/vnode'
 
 const vnode: VNode = {
-  type: 'h1',
-  children: 'hello vue',
+  type: 'div',
+  props: {
+    id: 'foo',
+  },
+  children: [
+    {
+      type: 'p',
+      children: 'hello',
+    },
+  ],
 }
 
 const dom: RendererOptions = {
@@ -33,6 +41,6 @@ const custom: RendererOptions = {
   },
 }
 
-const renderer = createRenderer(custom)
-// renderer.render(vnode, document.querySelector('#app'))
-renderer.render(vnode, { type: 'root' })
+const renderer = createRenderer(dom)
+renderer.render(vnode, document.querySelector('#app'))
+// renderer.render(vnode, { type: 'root' })
