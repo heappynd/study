@@ -2,6 +2,11 @@ import { VNode } from './vnode'
 
 type RendererElement = HTMLElement & {
   _vnode?: VNode
+  /** vue event invoker */
+  _vei?: {
+    value: () => void
+    [key: string]: (e: any) => void
+  }
 }
 
 export function createRenderer() {
@@ -43,7 +48,7 @@ export function createRenderer() {
 
   function mountElement(vnode: VNode, container: RendererElement) {
     // 让vnode.el引用真实DOM元素
-    const el = (vnode.el = document.createElement(vnode.type))
+    const el = (vnode.el = document.createElement(vnode.type) as RendererElement)
     if (typeof vnode.children === 'string') {
       el.textContent = vnode.children
     } else if (Array.isArray(vnode.children)) {
@@ -55,11 +60,37 @@ export function createRenderer() {
     if (vnode.props) {
       for (const key in vnode.props) {
         const value = vnode.props[key]
-        if (key === 'class') {
+        if (/^on/.test(key)) {
+          // 获取为该元素伪造的事件处理函数 invoker
+          const invokers = el._vei || (el._vei = {})
+          let invoker = invokers[key]
+          // 匹配事件
+          const name = key.slice(2).toLowerCase()
+          if (value) {
+            if (!invoker) {
+              // 如果没有invoker 将一个伪造的invoker缓存到el._vei中
+              invoker = el._vei[key] = (e) => {
+                // 当伪造的事件处理函数执行时 会执行真正的事件处理函数
+                if (Array.isArray(invoker.value)) {
+                  invoker.value.forEach((fn) => fn(e))
+                } else {
+                  invoker.value(e)
+                }
+              }
+              invoker.value = value
+              // 绑定invoker 作为事件处理函数
+              el.addEventListener(name, invoker)
+            } else {
+              invoker.value = value
+            }
+          } else if (invoker) {
+            // 新的事件绑定函数不存在 且之前绑定的invoker存在 则移除绑定
+            el.removeEventListener(name, invoker)
+          }
+        } else if (key === 'class') {
           // todo normalizeClass 源码在 @vue/shared
           el.className = value || ''
-        }
-        if (shouldSetAsProps(el, key, value)) {
+        } else if (shouldSetAsProps(el, key, value)) {
           const type = typeof el[key]
           if (typeof type === 'boolean' && value === '') {
             el[key] = true
