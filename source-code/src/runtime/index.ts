@@ -6,13 +6,31 @@ type RendererElement = HTMLElement & {
 
 export function createRenderer() {
   function patch(n1: VNode | undefined | null, n2: VNode, container: RendererElement) {
-    // n1旧节点不存在 意味着挂载
-    if (!n1) {
-      mountElement(n2, container)
-    } else {
-      // n1 n2 都存在 复杂
+    // 1 如果n1存在 则对比n1和n2的类型
+    if (n1 && n1.type !== n2.type) {
+      // 如果不相同 卸载旧的
+      unmount(n1)
+      n1 = null
+    }
+    // 代码运行到这里 说明n1和n2所描述的内容相同
+    const { type } = n2
+    // n2 的type为string 则描述的是普通标签
+    if (typeof type === 'string') {
+      // n1旧节点不存在 意味着挂载
+      if (!n1) {
+        mountElement(n2, container)
+      } else {
+        // n1 n2 都存在 复杂
+        patchElement(n1, n2)
+      }
+    } else if (typeof type === 'object') {
+      // todo 是对象描述的是组件
+    } else if (type === 'xxx') {
+      // todo 处理其他type
     }
   }
+
+  function patchElement(n1: VNode, n2: VNode) {}
 
   function shouldSetAsProps(el: RendererElement, key: string, value: any) {
     // 特殊处理

@@ -2,40 +2,17 @@ import { createRenderer } from './runtime'
 import { VNode } from './runtime/vnode'
 
 const vnode: VNode = {
-  type: 'div',
-  props: {
-    id: 'foo',
-  },
-  children: [
-    {
-      type: 'p',
-      children: 'hello',
-    },
-    {
-      type: 'button',
-      props: {
-        disabled: '',
-        class: [
-          'foo bar',
-          {
-            baz: true,
-          },
-        ],
-      },
-      children: 'ok',
-    },
-    {
-      type: 'input',
-      props: {
-        form: 'form1',
-      },
-    },
-  ],
+  type: 'h1',
+  children: 'hello vue',
+}
+const newVnode: VNode = {
+  type: 'h2',
+  children: 'hello vue3',
 }
 
 const renderer = createRenderer()
 renderer.render(vnode, document.querySelector('#app')!)
 
 setTimeout(() => {
-  renderer.render(null, document.getElementById('app')!)
+  renderer.render(newVnode, document.getElementById('app')!)
 }, 1000)
