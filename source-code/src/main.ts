@@ -35,3 +35,7 @@ const vnode: VNode = {
 
 const renderer = createRenderer()
 renderer.render(vnode, document.querySelector('#app')!)
+
+setTimeout(() => {
+  renderer.render(null, document.getElementById('app')!)
+}, 1000)

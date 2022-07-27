@@ -24,7 +24,8 @@ export function createRenderer() {
   }
 
   function mountElement(vnode: VNode, container: RendererElement) {
-    const el = document.createElement(vnode.type)
+    // 让vnode.el引用真实DOM元素
+    const el = (vnode.el = document.createElement(vnode.type))
     if (typeof vnode.children === 'string') {
       el.textContent = vnode.children
     } else if (Array.isArray(vnode.children)) {
@@ -37,7 +38,7 @@ export function createRenderer() {
       for (const key in vnode.props) {
         const value = vnode.props[key]
         if (key === 'class') {
-          // todo normalizeClass
+          // todo normalizeClass 源码在 @vue/shared
           el.className = value || ''
         }
         if (shouldSetAsProps(el, key, value)) {
@@ -56,6 +57,13 @@ export function createRenderer() {
     container.appendChild(el)
   }
 
+  function unmount(vnode: VNode) {
+    const parent = vnode.el.parentNode
+    if (parent) {
+      parent.removeChild(vnode.el)
+    }
+  }
+
   function render(vnode: VNode, container: RendererElement) {
     if (vnode) {
       // 新vnode存在 打补丁
@@ -63,7 +71,7 @@ export function createRenderer() {
     } else {
       if (container._vnode) {
         // 旧vnode存在 新vnode不存在 unmount
-        container.innerHTML = ''
+        unmount(container._vnode)
       }
     }
     container._vnode = vnode

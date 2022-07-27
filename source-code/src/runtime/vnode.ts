@@ -4,4 +4,5 @@ export type VNode = {
   props?: {
     [key: string]: any
   }
+  el?: HTMLElement
 }
