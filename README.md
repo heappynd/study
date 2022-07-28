@@ -34,9 +34,10 @@
 ## 0726
 
 1. 规范 GIT 代码提交信息
-
-  - https://jelly.jd.com/article/5f51aa34da524a0147e9529d
-  - https://www.ruanyifeng.com/blog/2016/01/commit_message_change_log.html
+   - https://jelly.jd.com/article/5f51aa34da524a0147e9529d
+   - https://www.ruanyifeng.com/blog/2016/01/commit_message_change_log.html
 
 ## 0729
- 1. [单文件组件 CSS 功能](https://staging-cn.vuejs.org/api/sfc-css-features.html)
+
+1. [单文件组件 CSS 功能](https://staging-cn.vuejs.org/api/sfc-css-features.html)
+2. [深度作用选择器](https://vue-loader.vuejs.org/zh/guide/scoped-css.html#深度作用选择器)
