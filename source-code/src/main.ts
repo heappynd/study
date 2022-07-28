@@ -1,35 +1,41 @@
+import { effect, ref } from '@vue/reactivity'
 import { createRenderer } from './runtime'
 import { VNode } from './runtime/vnode'
 
-const vnode: VNode = {
-  type: 'h1',
-  children: 'hello vue',
-  props: {
-    onContextmenu: () => {
-      console.log('onContextmenu')
-    },
-    onClick: [
-      () => {
-        alert('clicked 1')
-      },
-      () => {
-        alert('clicked 2')
+const bol = ref(false)
+const renderer = createRenderer()
+
+effect(() => {
+  const vnode: VNode = {
+    type: 'div',
+    props: bol.value
+      ? {
+          onClick: () => {
+            console.log('ccc')
+
+            alert('父元素 clicked')
+          },
+          class: 'test',
+        }
+      : {},
+    children: [
+      {
+        type: 'p',
+        props: {
+          onClick: () => {
+            console.log(1)
+
+            bol.value = true
+          },
+        },
+        children: 'text',
       },
     ],
-  },
-}
-const newVnode: VNode = {
-  type: 'h2',
-  children: 'hello vue3',
-  props: {
-    onClick: () => {
-      alert('at')
-    },
-  },
-}
+  }
+  console.log(vnode)
 
-const renderer = createRenderer()
-renderer.render(vnode, document.querySelector('#app')!)
+  renderer.render(vnode, document.querySelector('#app')!)
+})
 
 setTimeout(() => {
   // renderer.render(newVnode, document.getElementById('app')!)
