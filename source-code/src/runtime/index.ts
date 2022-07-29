@@ -148,6 +148,15 @@ export function createRenderer() {
             patch(null, newVNode, container, anchor)
           }
         }
+
+        // 上一步的更新操作完成后 遍历一组旧的子节点
+        for (let i = 0; i < oldChildren.length; i++) {
+          const oldVNode = oldChildren[i]
+          const has = newChildren.find((vnode) => vnode.key === oldVNode.key)
+          if (!has) {
+            unmount(oldVNode)
+          }
+        }
       } else {
         // 这时子节点要么是文本子节点 要么不存在
         // 都只需要把他清空 让后逐个挂载新的子节点数组
