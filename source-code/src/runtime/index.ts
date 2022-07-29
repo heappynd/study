@@ -26,7 +26,7 @@ function unmount(vnode: VNode) {
 export function createRenderer() {
   const { createElement, setElementText, insert, createText, setText, patchProps } = options
 
-  function patch(n1: VNode | undefined | null, n2: VNode, container: RendererElement) {
+  function patch(n1: VNode | undefined | null, n2: VNode, container: RendererElement, anchor?: Node) {
     // 1 如果n1存在 则对比n1和n2的类型
     if (n1 && n1.type !== n2.type) {
       // 如果不相同 卸载旧的
@@ -39,7 +39,7 @@ export function createRenderer() {
     if (typeof type === 'string') {
       // n1旧节点不存在 意味着挂载
       if (!n1) {
-        mountElement(n2, container)
+        mountElement(n2, container, anchor)
       } else {
         // n1 n2 都存在 复杂
         console.log('patchElement')
@@ -112,9 +112,13 @@ export function createRenderer() {
         let lastIndex = 0
         for (let i = 0; i < newChildren.length; i++) {
           const newVNode = newChildren[i]
-          for (let j = 0; j < oldChildren.length; j++) {
+          let j = 0
+          // 表示是否找到可复用的节点
+          let find = false
+          for (j; j < oldChildren.length; j++) {
             const oldVNode = oldChildren[j]
             if (newVNode.key === oldVNode.key) {
+              find = true
               patch(oldVNode, newVNode, container)
               if (j < lastIndex) {
                 // 如果找到的节点 在旧children中索引小于最大索引值lastIndex
@@ -130,6 +134,18 @@ export function createRenderer() {
               }
               break
             }
+          }
+          // 如果代码运行到这 仍然为false
+          // 说明有新增的节点
+          if (!find) {
+            const prevVNode = newChildren[i - 1]
+            let anchor = null
+            if (prevVNode) {
+              anchor = prevVNode.el?.nextSibling
+            } else {
+              anchor = container.firstChild
+            }
+            patch(null, newVNode, container, anchor)
           }
         }
       } else {
@@ -149,7 +165,7 @@ export function createRenderer() {
     }
   }
 
-  function mountElement(vnode: VNode, container: RendererElement) {
+  function mountElement(vnode: VNode, container: RendererElement, anchor: Node) {
     // 让vnode.el引用真实DOM元素
     const el = (vnode.el = createElement(vnode.type))
     if (typeof vnode.children === 'string') {
@@ -166,7 +182,7 @@ export function createRenderer() {
       }
     }
 
-    insert(el, container)
+    insert(el, container, anchor)
   }
 
   function render(vnode: VNode, container: RendererElement) {
