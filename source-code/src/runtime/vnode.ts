@@ -5,6 +5,7 @@ export type VNode = {
     [key: string]: any
   }
   el?: HTMLElement
+  key?: string | number
 }
 
 export const Text = Symbol()

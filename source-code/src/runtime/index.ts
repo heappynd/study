@@ -103,8 +103,35 @@ export function createRenderer() {
       if (Array.isArray(n1.children)) {
         // 旧节点也是一组子节点 ⭐️核心Diff算法
         // FIXME: 傻瓜式 把旧的全部删掉 然后将子节点挂载到容器中
-        n1.children.forEach((c) => unmount(c))
-        n2.children.forEach((c) => patch(null, c, container))
+        // n1.children.forEach((c) => unmount(c))
+        // n2.children.forEach((c) => patch(null, c, container))
+
+        const oldChildren = n1.children
+        const newChildren = n2.children
+
+        let lastIndex = 0
+        for (let i = 0; i < newChildren.length; i++) {
+          const newVNode = newChildren[i]
+          for (let j = 0; j < oldChildren.length; j++) {
+            const oldVNode = oldChildren[j]
+            if (newVNode.key === oldVNode.key) {
+              patch(oldVNode, newVNode, container)
+              if (j < lastIndex) {
+                // 如果找到的节点 在旧children中索引小于最大索引值lastIndex
+                // 说明该节点对应的真实dom需要移动
+                const prevVNode = newChildren[i - 1]
+                if (prevVNode) {
+                  const anchor = prevVNode.el?.nextSibling
+                  insert(newVNode.el, container, anchor)
+                }
+              } else {
+                // 如果当前找到的节点在旧children中索引不小于最大索引值 则更新
+                lastIndex = j
+              }
+              break
+            }
+          }
+        }
       } else {
         // 这时子节点要么是文本子节点 要么不存在
         // 都只需要把他清空 让后逐个挂载新的子节点数组
