@@ -2,11 +2,13 @@ lockfileVersion: 5.4
 
 specifiers:
   '@vue/reactivity': ^3.2.37
+  '@vue/shared': ^3.2.37
   typescript: ^4.6.4
   vite: ^3.0.0
 
 dependencies:
   '@vue/reactivity': 3.2.37
+  '@vue/shared': 3.2.37
 
 devDependencies:
   typescript: 4.7.4
