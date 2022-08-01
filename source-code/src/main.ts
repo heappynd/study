@@ -6,31 +6,23 @@ import { effect, ref } from '@vue/reactivity'
 
 const renderer = createRenderer()
 
-const bol = ref(false)
+const vnode: VNode = {
+  type: 'div',
+  children: [
+    { type: 'p', children: '1', key: 1 },
+    { type: 'p', children: '2', key: 2 },
+    { type: 'p', children: '3', key: 3 },
+  ],
+}
+renderer.render(vnode, document.querySelector('#app')!)
 
-effect(() => {
+setTimeout(() => {
   const vnode: VNode = {
     type: 'div',
-    props: bol.value
-      ? {
-          onClick: () => {
-            console.log('clicked')
-          },
-        }
-      : {},
     children: [
-      {
-        type: 'p',
-        props: {
-          onClick: () => {
-            bol.value = true
-          },
-        },
-        children: 'text',
-      },
+      { type: 'p', children: '3', key: 3 },
+      { type: 'p', children: '1', key: 1 },
     ],
   }
   renderer.render(vnode, document.querySelector('#app')!)
-})
-
-setTimeout(() => {}, 1000)
+}, 1000)

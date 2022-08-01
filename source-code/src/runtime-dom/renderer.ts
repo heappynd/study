@@ -22,7 +22,7 @@ export function createRenderer() {
    * @param n2 新vnode
    * @param container 容器
    */
-  function patch(n1: VNode | undefined | null, n2: VNode, container: Container) {
+  function patch(n1: VNode | undefined | null, n2: VNode, container: Container, anchor?: Node) {
     if (n1 && n1.type !== n2.type) {
       // 描述不同
       unmount(n1)
@@ -33,7 +33,7 @@ export function createRenderer() {
     if (typeof type === 'string') {
       if (!n1) {
         // mountElement
-        mountElement(n2, container)
+        mountElement(n2, container, anchor)
       } else {
         // 新旧 都存在 vnode
         patchElement(n1, n2)
@@ -43,7 +43,7 @@ export function createRenderer() {
     }
   }
 
-  function mountElement(vnode: VNode, container: Container) {
+  function mountElement(vnode: VNode, container: Container, anchor?: Node) {
     const el = createElement(vnode.type)
     vnode.el = el
     // children
@@ -62,7 +62,7 @@ export function createRenderer() {
       }
     }
 
-    insert(el, container)
+    insert(el, container, anchor)
   }
 
   function patchElement(n1: VNode, n2: VNode) {
@@ -90,8 +90,53 @@ export function createRenderer() {
       setElementText(el, n2.children)
     } else if (Array.isArray(n2.children)) {
       if (Array.isArray(n1.children)) {
-        n1.children.forEach((child) => unmount(child))
-        n2.children.forEach((child) => patch(null, child, el))
+        // diff
+        const oldChildren = n1.children
+        const newChildren = n2.children
+
+        let lastIndex = 0 // 最大索引值
+
+        for (let i = 0; i < newChildren.length; i++) {
+          const newVNode = newChildren[i]
+          let find = false
+          // debugger
+          for (let j = 0; j < oldChildren.length; j++) {
+            const oldVNode = oldChildren[j]
+            if (newVNode.key === oldVNode.key) {
+              find = true
+              patch(oldVNode, newVNode, el)
+              if (j < lastIndex) {
+                // 说明要移动
+                const prevVNode = newChildren[i - 1]
+                if (prevVNode) {
+                  const anchor = prevVNode.el?.nextSibling
+                  insert(newVNode.el, el, anchor)
+                }
+              } else {
+                lastIndex = j
+              }
+              break
+            }
+          }
+          if (!find) {
+            const prevVNode = newChildren[i - 1]
+            let anchor = null
+            if (prevVNode) {
+              anchor = prevVNode.el?.nextSibling
+            } else {
+              anchor = el.firstChild
+            }
+            patch(null, newVNode, el, anchor)
+          }
+        }
+
+        for (let i = 0; i < oldChildren.length; i++) {
+          const oldVNode = oldChildren[i]
+          const has = newChildren.find((item) => item.key === oldVNode.key)
+          if (!has) {
+            unmount(oldVNode)
+          }
+        }
       } else {
         setElementText(el, '')
         n2.children.forEach((child) => patch(null, child, el))
