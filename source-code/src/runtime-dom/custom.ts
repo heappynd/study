@@ -17,7 +17,10 @@ export const options = {
       const name = key.slice(2).toLowerCase()
       if (nextValue) {
         if (!invoker) {
-          invoker = el._vei[key] = (e) => {
+          invoker = el._vei[key] = (e: Event) => {
+            if (e.timeStamp < invoker.attached) {
+              return
+            }
             if (Array.isArray(invoker.value)) {
               invoker.value.forEach((fn) => fn(e))
             } else {
@@ -25,6 +28,7 @@ export const options = {
             }
           }
           invoker.value = nextValue
+          invoker.attached = performance.now()
           el.addEventListener(name, invoker)
         } else {
           invoker.value = nextValue

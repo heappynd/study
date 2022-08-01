@@ -2,53 +2,35 @@
 import type { VNode } from './runtime-dom'
 import { createRenderer } from './runtime-dom'
 import { normalizeClass } from '@vue/shared'
+import { effect, ref } from '@vue/reactivity'
 
 const renderer = createRenderer()
 
-const vnode: VNode = {
-  type: 'div',
-  props: {
-    id: 'foo',
-  },
-  children: [
-    {
-      type: 'p',
-      children: 'hello',
-    },
-    {
-      type: 'button',
-      props: {
-        disabled: false,
-        class: normalizeClass([
-          'foo bar',
-          {
-            baz: true,
-          },
-        ]),
-        onClick: () => {
-          console.log('clicked')
-        },
-        onMouseover: () => {
-          console.log('onMouseover')
-        },
-      },
-      children: 'button',
-    },
-    {
-      type: 'input',
-      props: {
-        form: 'form1',
-      },
-    },
-  ],
-}
+const bol = ref(false)
 
-renderer.render(vnode, document.querySelector('#app')!)
-
-setTimeout(() => {
-  const newVnode = {
+effect(() => {
+  const vnode: VNode = {
     type: 'div',
-    children: 'newVnode',
+    props: bol.value
+      ? {
+          onClick: () => {
+            console.log('clicked')
+          },
+        }
+      : {},
+    children: [
+      {
+        type: 'p',
+        props: {
+          onClick: () => {
+            bol.value = true
+          },
+        },
+        children: 'text',
+      },
+    ],
   }
-  renderer.render(newVnode, document.querySelector('#app')!)
-}, 1000)
+  renderer.render(vnode, document.querySelector('#app')!)
+})
+
+setTimeout(() => {}, 1000)
