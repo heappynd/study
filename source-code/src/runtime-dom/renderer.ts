@@ -90,53 +90,7 @@ export function createRenderer() {
       setElementText(el, n2.children)
     } else if (Array.isArray(n2.children)) {
       if (Array.isArray(n1.children)) {
-        // diff
-        const oldChildren = n1.children
-        const newChildren = n2.children
-
-        let lastIndex = 0 // 最大索引值
-
-        for (let i = 0; i < newChildren.length; i++) {
-          const newVNode = newChildren[i]
-          let find = false
-          // debugger
-          for (let j = 0; j < oldChildren.length; j++) {
-            const oldVNode = oldChildren[j]
-            if (newVNode.key === oldVNode.key) {
-              find = true
-              patch(oldVNode, newVNode, el)
-              if (j < lastIndex) {
-                // 说明要移动
-                const prevVNode = newChildren[i - 1]
-                if (prevVNode) {
-                  const anchor = prevVNode.el?.nextSibling
-                  insert(newVNode.el, el, anchor)
-                }
-              } else {
-                lastIndex = j
-              }
-              break
-            }
-          }
-          if (!find) {
-            const prevVNode = newChildren[i - 1]
-            let anchor = null
-            if (prevVNode) {
-              anchor = prevVNode.el?.nextSibling
-            } else {
-              anchor = el.firstChild
-            }
-            patch(null, newVNode, el, anchor)
-          }
-        }
-
-        for (let i = 0; i < oldChildren.length; i++) {
-          const oldVNode = oldChildren[i]
-          const has = newChildren.find((item) => item.key === oldVNode.key)
-          if (!has) {
-            unmount(oldVNode)
-          }
-        }
+        patchKeyedChildren(n1, n2, el)
       } else {
         setElementText(el, '')
         n2.children.forEach((child) => patch(null, child, el))
@@ -146,6 +100,77 @@ export function createRenderer() {
         n1.children.forEach((child) => unmount(child))
       } else if (typeof n1.children === 'string') {
         setElementText(el, '')
+      }
+    }
+  }
+
+  function patchKeyedChildren(n1: VNode, n2: VNode, container: Container) {
+    const oldChildren = n1.children
+    const newChildren = n2.children
+    let oldStartIdx = 0
+    let oldEndIdx = oldChildren!.length - 1
+    let newStartIdx = 0
+    let newEndIdx = newChildren!.length - 1
+    let oldStartVNode = oldChildren[oldStartIdx]
+    let oldEndVNode = oldChildren[oldEndIdx]
+    let newStartVNode = newChildren[newStartIdx]
+    let newEndVNode = newChildren[newEndIdx]
+
+    while (oldStartIdx <= oldEndIdx && newStartIdx <= newEndIdx) {
+      // debugger
+      if (!oldStartVNode) {
+        oldStartVNode = oldChildren[++oldStartIdx]
+      } else if (!oldEndVNode) {
+        oldEndVNode = oldChildren[--oldEndIdx]
+      } else if (oldStartVNode.key === newStartVNode.key) {
+        console.log('新前 旧前')
+        patch(oldEndVNode, newEndVNode, container)
+        newStartVNode = newChildren[++newStartIdx]
+        oldStartVNode = oldChildren[++oldStartIdx]
+      } else if (newEndVNode.key === oldEndVNode.key) {
+        console.log('新后 旧后')
+        patch(oldEndVNode, newEndVNode, container)
+        newEndVNode = newChildren[--newEndIdx]
+        oldEndVNode = oldChildren[--oldEndIdx]
+      } else if (newEndVNode.key === oldStartVNode.key) {
+        console.log('新后 旧前')
+        patch(oldStartVNode, newEndVNode, container)
+        insert(oldStartVNode.el, container, oldEndVNode.el.nextSibling)
+        oldStartVNode = oldChildren[++oldStartIdx]
+        newEndVNode = newChildren[--newEndIdx]
+      } else if (newStartVNode.key === oldEndVNode.key) {
+        console.log('新前 旧后')
+        patch(oldEndVNode, newStartVNode, container)
+        insert(oldEndVNode.el, container, oldStartVNode.el)
+        oldEndVNode = oldChildren[--oldEndIdx]
+        newStartVNode = newChildren[++newStartIdx]
+      } else {
+        console.log('no')
+        const idxInOld = oldChildren.findIndex((node) => node.key === newStartVNode.key)
+        console.log(idxInOld)
+
+        if (idxInOld > 0) {
+          const vnodeToMove = oldChildren[idxInOld]
+          patch(vnodeToMove, newStartIdx, container)
+          insert(vnodeToMove.el, container, oldStartVNode.el)
+          oldChildren[idxInOld] = undefined
+          newStartVNode = newChildren[++newStartIdx]
+        } else {
+          patch(null, newStartVNode, container, oldStartVNode.el)
+        }
+
+        debugger
+      }
+    }
+
+    if (oldEndIdx < oldStartIdx && newStartIdx <= newEndVNode) {
+      // 说明有新的节点遗漏
+      for (let i = newStartIdx; i <= newEndIdx; i++) {
+        patch(null, newChildren[i], container, oldStartVNode.el)
+      }
+    } else if (newEndIdx < newStartIdx && oldStartIdx <= oldEndIdx) {
+      for (let i = oldStartIdx; i <= oldEndIdx; i++) {
+        unmount(oldChildren[i])
       }
     }
   }
