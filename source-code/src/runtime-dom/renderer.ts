@@ -105,73 +105,58 @@ export function createRenderer() {
   }
 
   function patchKeyedChildren(n1: VNode, n2: VNode, container: Container) {
-    const oldChildren = n1.children
     const newChildren = n2.children
-    let oldStartIdx = 0
-    let oldEndIdx = oldChildren!.length - 1
-    let newStartIdx = 0
-    let newEndIdx = newChildren!.length - 1
-    let oldStartVNode = oldChildren[oldStartIdx]
-    let oldEndVNode = oldChildren[oldEndIdx]
-    let newStartVNode = newChildren[newStartIdx]
-    let newEndVNode = newChildren[newEndIdx]
-
-    while (oldStartIdx <= oldEndIdx && newStartIdx <= newEndIdx) {
-      // debugger
-      if (!oldStartVNode) {
-        oldStartVNode = oldChildren[++oldStartIdx]
-      } else if (!oldEndVNode) {
-        oldEndVNode = oldChildren[--oldEndIdx]
-      } else if (oldStartVNode.key === newStartVNode.key) {
-        console.log('新前 旧前')
-        patch(oldEndVNode, newEndVNode, container)
-        newStartVNode = newChildren[++newStartIdx]
-        oldStartVNode = oldChildren[++oldStartIdx]
-      } else if (newEndVNode.key === oldEndVNode.key) {
-        console.log('新后 旧后')
-        patch(oldEndVNode, newEndVNode, container)
-        newEndVNode = newChildren[--newEndIdx]
-        oldEndVNode = oldChildren[--oldEndIdx]
-      } else if (newEndVNode.key === oldStartVNode.key) {
-        console.log('新后 旧前')
-        patch(oldStartVNode, newEndVNode, container)
-        insert(oldStartVNode.el, container, oldEndVNode.el.nextSibling)
-        oldStartVNode = oldChildren[++oldStartIdx]
-        newEndVNode = newChildren[--newEndIdx]
-      } else if (newStartVNode.key === oldEndVNode.key) {
-        console.log('新前 旧后')
-        patch(oldEndVNode, newStartVNode, container)
-        insert(oldEndVNode.el, container, oldStartVNode.el)
-        oldEndVNode = oldChildren[--oldEndIdx]
-        newStartVNode = newChildren[++newStartIdx]
-      } else {
-        console.log('no')
-        const idxInOld = oldChildren.findIndex((node) => node.key === newStartVNode.key)
-        console.log(idxInOld)
-
-        if (idxInOld > 0) {
-          const vnodeToMove = oldChildren[idxInOld]
-          patch(vnodeToMove, newStartIdx, container)
-          insert(vnodeToMove.el, container, oldStartVNode.el)
-          oldChildren[idxInOld] = undefined
-          newStartVNode = newChildren[++newStartIdx]
-        } else {
-          patch(null, newStartVNode, container, oldStartVNode.el)
-        }
-
-        debugger
-      }
+    const oldChildren = n1.children
+    let j = 0
+    // 前置
+    let oldVNode = oldChildren[j] as VNode
+    let newVNode = newChildren[j] as VNode
+    while (oldVNode.key === newVNode.key) {
+      patch(oldVNode, newVNode, container)
+      j++
+      oldVNode = oldChildren[j]
+      newVNode = newChildren[j]
     }
-
-    if (oldEndIdx < oldStartIdx && newStartIdx <= newEndVNode) {
-      // 说明有新的节点遗漏
-      for (let i = newStartIdx; i <= newEndIdx; i++) {
-        patch(null, newChildren[i], container, oldStartVNode.el)
+    // 后置
+    let oldEnd = oldChildren?.length - 1
+    let newEnd = newChildren?.length - 1
+    oldVNode = oldChildren[oldEnd]
+    newVNode = newChildren[newEnd]
+    while (oldVNode.key === newVNode.key) {
+      patch(oldVNode, newVNode, container)
+      oldEnd--
+      newEnd--
+      oldVNode = oldChildren[oldEnd]
+      newVNode = newChildren[newEnd]
+    }
+    if (j > oldEnd && j <= newEnd) {
+      const anchorIndex = newEnd + 1
+      const anchor = anchorIndex < newChildren?.length ? newChildren[anchorIndex].el : null
+      while (j <= newEnd) {
+        patch(null, newChildren[j++], container, anchor)
       }
-    } else if (newEndIdx < newStartIdx && oldStartIdx <= oldEndIdx) {
-      for (let i = oldStartIdx; i <= oldEndIdx; i++) {
-        unmount(oldChildren[i])
+    } else if (j > newEnd && j <= oldEnd) {
+      while (j <= oldEnd) {
+        unmount(oldChildren[j++])
       }
+    } else {
+      // 新的子节点中未处理的节点数量
+      const count = newEnd - j + 1
+      const source = new Array(count)
+      source.fill(-1)
+      const oldStart = j
+      const newStart = j
+      for (let i = oldStart; i <= oldEnd; i++) {
+        const oldVNode = oldChildren[i]
+        for (let k = newStart; k <= newEnd; k++) {
+          const newVNode = newChildren[k]
+          if (oldVNode.key === newVNode.key) {
+            patch(oldVNode, newVNode, container)
+            source[k - newStart] = i
+          }
+        }
+      }
+      console.log(source)
     }
   }
 
