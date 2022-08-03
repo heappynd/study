@@ -146,19 +146,34 @@ export function createRenderer() {
       source.fill(-1)
       const oldStart = j
       const newStart = j
+
+      let moved = false
+      let pos = 0
       // 构建索引表
       const keyIndex = {}
       for (let i = newStart; i <= newEnd; i++) {
         keyIndex[newChildren[i].key] = i
       }
+      // 代表更新过的节点数量
+      let patched = 0
       console.log('keyIndex :>> ', keyIndex)
       for (let i = oldStart; i <= oldEnd; i++) {
         const oldVNode = oldChildren[i]
-        const k = keyIndex[oldVNode.key]
-        if (typeof k !== 'undefined') {
-          newVNode = newChildren[k]
-          patch(oldVNode, newVNode, container)
-          source[k - newStart] = i
+        if (patched <= count) {
+          const k = keyIndex[oldVNode.key]
+          if (typeof k !== 'undefined') {
+            newVNode = newChildren[k]
+            patch(oldVNode, newVNode, container)
+            source[k - newStart] = i
+            // 判断节点是否需要移动
+            if (k < pos) {
+              moved = true
+            } else {
+              pos = k
+            }
+          } else {
+            unmount(oldVNode)
+          }
         } else {
           unmount(oldVNode)
         }
