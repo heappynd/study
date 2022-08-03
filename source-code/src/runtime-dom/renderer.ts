@@ -146,14 +146,21 @@ export function createRenderer() {
       source.fill(-1)
       const oldStart = j
       const newStart = j
+      // 构建索引表
+      const keyIndex = {}
+      for (let i = newStart; i <= newEnd; i++) {
+        keyIndex[newChildren[i].key] = i
+      }
+      console.log('keyIndex :>> ', keyIndex)
       for (let i = oldStart; i <= oldEnd; i++) {
         const oldVNode = oldChildren[i]
-        for (let k = newStart; k <= newEnd; k++) {
-          const newVNode = newChildren[k]
-          if (oldVNode.key === newVNode.key) {
-            patch(oldVNode, newVNode, container)
-            source[k - newStart] = i
-          }
+        const k = keyIndex[oldVNode.key]
+        if (typeof k !== 'undefined') {
+          newVNode = newChildren[k]
+          patch(oldVNode, newVNode, container)
+          source[k - newStart] = i
+        } else {
+          unmount(oldVNode)
         }
       }
       console.log(source)
