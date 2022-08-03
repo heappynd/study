@@ -144,9 +144,9 @@ export function createRenderer() {
       const count = newEnd - j + 1
       const source = new Array(count)
       source.fill(-1)
+
       const oldStart = j
       const newStart = j
-
       let moved = false
       let pos = 0
       // 构建索引表
@@ -164,6 +164,8 @@ export function createRenderer() {
           if (typeof k !== 'undefined') {
             newVNode = newChildren[k]
             patch(oldVNode, newVNode, container)
+            // 每更新一个节点 都将patched变量+1
+            patched++
             source[k - newStart] = i
             // 判断节点是否需要移动
             if (k < pos) {
