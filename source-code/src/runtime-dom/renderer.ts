@@ -1,4 +1,5 @@
 import { options } from './custom'
+import { getSequence } from './utils'
 import { VNode, Container } from './vnode'
 
 export function createRenderer() {
@@ -181,6 +182,35 @@ export function createRenderer() {
         }
       }
       console.log(source)
+
+      if (moved) {
+        // 如果moved为真 则需要进行DOM移动操作
+        const seq = getSequence(source)
+        console.log('seq :>> ', seq)
+        let s = seq.length - 1
+        let i = count - 1
+        for (i; i >= 0; i--) {
+          if (source[i] === -1) {
+            const pos = i + newStart
+            const newVNode = newChildren[pos]
+            const nextPos = pos + 1
+            const anchor = nextPos < newChildren?.length ? newChildren[nextPos].el : null
+            patch(null, newVNode, container, anchor)
+          }
+
+          if (i != seq[s]) {
+            // 不等于seq[s]表示要移动
+            const pos = i + newStart
+            const newVNode = newChildren[pos]
+            const nextPos = pos + 1
+            const anchor = nextPos < newChildren?.length ? newChildren[nextPos].el : null
+            insert(newVNode.el, container, anchor)
+          } else {
+            // 不需要移动
+            s--
+          }
+        }
+      }
     }
   }
 
