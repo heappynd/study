@@ -16,11 +16,25 @@ const myComponent = {
       foo: 'hello world',
     }
   },
+  setup(props, setupContext) {
+    console.log(props.title)
+    const { slots, emit, attrs, expose } = setupContext
+
+    // return () => {
+    //   return {
+    //     type: 'h1',
+    //     children: 'text',
+    //   }
+    // }
+    return {
+      setupTitle: 'test setup',
+    }
+  },
   beforeCreate() {
     console.log('beforeCreate')
   },
   created() {
-    console.log('created')
+    console.log('created', this)
   },
   beforeMount() {
     console.log('beforeMount')
@@ -37,7 +51,7 @@ const myComponent = {
   render() {
     return {
       type: 'div',
-      children: `foo: ${this.title}`,
+      children: `foo: ${this.setupTitle}`,
     }
   },
 }

@@ -2,6 +2,21 @@ import { options } from './custom'
 import { getSequence } from './utils'
 import { VNode, Container } from './vnode'
 import { effect, reactive } from '../reactivity'
+import { shallowReactive } from '../reactivity/reactive'
+
+function resolveProps(options, propsData) {
+  const props = {}
+  const attrs = {}
+  for (const key in propsData) {
+    if ((options && key in options) || key.startsWith('on')) {
+      props[key] = propsData[key]
+    } else {
+      attrs[key] = propsData[key]
+    }
+  }
+
+  return [props, attrs]
+}
 
 export function createRenderer() {
   const { createElement, setElementText, insert, patchProps, unmount } = options
@@ -73,27 +88,85 @@ export function createRenderer() {
 
   function mountComponent(vnode, container, anchor) {
     const componentOptions = vnode.type
-    const { render, data, beforeCreate, created, beforeMount, mounted, beforeUpdate, updated } = componentOptions
+    const {
+      data,
+      beforeCreate,
+      created,
+      beforeMount,
+      mounted,
+      beforeUpdate,
+      updated,
+      props: propsOption,
+      setup,
+    } = componentOptions
+
+    let render = componentOptions.render
 
     console.log('componentOptions :>> ', componentOptions)
 
     beforeCreate && beforeCreate()
 
-    const state = reactive(data())
+    const state = data ? reactive(data()) : null
+
+    const [props, attrs] = resolveProps(propsOption, vnode.props)
 
     // 定义组件实例
     const instance = {
       state,
+      props: shallowReactive(props),
       isMounted: false,
       subTree: null,
     }
+
+    const setupContext = { attrs }
+    // setup
+    const setupResult = setup(shallowReactive(props), setupContext)
+    let setupState = null
+    if (typeof setupResult === 'function') {
+      // setup 函数返回值是函数，则将其作为渲染函数
+      if (render) {
+        console.warn('setup 函数返回渲染函数, render选项被忽略')
+      }
+      render = setupResult
+    } else {
+      setupState = setupResult
+    }
+
     vnode.component = instance
 
-    created && created()
+    // 创建渲染上下文
+    const renderContext = new Proxy(instance, {
+      get(t, k, r) {
+        const { state, props } = t
+        if (state && k in state) {
+          return state[k]
+        } else if (k in props) {
+          return props[k]
+        } else if (setupState && k in setupState) {
+          return setupState[k]
+        } else {
+          console.error('不存在')
+        }
+      },
+      set(t, k, v, r) {
+        const { state, props } = t
+        if (state && k in state) {
+          state[k] = v
+        } else if (k in props) {
+          console.warn(`Attempting to mutate prop "${k}".Props are readonly.`)
+        } else if (setupState && k in setupState) {
+          setupState[k] = v
+        } else {
+          console.error('不存在')
+        }
+      },
+    })
+
+    created && created.call(renderContext)
 
     effect(
       () => {
-        const subTree = render.call(state, state)
+        const subTree = render.call(renderContext, renderContext)
 
         if (!instance.isMounted) {
           beforeMount && beforeMount()
@@ -109,11 +182,37 @@ export function createRenderer() {
       },
       { scheduler: queueJob }
     )
+  }
 
-    setTimeout(() => {
-      state.foo = 'h bbb'
-      state.foo = 'x vvv'
-    }, 1000)
+  function patchComponent(n1, n2, container) {
+    const instance = (n2.component = n1.component)
+    const { props } = instance
+    if (hasPropsChanged(n1.props, n2.props)) {
+      const [nextProps] = resolveProps(n2.type.props, n2.props)
+      for (const k in nextProps) {
+        props[k] = nextProps[k]
+      }
+      for (const k in props) {
+        if (!(k in nextProps)) {
+          delete props[k]
+        }
+      }
+    }
+  }
+
+  function hasPropsChanged(prevProps, nextProps) {
+    const nextKeys = Object.keys(nextProps)
+    // 新旧props数量变化
+    if (nextKeys.length !== Object.keys(prevProps).length) {
+      return true
+    }
+    for (let i = 0; i < nextKeys.length; i++) {
+      const key = nextKeys[i]
+      if (nextProps[key] !== prevProps[key]) {
+        return true
+      }
+    }
+    return false
   }
 
   function mountElement(vnode: VNode, container: Container, anchor?: Node) {
