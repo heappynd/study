@@ -110,12 +110,14 @@ export function createRenderer() {
 
     const [props, attrs] = resolveProps(propsOption, vnode.props)
 
+    const slots = vnode.children || {}
     // 定义组件实例
     const instance = {
       state,
       props: shallowReactive(props),
       isMounted: false,
       subTree: null,
+      slots,
     }
 
     function emit(event: string, ...payload) {
@@ -128,7 +130,7 @@ export function createRenderer() {
       }
     }
 
-    const setupContext = { attrs, emit }
+    const setupContext = { attrs, emit, slots }
     // setup
     const setupResult = setup(shallowReactive(props), setupContext)
     let setupState = null
@@ -147,7 +149,10 @@ export function createRenderer() {
     // 创建渲染上下文
     const renderContext = new Proxy(instance, {
       get(t, k, r) {
-        const { state, props } = t
+        const { state, props, slots } = t
+        if (k === '$slots') {
+          return slots
+        }
         if (state && k in state) {
           return state[k]
         } else if (k in props) {

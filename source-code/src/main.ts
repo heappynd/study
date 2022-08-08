@@ -47,7 +47,11 @@ const myComponent = {
   render() {
     return {
       type: 'div',
-      children: `foo: ${this.setupTitle}`,
+      children: [
+        { type: 'header', children: [this.$slots.header()] },
+        { type: 'body', children: [this.$slots.body()] },
+        { type: 'footer', children: [this.$slots.footer()] },
+      ],
     }
   },
 }
@@ -58,6 +62,17 @@ const vnode: VNode = {
     title: 'A big Title',
     onChange: (a, b) => {
       console.log('o(￣ヘ￣o＃) change', a, b)
+    },
+  },
+  children: {
+    header() {
+      return { type: 'h1', children: '我是标题' }
+    },
+    body() {
+      return { type: 'section', children: '我是内容' }
+    },
+    footer() {
+      return { type: 'p', children: '我是注脚' }
     },
   },
 }
