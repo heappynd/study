@@ -118,7 +118,17 @@ export function createRenderer() {
       subTree: null,
     }
 
-    const setupContext = { attrs }
+    function emit(event: string, ...payload) {
+      const eventName = `on${event[0].toUpperCase() + event.slice(1)}`
+      const handler = instance.props[eventName]
+      if (handler) {
+        handler(...payload)
+      } else {
+        console.error('事件不存在')
+      }
+    }
+
+    const setupContext = { attrs, emit }
     // setup
     const setupResult = setup(shallowReactive(props), setupContext)
     let setupState = null

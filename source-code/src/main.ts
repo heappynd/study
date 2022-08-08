@@ -20,12 +20,8 @@ const myComponent = {
     console.log(props.title)
     const { slots, emit, attrs, expose } = setupContext
 
-    // return () => {
-    //   return {
-    //     type: 'h1',
-    //     children: 'text',
-    //   }
-    // }
+    emit('change', 1, 2)
+
     return {
       setupTitle: 'test setup',
     }
@@ -60,6 +56,9 @@ const vnode: VNode = {
   type: myComponent,
   props: {
     title: 'A big Title',
+    onChange: (a, b) => {
+      console.log('o(￣ヘ￣o＃) change', a, b)
+    },
   },
 }
 renderer.render(vnode, document.querySelector('#app')!)
