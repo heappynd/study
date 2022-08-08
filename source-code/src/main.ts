@@ -6,30 +6,48 @@ import { effect, ref } from '@vue/reactivity'
 
 const renderer = createRenderer()
 
+const myComponent = {
+  name: 'MyComponent',
+  props: {
+    title: String,
+  },
+  data() {
+    return {
+      foo: 'hello world',
+    }
+  },
+  beforeCreate() {
+    console.log('beforeCreate')
+  },
+  created() {
+    console.log('created')
+  },
+  beforeMount() {
+    console.log('beforeMount')
+  },
+  mounted() {
+    console.log('mounted')
+  },
+  beforeUpdate() {
+    console.log('beforeUpdate')
+  },
+  updated() {
+    console.log('updated')
+  },
+  render() {
+    return {
+      type: 'div',
+      children: `foo: ${this.title}`,
+    }
+  },
+}
+
 const vnode: VNode = {
-  type: 'div',
-  children: [
-    { type: 'p', children: '1', key: 1 },
-    { type: 'p', children: '2', key: 2 },
-    { type: 'p', children: '3', key: 3 },
-    { type: 'p', children: '4', key: 4 },
-    { type: 'p', children: '6', key: 6 },
-    { type: 'p', children: '5', key: 5 },
-  ],
+  type: myComponent,
+  props: {
+    title: 'A big Title',
+  },
 }
 renderer.render(vnode, document.querySelector('#app')!)
 
-setTimeout(() => {
-  const vnode: VNode = {
-    type: 'div',
-    children: [
-      { type: 'p', children: '1', key: 1 },
-      { type: 'p', children: '3', key: 3 },
-      { type: 'p', children: '4', key: 4 },
-      { type: 'p', children: '2', key: 2 },
-      { type: 'p', children: '7', key: 7 },
-      { type: 'p', children: '5', key: 5 },
-    ],
-  }
-  renderer.render(vnode, document.querySelector('#app')!)
-}, 1000)
+setTimeout(() => {}, 1000)

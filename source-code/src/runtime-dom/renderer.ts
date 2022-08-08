@@ -1,6 +1,7 @@
 import { options } from './custom'
 import { getSequence } from './utils'
 import { VNode, Container } from './vnode'
+import { effect, reactive } from '../reactivity'
 
 export function createRenderer() {
   const { createElement, setElementText, insert, patchProps, unmount } = options
@@ -39,9 +40,80 @@ export function createRenderer() {
         // 新旧 都存在 vnode
         patchElement(n1, n2)
       }
-    } else if (type === 'xxx') {
+    } else if (typeof type === 'object') {
       // TODO
+      if (!n1) {
+        mountComponent(n2, container, anchor)
+      } else {
+        patchComponent(n1, n2, container)
+      }
     }
+  }
+
+  const queue = new Set()
+  let isFlushing = false
+  const p = Promise.resolve()
+
+  function queueJob(job) {
+    // console.log(job)
+
+    queue.add(job)
+    if (!isFlushing) {
+      isFlushing = true
+      p.then(() => {
+        try {
+          queue.forEach((job) => job())
+        } finally {
+          isFlushing = false
+          queue.clear()
+        }
+      })
+    }
+  }
+
+  function mountComponent(vnode, container, anchor) {
+    const componentOptions = vnode.type
+    const { render, data, beforeCreate, created, beforeMount, mounted, beforeUpdate, updated } = componentOptions
+
+    console.log('componentOptions :>> ', componentOptions)
+
+    beforeCreate && beforeCreate()
+
+    const state = reactive(data())
+
+    // 定义组件实例
+    const instance = {
+      state,
+      isMounted: false,
+      subTree: null,
+    }
+    vnode.component = instance
+
+    created && created()
+
+    effect(
+      () => {
+        const subTree = render.call(state, state)
+
+        if (!instance.isMounted) {
+          beforeMount && beforeMount()
+          patch(null, subTree, container, anchor)
+          mounted && mounted()
+          instance.isMounted = true
+        } else {
+          beforeUpdate && beforeUpdate()
+          patch(instance.subTree, subTree, container, anchor)
+          updated && updated()
+        }
+        instance.subTree = subTree
+      },
+      { scheduler: queueJob }
+    )
+
+    setTimeout(() => {
+      state.foo = 'h bbb'
+      state.foo = 'x vvv'
+    }, 1000)
   }
 
   function mountElement(vnode: VNode, container: Container, anchor?: Node) {
