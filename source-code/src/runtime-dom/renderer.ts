@@ -4,6 +4,20 @@ import { VNode, Container } from './vnode'
 import { effect, reactive } from '../reactivity'
 import { shallowReactive } from '../reactivity/reactive'
 
+// 全局变量 存储当前正在初始化的组件实例
+let currentInstance = null
+function setCurrentInstance(instance) {
+  currentInstance = instance
+}
+
+export function onMounted(fn) {
+  if (currentInstance) {
+    currentInstance.mounted.push(fn)
+  } else {
+    console.error('onMounted函数只能在setup中调用')
+  }
+}
+
 function resolveProps(options, propsData) {
   const props = {}
   const attrs = {}
@@ -118,6 +132,7 @@ export function createRenderer() {
       isMounted: false,
       subTree: null,
       slots,
+      mounted: [],
     }
 
     function emit(event: string, ...payload) {
@@ -131,8 +146,13 @@ export function createRenderer() {
     }
 
     const setupContext = { attrs, emit, slots }
+
+    // 在调用setup函数前 设置当前组件实例
+    setCurrentInstance(instance)
     // setup
     const setupResult = setup(shallowReactive(props), setupContext)
+    // 执行完毕后 重置当前组件实例
+    setCurrentInstance(null)
     let setupState = null
     if (typeof setupResult === 'function') {
       // setup 函数返回值是函数，则将其作为渲染函数
@@ -188,6 +208,7 @@ export function createRenderer() {
           patch(null, subTree, container, anchor)
           mounted && mounted()
           instance.isMounted = true
+          instance.mounted && instance.mounted.forEach((hook) => hook.call(renderContext))
         } else {
           beforeUpdate && beforeUpdate()
           patch(instance.subTree, subTree, container, anchor)

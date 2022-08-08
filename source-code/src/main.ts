@@ -3,6 +3,7 @@ import type { VNode } from './runtime-dom'
 import { createRenderer } from './runtime-dom'
 import { normalizeClass } from '@vue/shared'
 import { effect, ref } from '@vue/reactivity'
+import { onMounted } from './runtime-dom/renderer'
 
 const renderer = createRenderer()
 
@@ -21,6 +22,10 @@ const myComponent = {
     const { slots, emit, attrs, expose } = setupContext
 
     emit('change', 1, 2)
+
+    onMounted(() => {
+      console.log('onMounted vvvv')
+    })
 
     return {
       setupTitle: 'test setup',
