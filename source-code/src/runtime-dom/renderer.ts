@@ -3,6 +3,7 @@ import { getSequence } from './utils'
 import { VNode, Container } from './vnode'
 import { effect, reactive } from '../reactivity'
 import { shallowReactive } from '../reactivity/reactive'
+import { ref, shallowRef } from '@vue/reactivity'
 
 // 全局变量 存储当前正在初始化的组件实例
 let currentInstance = null
@@ -423,5 +424,66 @@ export function createRenderer() {
 
   return {
     render,
+  }
+}
+
+export function defineAsyncComponent(options) {
+  if (typeof options === 'function') {
+    options = {
+      loader: options,
+    }
+  }
+  const { loader } = options
+  let InnerComp = null
+  return {
+    name: 'AsyncComponentWrapper',
+    setup() {
+      const loaded = ref(false)
+      const error = shallowRef(null)
+      const loading = ref(false)
+
+      const loadingTimer = null
+      if (options.delay) {
+        loadingTimer = setTimeout(() => {
+          loading.value = true
+        }, options.delay)
+      } else {
+        loading.value = true
+      }
+
+      loader()
+        .then((c) => {
+          InnerComp = c
+          loaded.value = true
+        })
+        .catch((err) => {
+          error.value = err
+        })
+        .finally(() => {
+          loading.value = false
+          clearTimeout(loadingTimer)
+        })
+      let timer = null
+      if (options.timeout) {
+        timer = setTimeout(() => {
+          const err = new Error(`Async Component timed out after ${options.timeout}ms`)
+          error.value = err
+        }, options.timeout)
+      }
+      onUnMounted(() => {
+        clearTimeout(timer)
+      })
+      const placeholder = { type: 'div', children: '' }
+      return () => {
+        if (loaded.value) {
+          return { type: InnerComp }
+        } else if (error.value && options.errorComponent) {
+          return { type: options.errorComponent, props: { error: error.value } }
+        } else if (loading.value && options.loadingComponent) {
+          return { type: options.loadingComponent }
+        }
+        return placeholder
+      }
+    },
   }
 }
