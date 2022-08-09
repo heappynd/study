@@ -84,3 +84,35 @@ const vnode: VNode = {
 renderer.render(vnode, document.querySelector('#app')!)
 
 setTimeout(() => {}, 1000)
+
+// ---
+function fetch() {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      console.log('fetch....')
+
+      if (Math.random() < 0.2) {
+        resolve('ok')
+      } else {
+        reject('err')
+      }
+    }, 1000)
+  })
+}
+function load(onError) {
+  const p = fetch()
+
+  return p.catch((err) => {
+    return new Promise((resolve, reject) => {
+      const retry = () => resolve(load(onError))
+      const fail = () => reject(err)
+      onError(retry, fail)
+    })
+  })
+}
+
+load((retry) => {
+  retry()
+}).then((res) => {
+  console.log(res)
+})
