@@ -96,3 +96,72 @@ export function tokenize(str: string) {
 
   return tokens
 }
+
+export function parse(str: string) {
+  const tokens = tokenize(str)
+
+  const root = {
+    type: 'Root',
+    children: [],
+  }
+  const elementStack = [root]
+
+  while (tokens.length) {
+    const parent = elementStack[elementStack.length - 1]
+    const t = tokens[0]
+    switch (t.type) {
+      case 'tag':
+        const elementNode = {
+          type: 'Element',
+          tag: t.name,
+          children: [],
+        }
+        parent.children.push(elementNode)
+        elementStack.push(elementNode)
+        break
+      case 'text':
+        const textNode = {
+          type: 'Text',
+          content: t.content,
+        }
+        parent.children.push(textNode)
+        break
+      case 'tagEnd':
+        elementStack.pop()
+        break
+    }
+    tokens.shift()
+  }
+
+  return root
+}
+
+export function dump(node, indent = 0) {
+  const type = node.type
+  const desc = node.type === 'Root' ? '' : node.type === 'Element' ? node.tag : node.content
+
+  console.log(`${'-'.repeat(indent)}${type}: ${desc}`)
+
+  if (node.children) {
+    node.children.forEach((n) => dump(n, indent + 2))
+  }
+}
+
+export function traverseNode(ast, context) {
+  context.currentNode = ast
+
+  const transforms = context.nodeTransforms
+  for (let i = 0; i < transforms.length; i++) {
+    transforms[i](context.currentNode, context)
+    if (!context.currentNode) return
+  }
+
+  const children = context.currentNode.children
+  if (children) {
+    for (let i = 0; i < children.length; i++) {
+      context.parent = context.currentNode
+      context.childIndex = i
+      traverseNode(children[i], context)
+    }
+  }
+}
