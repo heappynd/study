@@ -15,9 +15,16 @@ interface IContext {
 export function traverseNode(ast: Node, context: IContext) {
   context.currentNode = ast
 
+  // 增加退出阶段的回调函数
+  const exitFns: any[] = []
   const transforms = context.nodeTransforms
   for (let i = 0; i < transforms.length; i++) {
-    transforms[i](context.currentNode, context)
+    // 转换函数返回一个函数 该函数作为退出阶段的回调函数
+    const onExit = transforms[i](context.currentNode, context)
+    if (onExit) {
+      exitFns.push(onExit)
+    }
+
     if (!context.currentNode) return // ?
   }
 
@@ -29,17 +36,28 @@ export function traverseNode(ast: Node, context: IContext) {
       traverseNode(children[i], context)
     }
   }
+
+  let i = exitFns.length
+  while (i--) {
+    exitFns[i]()
+  }
 }
 
 export function transformElement(node: Node) {
-  if (node.type === 'Element' && node.tag === 'p') {
-    node.tag = 'h1'
+  // if (node.type === 'Element' && node.tag === 'p') {
+  //   node.tag = 'h1'
+  // }
+  console.log(`进入节点 ${node.type}`)
+
+  return () => {
+    console.log(`退出节点 ${node.type}`)
   }
 }
 export function transformText(node: Node, context: IContext) {
-  if (node.type === 'Text') {
-    context.removeNode()
-  }
+  // if (node.type === 'Text') {
+  //   context.removeNode()
+  // }
+  return () => {}
 }
 
 export function transform(ast: RootNode) {
