@@ -1,5 +1,5 @@
 import { RootNode, ElementNode, hasChildren, Node, TextNode } from './types'
-import { dump } from './utils'
+import { dump, transformElement, transformRoot, transformText } from './utils'
 
 interface IContext {
   nodeTransforms: ((node: Node, context: IContext) => void)[]
@@ -43,26 +43,9 @@ export function traverseNode(ast: Node, context: IContext) {
   }
 }
 
-export function transformElement(node: Node) {
-  // if (node.type === 'Element' && node.tag === 'p') {
-  //   node.tag = 'h1'
-  // }
-  console.log(`进入节点 ${node.type}`)
-
-  return () => {
-    console.log(`退出节点 ${node.type}`)
-  }
-}
-export function transformText(node: Node, context: IContext) {
-  // if (node.type === 'Text') {
-  //   context.removeNode()
-  // }
-  return () => {}
-}
-
 export function transform(ast: RootNode) {
   const context: IContext = {
-    nodeTransforms: [transformElement, transformText],
+    nodeTransforms: [transformElement, transformText, transformRoot],
     currentNode: null,
     parent: null,
     childIndex: 0,
@@ -78,6 +61,9 @@ export function transform(ast: RootNode) {
     },
   }
   traverseNode(ast, context)
+
+  console.dir(ast)
+  console.log(ast)
 
   dump(ast)
 }
