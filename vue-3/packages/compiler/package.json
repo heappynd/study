@@ -8,8 +8,5 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@vue-3/utils": "workspace:^1.0.0"
-  }
+  "license": "ISC"
 }
