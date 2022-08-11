@@ -36,7 +36,7 @@ export function createArrayExpression(elements: any[]) {
 export function createCallExpression(callee: string, args: any[]) {
   return {
     type: 'CallExpression',
-    callee,
+    callee: createIdentifier(callee),
     arguments: args,
   }
 }
