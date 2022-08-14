@@ -1,0 +1,21 @@
+/* 
+<div class="circle red"></div>
+<div class="circle blue"></div>
+<div class="circle yellow"></div> 
+*/
+
+.circle {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+}
+
+.red {
+  color: red;
+}
+.blue {
+  color: blue;
+}
+.yellow {
+  color: yellow;
+}
