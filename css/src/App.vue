@@ -1,6 +1,12 @@
 <script setup lang="ts">
+import { onMounted } from 'vue'
 import CompMedia from './components/CompMedia.vue'
 import Layout from './Layout.vue'
+import Theme from './Theme.vue'
+
+onMounted(() => {
+  document.documentElement.setAttribute('data-theme', 'light')
+})
 </script>
 
 <template>
@@ -21,21 +27,11 @@ import Layout from './Layout.vue'
       <c-col span="8">3</c-col>
     </c-row> -->
 
-    <Layout />
+    <!-- <Layout /> -->
+    <!-- <h1 font-quaternary>Title</h1> -->
+
+    <Theme />
   </div>
 </template>
 
-<style lang="scss" scoped>
-.part {
-  color: $color-primary;
-}
-
-header {
-  width: 200px;
-  height: 200px;
-  background: rgba($color: #000000, $alpha: 0.45);
-  color: #fff;
-
-  @include box-center(center, center);
-}
-</style>
+<style lang="scss" scoped></style>
