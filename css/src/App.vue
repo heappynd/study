@@ -3,9 +3,14 @@ import { onMounted } from 'vue'
 import CompMedia from './components/CompMedia.vue'
 import Layout from './Layout.vue'
 import Theme from './Theme.vue'
+import { getUsers } from './api'
 
 onMounted(() => {
   document.documentElement.setAttribute('data-theme', 'light')
+
+  getUsers().then((res) => {
+    console.log(res)
+  })
 })
 </script>
 
