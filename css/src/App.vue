@@ -4,6 +4,7 @@ import CompMedia from './components/CompMedia.vue'
 import Layout from './Layout.vue'
 import Theme from './Theme.vue'
 import { getUsers } from './api'
+import Lunbo from './Lunbo.vue'
 
 onMounted(() => {
   document.documentElement.setAttribute('data-theme', 'light')
@@ -35,7 +36,9 @@ onMounted(() => {
     <!-- <Layout /> -->
     <!-- <h1 font-quaternary>Title</h1> -->
 
-    <Theme />
+    <!-- <Theme /> -->
+
+    <Lunbo></Lunbo>
   </div>
 </template>
 
