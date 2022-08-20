@@ -1,34 +1,28 @@
-function sum(a: number, b: number): number {
-  return a + b
-}
-
-function times(f: (index: number) => void, n: number) {
-  for (let i = 0; i < n; i++) {
-    f(i)
+type APIResponse = {
+  user: {
+    userId: string
+    friendList: {
+      count: number
+      friends: {
+        firstName: string
+        lastName: string
+      }[]
+    }[]
   }
 }
+type FriendList = APIResponse['user']['friendList']
 
-times((n) => {
-  console.log(n.toFixed(2))
-}, 3)
-
-type Reverse = {
-  (from: Date, to: Date, destination: string): void
-  (from: Date, destination: string): void
+function getAPIResponse(): Promise<APIResponse> {
+  return new Promise((resolve, reject) => {})
 }
+// 键入 类型
+function renderFriendList(firendList: FriendList) {}
 
-let reverse: Reverse = (
-  from: Date,
-  to: Date | string,
-  destination?: string
-) => {}
+let response = await getAPIResponse()
+renderFriendList(response.user.friendList)
 
-function map<T, U>(array: T[], f: (item: T) => U): U[] {
-  let result = []
-  for (let i = 0; i < array.length; i++) {
-    result.push(f(array[i]))
-  }
-  return result
-}
-let m = [1, 2, 3]
-map(m, (item) => item.toFixed(2))
+export {}
+
+// keyof
+type ResponseKeys = keyof APIResponse // 'user'
+type UserKeys = keyof APIResponse['user']
