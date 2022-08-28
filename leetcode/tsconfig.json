@@ -10,5 +10,5 @@
     "noImplicitReturns": true,
     "keyofStringsOnly": false
   },
-  "include": ["src", "instance"]
+  "include": ["src"]
 }
