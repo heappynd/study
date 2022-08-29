@@ -4,17 +4,17 @@ function isValid(s: string): boolean {
     return false
   }
   let stack: string[] = []
+  let map = new Map()
+  map.set('(', ')')
+  map.set('[', ']')
+  map.set('{', '}')
   for (const char of s) {
-    if (char === '(' || char === '{' || char === '[') {
+    if (map.has(char)) {
       stack.push(char)
     } else {
       // 取得栈顶
       let top = stack[stack.length - 1]
-      if (
-        (char === ')' && top === '(') ||
-        (char === '}' && top === '{') ||
-        (char === ']' && top === '[')
-      ) {
+      if (map.get(top) === char) {
         stack.pop()
       } else {
         return false
