@@ -3,6 +3,8 @@ import { useContext } from 'react'
 
 import { LanguageContext } from './context'
 
+import style from './FuncExample.module.css'
+
 export function FuncExample() {
   const [count, setCount] = useState(1)
   const [visible, setVisible] = useState(false)
@@ -35,7 +37,7 @@ export function FuncExample() {
 
   return (
     <div style={{ border: '1px solid #f00' }}>
-      <h1>FuncExample</h1>
+      <h1 className={style.active}>FuncExample</h1>
       <h2>count: {count}</h2>
       <h2>doubleCount: {doubleCount}</h2>
       <button onClick={add}>add</button>
