@@ -4,6 +4,7 @@ import { FuncNew } from '../func/child/FuncNew'
 import { FuncOld } from '../func/child/FuncOld'
 import { FuncDemo } from '../func/FuncDemo'
 import NotFound from '../views/NotFound'
+import ReduxDemo from '../views/ReduxDemo'
 import Styled from '../views/Styled'
 
 export function URouter() {
@@ -27,6 +28,10 @@ export function URouter() {
     {
       path: '/styl',
       element: <Styled />,
+    },
+    {
+      path: '/redux',
+      element: <ReduxDemo />,
     },
     { path: '*', element: <NotFound /> },
   ])
