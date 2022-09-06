@@ -4,6 +4,7 @@ import { FuncNew } from '../func/child/FuncNew'
 import { FuncOld } from '../func/child/FuncOld'
 import { FuncDemo } from '../func/FuncDemo'
 import NotFound from '../views/NotFound'
+import Styled from '../views/Styled'
 
 export function URouter() {
   const element = useRoutes([
@@ -22,6 +23,10 @@ export function URouter() {
         { path: 'new', element: <FuncNew /> },
         { path: 'old', element: <FuncOld /> },
       ],
+    },
+    {
+      path: '/styl',
+      element: <Styled />,
     },
     { path: '*', element: <NotFound /> },
   ])
