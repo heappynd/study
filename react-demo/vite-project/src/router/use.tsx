@@ -4,6 +4,7 @@ import { FuncNew } from '../func/child/FuncNew'
 import { FuncOld } from '../func/child/FuncOld'
 import { FuncDemo } from '../func/FuncDemo'
 import HocDemo from '../views/HocDemo'
+import Imm from '../views/Imm'
 import NotFound from '../views/NotFound'
 import ReduxDemo from '../views/ReduxDemo'
 import Styled from '../views/Styled'
@@ -37,6 +38,10 @@ export function URouter() {
     {
       path: '/hoc',
       element: <HocDemo />,
+    },
+    {
+      path: '/imm',
+      element: <Imm />,
     },
     { path: '*', element: <NotFound /> },
   ])
