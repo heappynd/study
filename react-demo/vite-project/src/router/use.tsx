@@ -3,6 +3,7 @@ import { ClassDemo } from '../class/ClassDemo'
 import { FuncNew } from '../func/child/FuncNew'
 import { FuncOld } from '../func/child/FuncOld'
 import { FuncDemo } from '../func/FuncDemo'
+import HocDemo from '../views/HocDemo'
 import NotFound from '../views/NotFound'
 import ReduxDemo from '../views/ReduxDemo'
 import Styled from '../views/Styled'
@@ -32,6 +33,10 @@ export function URouter() {
     {
       path: '/redux',
       element: <ReduxDemo />,
+    },
+    {
+      path: '/hoc',
+      element: <HocDemo />,
     },
     { path: '*', element: <NotFound /> },
   ])
