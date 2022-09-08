@@ -10,8 +10,24 @@ http
       return
     }
     const { pathname, searchParams } = new URL(req.url, `http://localhost:3000`)
-    if (pathname === '/api/user') {
-      res.end(`${searchParams.get('cb')}({ "name": "andy" })`)
+    if (pathname === '/api/jsonp') {
+      res.end(
+        `${searchParams.get('cb')}(${JSON.stringify({
+          date: new Date().toLocaleString(),
+        })})`
+      )
+      return
+    }
+    if (pathname === '/api/cors') {
+      res.writeHead(200, {
+        'Content-Type': 'application/json;charset=utf-8',
+        'Access-Control-Allow-Origin': '*',
+      })
+      res.end(
+        JSON.stringify({
+          date: new Date().toLocaleString(),
+        })
+      )
       return
     }
     // res.write('hello world')

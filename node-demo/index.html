@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script>
+      fetch('http://localhost:3000/api/cors')
+        .then((res) => res.json())
+        .then((json) => {
+          console.log(json)
+        })
+    </script>
+
+    <script>
+      function cb(params) {
+        console.log(params)
+      }
+    </script>
+    <script src="http://localhost:3000/api/jsonp?cb=cb"></script>
+  </body>
+</html>
