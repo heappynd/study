@@ -9,9 +9,11 @@ http
     if (req.url === '/favicon.ico') {
       return
     }
-    console.log(
-      url.parse('https://localhost:3000/api/kkk?q=123&a=111/#/home', true)
-    )
+    const { pathname, searchParams } = new URL(req.url, `http://localhost:3000`)
+    if (pathname === '/api/user') {
+      res.end(`${searchParams.get('cb')}({ "name": "andy" })`)
+      return
+    }
     // res.write('hello world')
     res.writeHead(200, { 'Content-Type': 'text/html;charset=utf-8' })
     res.end(renderHTML(req))
