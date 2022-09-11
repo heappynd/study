@@ -1,4 +1,4 @@
-import { Button, message, Table } from 'antd'
+import { Button, message, Table, Image } from 'antd'
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -7,6 +7,7 @@ import request from '../../utils/request'
 interface DataType {
   username: string
   age: number
+  avatar: string
 }
 const columns: ColumnsType<DataType> = [
   {
@@ -17,6 +18,13 @@ const columns: ColumnsType<DataType> = [
     title: '年龄',
     dataIndex: 'age',
   },
+  {
+    title: '头像',
+    dataIndex: 'avatar',
+    render: (text) => {
+      return <Image width={80} src={`http://localhost:3000${text}`} />
+    },
+  },
 ]
 
 function Home() {
@@ -26,7 +34,7 @@ function Home() {
 
   const [pagination, setPagination] = useState<TablePaginationConfig>({
     current: 1,
-    pageSize: 1,
+    pageSize: 5,
     showQuickJumper: true,
     total: 0,
   })

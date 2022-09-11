@@ -8,6 +8,8 @@ import './conf/db.config.js'
 
 const app = express()
 
+app.use(express.static('public'))
+
 // session
 app.use(
   session({
