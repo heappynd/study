@@ -13,25 +13,54 @@ bar(
   'ccc'
 )
 
-export default class App extends Component<{}, {}> {
+export default class App extends Component<{}, { count: number }> {
   constructor(props: {}) {
     super(props)
 
-    // this.ok = this.ok.bind(this)
+    this.state = {
+      count: 0,
+    }
   }
 
-  ok = (_, event) => {
-    console.log(_, event)
-    event.preventDefault()
+  ok = () => {
+    this.setState(
+      (prevState, props) => {
+        return {
+          count: prevState.count + 1,
+        }
+      },
+      () => {
+        console.log('cb', this.state.count)
+      }
+    )
+    this.setState(
+      (prevState, props) => {
+        return {
+          count: prevState.count + 1,
+        }
+      },
+      () => {
+        console.log('cb', this.state.count)
+      }
+    )
+    this.setState(
+      (prevState, props) => {
+        return {
+          count: prevState.count + 1,
+        }
+      },
+      () => {
+        console.log('cb', this.state.count)
+      }
+    )
   }
 
   render() {
     return (
       <div>
         App
-        <a href="#" onClick={(event) => this.ok('foo', event)}>
-          ok
-        </a>
+        <h1>{this.state.count}</h1>
+        <button onClick={this.ok}>+</button>
       </div>
     )
   }
