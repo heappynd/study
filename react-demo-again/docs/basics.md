@@ -48,3 +48,76 @@ this.setState(
   }
 )
 ```
+
+## 非受控组件
+
+- ref
+- defaultValue defaultChecked
+- 手动操作 DOM 元素
+
+```js
+const inputRef =  React.createRef()
+inputRef.current  = >  DOM
+
+<input ref={this.inputRef} />
+```
+
+使用场景
+
+- 必须手动操作 DOM 元素，setState 实现不了
+- 文件上传
+- 某些富文本编辑器，需要传入 DOM 元素
+
+## Portals 入口 （vue3 teleport）
+
+- 组件默认会按照既定层次嵌套渲染
+- 如何让组件渲染到父组件以外？
+
+props.children => vue slot
+
+```tsx
+ReactDOM.createPortal(<div className="modal">11111</div>, document.body)
+```
+
+### 使用场景
+
+- overflow: hidden
+- 父组件 z-index 值太小
+- fixed 需要放在 body 第一层级
+
+## context (vue provide inject)
+
+- 公共信息（语言、主题）如何传递给每个组件？
+- 用 props 太繁琐
+- 用 redux 小题大做
+
+```tsx
+const ThemeContext = React.createContext('light')
+
+<ThemeContext.Provider value={this.state.theme}>
+  <App2 />
+</ThemeContext.Provider>
+// 用法 1
+static contextType = ThemeContext
+this.context
+//  用法 2
+<ThemeContext.Consumer>
+  {(value) => <h3>{value}</h3>}
+</ThemeContext.Consumer>
+```
+
+## 异步组件
+
+- import
+- React.lazy
+- React.Suspense
+
+```tsx
+const LazyComponent = React.lazy(() => import('./Lazy'))
+
+<React.Suspense fallback={<h1>Loading...</h1>}>
+  <LazyComponent />
+</React.Suspense>
+```
+
+## 高阶组件

@@ -1,67 +1,59 @@
 import React, { Component } from 'react'
+import ReactDOM from 'react-dom'
+import './App.css'
 
-function foo(...args) {
-  console.log(args)
+function withMouse(C) {
+  class Comp extends Component {
+    state = {
+      x: 0,
+      y: 0,
+    }
+
+    mouse = (e: React.MouseEventHandler) => {
+      // console.log(e.clientX)
+      // console.log(e.clientY)
+      console.log(e)
+
+      this.setState({
+        x: e.clientX,
+        y: e.clientY,
+      })
+    }
+
+    render() {
+      return (
+        <div
+          style={{ height: '500px', background: 'pink' }}
+          onMouseMove={this.mouse}
+        >
+          <C {...this.props} mouse={this.state} />
+        </div>
+      )
+    }
+  }
+
+  return Comp
 }
 
-let bar = foo.bind(null, 'test')
-
-bar(
-  {
-    on: { c: 'cc' },
-  },
-  'ccc'
-)
-
-export default class App extends Component<{}, { count: number }> {
+class App extends Component<{}, {}> {
   constructor(props: {}) {
     super(props)
 
     this.state = {
       count: 0,
+      theme: 'light',
     }
   }
 
-  ok = () => {
-    this.setState(
-      (prevState, props) => {
-        return {
-          count: prevState.count + 1,
-        }
-      },
-      () => {
-        console.log('cb', this.state.count)
-      }
-    )
-    this.setState(
-      (prevState, props) => {
-        return {
-          count: prevState.count + 1,
-        }
-      },
-      () => {
-        console.log('cb', this.state.count)
-      }
-    )
-    this.setState(
-      (prevState, props) => {
-        return {
-          count: prevState.count + 1,
-        }
-      },
-      () => {
-        console.log('cb', this.state.count)
-      }
-    )
-  }
+  ok = (e) => {}
 
   render() {
     return (
       <div>
-        App
-        <h1>{this.state.count}</h1>
-        <button onClick={this.ok}>+</button>
+        <h2>x: {this.props.mouse.x}</h2>
       </div>
     )
   }
 }
+
+export default withMouse(App)
