@@ -121,3 +121,5 @@ const LazyComponent = React.lazy(() => import('./Lazy'))
 ```
 
 ## 高阶组件
+
+## Render Props
