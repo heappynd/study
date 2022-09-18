@@ -1,46 +1,27 @@
-import React, { Component } from 'react'
+import React, { Component, useEffect, useState } from 'react'
 import ReactDOM from 'react-dom'
 import './App.css'
-class Factory extends Component {
-  constructor(props) {
-    super(props)
 
-    this.state = {
-      x: 0,
-      y: 0,
-    }
-  }
+function Hook() {
+  const [count, setCount] = useState(0)
+  useEffect(() => {
+    console.log('eff')
+  }, [])
 
-  render() {
-    return (
-      <div
-        style={{ background: 'lightgreen' }}
-        onMouseMove={(e) => {
-          this.setState({ x: e.clientX })
-        }}
-      >
-        {this.props.renderProps(this.state)}
-      </div>
-    )
-  }
+  return (
+    <div>
+      <button onClick={() => setCount(count + 1)}>+</button>
+      <h1>{count}</h1>
+    </div>
+  )
 }
 
-class App extends Component {
-  constructor(props: {}) {
-    super(props)
-
-    this.state = {}
-  }
-
-  ok = (e) => {}
-
-  render() {
-    return (
-      <div>
-        <Factory renderProps={(value) => <h2>x: {value.x}</h2>} />
-      </div>
-    )
-  }
+function App() {
+  return (
+    <div>
+      <Hook />
+    </div>
+  )
 }
 
 export default App
