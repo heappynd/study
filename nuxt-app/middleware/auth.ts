@@ -1,7 +1,7 @@
 function isAuthenticated() {
   console.log('验证权限')
 
-  return false
+  return true
 }
 
 export default defineNuxtRouteMiddleware((to, from) => {

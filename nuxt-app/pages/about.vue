@@ -1,14 +1,13 @@
 <template>
-  <section>
-    <p>This page will be displayed at the /about route.</p>
-    <p>Page visits: {{ data.title }}</p>
-  </section>
+  <div>
+    Counter: {{ counter }}
+    <button @click="counter++">+</button>
+    <button @click="counter--">-</button>
+  </div>
 </template>
 
 <script setup>
-const { data } = await useLazyFetch(
-  'https://jsonplaceholder.typicode.com/posts/1'
-)
+const counter = useState('counter', () => Math.round(Math.random() * 1000))
 
-console.log(data.value)
+throw createError({ name: 'ss', message: 'ssfsd' })
 </script>
