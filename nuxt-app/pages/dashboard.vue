@@ -4,6 +4,10 @@ definePageMeta({
 })
 const config = useAppConfig()
 // const
+
+const res = await $fetch('/api/test', { method: 'get' })
+
+console.log(res)
 </script>
 
 <template>
