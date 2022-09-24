@@ -1,5 +1,3 @@
-export const x = 1
-
 const list = document.getElementById('list') as HTMLUListElement
 
 for (let i = 0; i < 5; i++) {
