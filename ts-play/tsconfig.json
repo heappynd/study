@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "target": "ES3",
+    "strict": true,
+    "noImplicitAny": true, // 隐式具有 "any" 类型
+    "strictNullChecks": true,
+    "noEmitOnError": true
+  }
+}
