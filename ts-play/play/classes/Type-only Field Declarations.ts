@@ -14,10 +14,14 @@ class AnimalHouse {
 }
 
 class DogHouse extends AnimalHouse {
+  declare resident: Dog
   constructor(dog: Dog) {
     super(dog)
   }
 }
+
+let d = new DogHouse()
+d.resident
 
 class MsgError extends Error {
   constructor(m: string) {

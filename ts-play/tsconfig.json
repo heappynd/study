@@ -1,11 +1,16 @@
 {
   "compilerOptions": {
-    "target": "ES2015",
+    "target": "ESNext",
     "strict": true,
     "noImplicitAny": true, // 隐式具有 "any" 类型
     "strictNullChecks": true,
     "noEmitOnError": true,
     // "downlevelIteration": false
-    "strictPropertyInitialization": true
-  }
+    "strictPropertyInitialization": true,
+    "esModuleInterop": true,
+    "moduleResolution": "Node",
+    "module": "UMD",
+    "outDir": "dist"
+  },
+  "files": ["./play/modules/main.ts"]
 }
