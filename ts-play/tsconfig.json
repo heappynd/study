@@ -10,7 +10,8 @@
     "esModuleInterop": true,
     "moduleResolution": "Node",
     "module": "UMD",
-    "outDir": "dist"
+    "outDir": "dist",
+    "experimentalDecorators": true
   },
-  "files": ["./play/modules/main.ts"]
+  "files": ["./src/main.ts"]
 }
