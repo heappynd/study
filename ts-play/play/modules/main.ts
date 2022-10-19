@@ -1,5 +1,3 @@
-import { valueOfPi } from './constants'
-
-export const twoPi = valueOfPi * 2
-
-console.log(twoPi)
+import * as URL from 'murl'
+import { x } from 'm-hot-module'
+let myUrl = URL.parse('http://')

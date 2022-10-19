@@ -9,9 +9,9 @@
     "strictPropertyInitialization": true,
     "esModuleInterop": true,
     "moduleResolution": "Node",
-    "module": "UMD",
+    "module": "CommonJS",
     "outDir": "dist",
     "experimentalDecorators": true
-  },
-  "files": ["./src/main.ts"]
+  }
+  // "files": ["./src/main.ts"]
 }
