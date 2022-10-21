@@ -4,6 +4,7 @@ import MessageBoxComponent from './MessageBox.vue'
 export const fields = ['confirm', 'prompt']
 
 // Vue.extend
+// https://v3-migration.vuejs.org/breaking-changes/global-api.html#vue-extend-removed
 const MessageBox = (options) => {
   const messageBoxApp = createApp(MessageBoxComponent, options)
 
