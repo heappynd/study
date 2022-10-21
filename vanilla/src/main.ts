@@ -1,8 +1,13 @@
+type CharArea = {
+  startX: number
+  startY: number
+}
 ;(() => {
   const idioms = ['诗情画意', '南来北往', '一团和气', '落花流水'],
     oCharCellGroup = document.querySelector('.char-cell-group')!
 
   let charCollection: string[] = [],
+    charAreas: CharArea[] = [],
     oChars: NodeListOf<HTMLDivElement> | null = null,
     startX = 0,
     startY = 0,
@@ -17,7 +22,7 @@
     render()
 
     oChars = oCharCellGroup.querySelectorAll('.cell-item .wrapper')
-
+    getAreas(oChars, charAreas)
     bindEvent()
   }
 
@@ -37,8 +42,8 @@
 
   function charCellTpl(char: string, index: number) {
     return `
-      <div class="cell-item" data-index="${index}">
-        <div class="wrapper">${char}</div>
+      <div class="cell-item">
+        <div class="wrapper" data-index="${index}">${char}</div>
       </div>`
   }
 
@@ -95,7 +100,34 @@
     this.style.left = cellX + 'px'
     this.style.top = cellY + 'px'
   }
-  function handleTouchEnd(e: TouchEvent) {}
+  function handleTouchEnd(this: HTMLDivElement, e: TouchEvent) {
+    const _index = +this.dataset.index!,
+      charArea = charAreas[_index]
+
+    console.log(_index)
+    this.style.left = charArea.startX + 'px'
+    this.style.top = charArea.startY + 'px'
+  }
+
+  // 保存位置
+  function getAreas(
+    domCollection: NodeListOf<HTMLDivElement>,
+    arrWrapper: CharArea[]
+  ) {
+    let startX = 0,
+      startY = 0,
+      oItem = null
+
+    for (let i = 0; i < domCollection.length; i++) {
+      oItem = domCollection[i]
+      startX = oItem.offsetLeft
+      startY = oItem.offsetTop
+
+      arrWrapper.push({ startX, startY })
+    }
+
+    console.log(arrWrapper)
+  }
 
   init()
 })()
