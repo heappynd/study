@@ -1,16 +1,25 @@
-type CharArea = {
+type Area = {
   startX: number
   startY: number
 }
 ;(() => {
   const idioms = ['诗情画意', '南来北往', '一团和气', '落花流水'],
-    oCharCellGroup = document.querySelector('.char-cell-group')!
+    oCharCellGroup = document.querySelector('.char-cell-group')!,
+    oBlanks: NodeListOf<HTMLDivElement> = document.querySelectorAll(
+      '.blank-cell-group .wrapper'
+    )
 
   let charCollection: string[] = [],
-    charAreas: CharArea[] = [],
+    charAreas: Area[] = [],
+    blackAreas: Area[] = [],
+    resArr: { char: string; el: HTMLDivElement }[] = [
+      // { char: '',el: null }
+    ],
     oChars: NodeListOf<HTMLDivElement> | null = null,
     startX = 0,
     startY = 0,
+    cellX = 0,
+    cellY = 0,
     cellW = 0,
     cellH = 0,
     mouseX = 0, // 鼠标到元素边框距离
@@ -22,6 +31,7 @@ type CharArea = {
     render()
 
     oChars = oCharCellGroup.querySelectorAll('.cell-item .wrapper')
+    getAreas(oBlanks, blackAreas)
     getAreas(oChars, charAreas)
     bindEvent()
   }
@@ -75,8 +85,8 @@ type CharArea = {
     this.style.height = cellH + 'px'
     this.style.position = 'fixed'
 
-    let cellX = this.offsetLeft
-    let cellY = this.offsetTop
+    cellX = this.offsetLeft
+    cellY = this.offsetTop
 
     startX = e.touches[0].clientX
     startY = e.touches[0].clientY
@@ -94,13 +104,50 @@ type CharArea = {
     const moveX = e.touches[0].clientX,
       moveY = e.touches[0].clientY
 
-    let cellX = moveX - mouseX
-    let cellY = moveY - mouseY
+    cellX = moveX - mouseX
+    cellY = moveY - mouseY
 
     this.style.left = cellX + 'px'
     this.style.top = cellY + 'px'
   }
   function handleTouchEnd(this: HTMLDivElement, e: TouchEvent) {
+    const blankWidth = oBlanks[0].offsetWidth,
+      blankHeight = oBlanks[0].offsetHeight
+
+    for (let i = 0; i < blackAreas.length; i++) {
+      if (resArr[i] !== undefined) {
+        continue
+      }
+      let { startX, startY } = blackAreas[i]
+      // 对比
+      if (
+        (cellX > startX &&
+          cellX < startX + blankWidth / 2 &&
+          cellY > startY &&
+          cellY > startY + blankHeight / 2) ||
+        (cellX + blankWidth > startX + blankWidth / 2 &&
+          cellX + blankWidth < startX + blankWidth &&
+          cellY > startY &&
+          cellY < startY + blankHeight / 2)
+      ) {
+        setPosition(this, { startX, startY })
+        setResArr(this, i)
+        // FIXME: has error
+        if (resArr.length === 4) {
+          // check res
+          setTimeout(() => {
+            if (!checkResult()) {
+              alert('error')
+              resetPosition()
+            } else {
+              alert('success')
+            }
+          }, 500)
+        }
+        return
+      }
+    }
+
     const _index = +this.dataset.index!,
       charArea = charAreas[_index]
 
@@ -109,10 +156,48 @@ type CharArea = {
     this.style.top = charArea.startY + 'px'
   }
 
+  function setPosition(el: HTMLDivElement, { startX, startY }: Area) {
+    el.style.left = startX + 'px'
+    el.style.top = startY + 'px'
+  }
+  function resetPosition() {
+    resArr.forEach((item) => {
+      const el = item.el,
+        index = Number(el.dataset.index),
+        { startX, startY } = charAreas[index]
+
+      setPosition(el, { startX, startY })
+    })
+    resArr = []
+    startX = 0
+    startY = 0
+    cellX = 0
+    cellY = 0
+    mouseX = 0 // 鼠标到元素边框距离
+    mouseY = 0
+
+    cellW = 0
+    cellH = 0
+  }
+  function setResArr(el: HTMLDivElement, index: number) {
+    resArr[index] = {
+      char: el.innerText,
+      el,
+    }
+  }
+
+  function checkResult() {
+    let idiom = ''
+    resArr.forEach((item) => {
+      idiom += item.char
+    })
+    return idioms.find((item) => item === idiom)
+  }
+
   // 保存位置
   function getAreas(
     domCollection: NodeListOf<HTMLDivElement>,
-    arrWrapper: CharArea[]
+    arrWrapper: Area[]
   ) {
     let startX = 0,
       startY = 0,
