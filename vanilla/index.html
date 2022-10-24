@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Document</title>
+    <style>
+      .area {
+        border: 1px dashed #000;
+        padding: 10px;
+        display: flex;
+        justify-content: space-around;
+      }
+      .area div {
+        border: 1px solid #000;
+        width: 20vw;
+        height: 20vw;
+        /* box-sizing: border-box; */
+        flex-shrink: 0;
+      }
+      #char {
+        margin-top: 50px;
+        flex-wrap: wrap;
+        row-gap: 10px;
+      }
+      #char div {
+        background: forestgreen;
+        color: #fff;
+        text-align: center;
+        line-height: 20vw;
+        font-size: 30px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="blank" class="area">
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+    <div id="char" class="area">
+      <div draggable="true">我</div>
+      <div>的</div>
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+
+    <script>
+      const charDivs = document.querySelector('#char div')
+      console.log(charDivs)
+
+      charDivs.addEventListener('dragstart', (e) => {
+        console.log(e)
+      })
+      charDivs.addEventListener('dragmove', (e) => {
+        e.preventDefault()
+        console.log(Date.now())
+        console.log(e)
+      })
+      charDivs.addEventListener('dragend', (e) => {
+        console.log('end', e)
+      })
+    </script>
+  </body>
+</html>
