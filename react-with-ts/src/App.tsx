@@ -1,10 +1,12 @@
-import { useState } from 'react'
-import TodoList from './components/TodoList'
+import React, { useState } from 'react'
+import Hook from './hooks/Hook'
+// import TodoList from './components/TodoList'
 
 function App() {
   return (
     <div>
-      <TodoList />
+      {/* <TodoList /> */}
+      <Hook />
     </div>
   )
 }
