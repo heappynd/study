@@ -42,6 +42,7 @@ const AHooks: FC = () => {
   const { tableProps, search, params } = useAntdTable(getTableData, {
     defaultPageSize: 5,
     form,
+    pollingInterval: 5000,
   })
 
   const { type, changeType, submit, reset } = search
