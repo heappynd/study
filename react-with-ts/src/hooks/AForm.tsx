@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Form, Input, Checkbox, Button } from 'antd'
 import 'antd/dist/antd.css'
 
@@ -11,9 +11,17 @@ const AForm = () => {
     console.log('Failed:', errorInfo)
   }
 
+  const [form] = Form.useForm()
+
+  useEffect(() => {
+    console.log(form)
+    // form.setFieldValue()
+  })
+
   return (
     <div>
       <Form
+        form={form}
         name="basic"
         labelCol={{ span: 8 }}
         wrapperCol={{ span: 16 }}
@@ -23,9 +31,10 @@ const AForm = () => {
         autoComplete="off"
       >
         <Form.Item
+          noStyle
           label="Username"
           name="username"
-          rules={[{ required: true, message: 'Please input your username!' }]}
+          rules={[{ required: true }]}
         >
           <Input />
         </Form.Item>

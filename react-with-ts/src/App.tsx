@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
-import AForm from './hooks/AForm'
+import Demo from './hooks/Chart'
 
 function App() {
   return (
     <div style={{ padding: 24 }}>
-      <AForm />
+      <Demo />
     </div>
   )
 }
