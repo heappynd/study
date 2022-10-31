@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import Demo from './hooks/Chart'
+import Demo from './hooks/ProComp'
 
 function App() {
   return (
