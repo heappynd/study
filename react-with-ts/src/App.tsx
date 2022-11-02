@@ -1,10 +1,12 @@
 import React, { useState } from 'react'
-import Demo from './hooks/ProComp'
+import { GlobalStyle } from './styled/global.style'
+import Demo from './styled/MyDemo'
 
 function App() {
   return (
     <div style={{ padding: 24 }}>
       <Demo />
+      <GlobalStyle />
     </div>
   )
 }
