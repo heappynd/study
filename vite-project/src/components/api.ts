@@ -23,3 +23,19 @@ export function getAllModels(username: string, project_id: number) {
     url: `/api/v1/users/${username}/projects/${project_id}/models/all`,
   })
 }
+
+export function registerModel(project_id: string, data: any) {
+  return request({
+    url: `/mt/api/v1/tasks/models/projects/${project_id}`,
+    data,
+    method: 'post',
+  })
+}
+
+export function updateModel(project_id: string, data: any) {
+  return request({
+    url: `/mt/api/v1/tasks/models/projects/${project_id}`,
+    data,
+    method: 'patch',
+  })
+}

@@ -1,12 +1,17 @@
 import axios, { AxiosRequestConfig } from 'axios'
 
-const mockBase = 'http://127.0.0.1:4523/m1/1836948-0-default'
+const service = axios.create({ baseURL: '/', timeout: 8000 })
 
-const service = axios.create({ baseURL: mockBase, timeout: 8000 })
+const mock = 'http://127.0.0.1:4523/m1/1836948-0-default'
+const isMock = sessionStorage.getItem('mock')
 
 // 添加请求拦截器
 service.interceptors.request.use(
   (config) => {
+    // override baseurl when mock
+    if (isMock) {
+      config.baseURL = mock
+    }
     return config
   },
   (error) => {
@@ -19,27 +24,10 @@ service.interceptors.response.use(
   (response) => {
     // 2xx 范围内的状态码都会触发该函数。
     const res = response.data
-    const url = response.config.url
-    console.log('url', url)
-    // handle special url
-    if (url && url.startsWith('/sso')) {
-      if (res.success) {
-        return res.data
-      } else {
-        return Promise.reject(new Error(res.message || 'Error'))
-      }
-    } else if (url && url.startsWith('/v1')) {
-      if (res.status === 0) {
-        return res.data
-      } else {
-        return Promise.reject(new Error(res.message || 'Error'))
-      }
+    if (res.success || res.status === 0 || res.code === 200) {
+      return res.data
     } else {
-      if (res.code === 200) {
-        return res.data
-      } else {
-        return Promise.reject(new Error(res.message || 'Error'))
-      }
+      return Promise.reject(new Error(res.message || 'Error'))
     }
   },
   (error) => {

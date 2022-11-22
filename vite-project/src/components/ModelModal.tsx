@@ -21,18 +21,24 @@ const layout = {
   wrapperCol: { span: 20 },
 }
 
-//
+interface IProps {
+  onClose(): void
+  project_type: string
+  project_id: number
+  username: string
+}
 
-const ModelModal: React.FC<{ onClose: any; project_type: string }> = ({
+const ModelModal: React.FC<IProps> = ({
   onClose,
   project_type,
+  project_id,
+  username,
 }) => {
   const isITM = true || project_type === 'ITM项目'
 
   const [form] = Form.useForm<{ task_domain: string }>()
 
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [messageApi, contextHolder] = message.useMessage()
+  const [isModalOpen, setIsModalOpen] = useState(true)
 
   const { data: noRegisterModels } = useRequest(
     api.getNoRegisterModelsByProjectId
@@ -43,7 +49,7 @@ const ModelModal: React.FC<{ onClose: any; project_type: string }> = ({
   }))
 
   const { data: models } = useRequest(api.getAllModels, {
-    defaultParams: ['xx', 1],
+    defaultParams: [username, project_id],
   })
   const options2 = models?.map((item) => ({
     label: item.name,
@@ -53,6 +59,8 @@ const ModelModal: React.FC<{ onClose: any; project_type: string }> = ({
   const name = Form.useWatch('name', form)
   const task_domain = Form.useWatch('task_domain', form)
   const is_update = Form.useWatch('is_update', form)
+
+  console.log(is_update)
 
   useEffect(() => {
     // form.resetFields()
@@ -68,7 +76,7 @@ const ModelModal: React.FC<{ onClose: any; project_type: string }> = ({
 
     if (seleted && seleted.refModelId) {
       api
-        .getModel('x', 222, seleted.id)
+        .getModel(username, project_id, seleted.id)
         .then(({ version, task_domain, framework, description, task_type }) => {
           form.setFieldValue('version', version)
           form.setFieldValue('task_domain', task_domain)
@@ -86,7 +94,7 @@ const ModelModal: React.FC<{ onClose: any; project_type: string }> = ({
   useEffect(() => {
     if (selected2) {
       api
-        .getModel('x', 222, selected2.id)
+        .getModel(username, project_id, selected2.id)
         .then(({ version, task_domain, framework, description, task_type }) => {
           form.setFieldValue('version', version)
           form.setFieldValue('task_domain', task_domain)
@@ -105,7 +113,7 @@ const ModelModal: React.FC<{ onClose: any; project_type: string }> = ({
   }
 
   const handleOk = () => {
-    messageApi.open({
+    message.open({
       type: 'success',
       content: (
         <>
@@ -121,7 +129,7 @@ const ModelModal: React.FC<{ onClose: any; project_type: string }> = ({
   const handleCancel = () => {
     form.resetFields()
     setIsModalOpen(false)
-    onClose()
+    // onClose()
   }
 
   const [value, setValue] = useState(0)
@@ -135,13 +143,13 @@ const ModelModal: React.FC<{ onClose: any; project_type: string }> = ({
 
   return (
     <>
-      {contextHolder}
-
       <Modal
         title="注册模型"
-        open={true}
+        open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}
+        afterClose={onClose}
+        destroyOnClose
       >
         <Form
           {...layout}
@@ -149,7 +157,7 @@ const ModelModal: React.FC<{ onClose: any; project_type: string }> = ({
           name="control-hooks"
           initialValues={{ is_update: false }}
         >
-          {isITM && (
+          {!isITM && (
             <Form.Item name="is_update" wrapperCol={{ offset: 4 }}>
               <Radio.Group>
                 <Radio value={false}>新建模型</Radio>
@@ -198,7 +206,7 @@ const ModelModal: React.FC<{ onClose: any; project_type: string }> = ({
             label="所属领域"
             rules={[{ required: true }]}
           >
-            <Select disabled options={options.domain} />
+            <Select disabled={isITM || is_update} options={options.domain} />
           </Form.Item>
           <Form.Item name="task_domain" label="任务领域">
             <Select options={options.task_domain} />
@@ -213,6 +221,7 @@ const ModelModal: React.FC<{ onClose: any; project_type: string }> = ({
           >
             <Select options={options.framework} />
           </Form.Item>
+
           <Form.Item
             name="description"
             label="模型描述"
