@@ -1,11 +1,11 @@
-export interface IITMModel {
+export interface IItmModel {
   description: string
   domainId: number
   domainName: string
   id: number
   name: string
   type: string
-  refModelId: string | null
+  refModelId: number | null
 }
 
 export interface IModel {

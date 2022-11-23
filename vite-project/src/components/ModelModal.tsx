@@ -1,20 +1,19 @@
-import React, { useEffect, useState } from 'react'
+import { useBoolean, useRequest } from 'ahooks'
 import {
-  Button,
-  Modal,
+  Col,
   Form,
   Input,
+  message,
+  Modal,
+  Radio,
+  Row,
   Select,
   Typography,
-  message,
-  Radio,
 } from 'antd'
-import ReactDOM from 'react-dom'
-import { useRequest } from 'ahooks'
+import React, { useEffect, useState } from 'react'
 import * as api from './api'
 import options from './options'
-
-console.log(options)
+import { IModel } from './types'
 
 const layout = {
   labelCol: { span: 4 },
@@ -28,28 +27,46 @@ interface IProps {
   username: string
 }
 
+type Values = {
+  description: string
+  domain: number
+  framework: string
+  name: string
+  task_domain: string
+  task_type: string
+  version: string
+}
+
 const ModelModal: React.FC<IProps> = ({
   onClose,
   project_type,
   project_id,
   username,
 }) => {
-  const isITM = true || project_type === 'ITM项目'
+  // project_type === 'ITM项目'
+  const isItm = true
 
-  const [form] = Form.useForm<{ task_domain: string }>()
+  const [form] = Form.useForm<Values>()
 
   const [isModalOpen, setIsModalOpen] = useState(true)
 
+  const [isUpdate, { set: setIsUpdate }] = useBoolean(false)
+  // 是否是回显
+  const [isFill, setIsFill] = useState(false)
+
+  // itm项目下获取模型列表
   const { data: noRegisterModels } = useRequest(
-    api.getNoRegisterModelsByProjectId
+    api.getNoRegisterModelsByProjectId,
+    { ready: isItm }
   )
   const options1 = noRegisterModels?.map((item) => ({
     label: item.name,
     value: item.name,
   }))
-
+  // 非itm项目下获取模型列表
   const { data: models } = useRequest(api.getAllModels, {
     defaultParams: [username, project_id],
+    ready: !isItm,
   })
   const options2 = models?.map((item) => ({
     label: item.name,
@@ -58,66 +75,76 @@ const ModelModal: React.FC<IProps> = ({
 
   const name = Form.useWatch('name', form)
   const task_domain = Form.useWatch('task_domain', form)
-  const is_update = Form.useWatch('is_update', form)
-
-  console.log(is_update)
 
   useEffect(() => {
-    // form.resetFields()
-    form.setFieldValue('version', '1.0.0')
-  }, [is_update])
+    form.resetFields()
+    if (!isUpdate) {
+      form.setFieldValue('version', '1.0.0')
+    }
+  }, [isUpdate])
 
   const seleted = noRegisterModels?.find((item) => item.name === name)
 
-  useEffect(() => {
-    seleted &&
-      seleted.refModelId === null &&
-      form.setFieldValue('version', 'v1.0.0')
-
-    if (seleted && seleted.refModelId) {
-      api
-        .getModel(username, project_id, seleted.id)
-        .then(({ version, task_domain, framework, description, task_type }) => {
-          form.setFieldValue('version', version)
-          form.setFieldValue('task_domain', task_domain)
-          form.setFieldValue('framework', framework)
-          form.setFieldValue('description', description)
-          form.setFieldValue('task_type', task_type)
-        })
-      form.setFieldValue('domain', seleted.domainId)
-    }
-
-    return () => {}
-  }, [seleted])
-
-  const selected2 = models?.find((item) => item.name === name)
-  useEffect(() => {
-    if (selected2) {
-      api
-        .getModel(username, project_id, selected2.id)
-        .then(({ version, task_domain, framework, description, task_type }) => {
-          form.setFieldValue('version', version)
-          form.setFieldValue('task_domain', task_domain)
-          form.setFieldValue('framework', framework)
-          form.setFieldValue('description', description)
-          form.setFieldValue('task_type', task_type)
-        })
-      // form.setFieldValue('domain', selected2.domainId)
-    }
-
-    return () => {}
-  }, [selected2])
-
-  const showModal = () => {
-    setIsModalOpen(true)
+  const fill = ({
+    version,
+    task_domain,
+    framework,
+    description,
+    task_type,
+  }: IModel) => {
+    form.getFieldValue('task_domain') !== task_domain && setIsFill(true)
+    form.setFieldsValue({
+      description,
+      framework,
+      task_domain,
+      task_type,
+      version,
+    })
   }
 
+  useEffect(() => {
+    if (seleted) {
+      // 如果模型未投产过 refModelId为null
+      if (seleted.refModelId === null) {
+        form.setFieldsValue({
+          description: '',
+          framework: '',
+          task_domain: '',
+          task_type: '',
+          version: '1.0.0',
+        })
+      }
+      // 如果模型投产过 refModelId为模型id
+      if (seleted.refModelId) {
+        api.getModel(username, project_id, seleted.refModelId).then(fill)
+      }
+      form.setFieldValue('domain', seleted.domainId)
+    }
+  }, [seleted])
+
+  const selected2 = isUpdate
+    ? models?.find((item) => item.name === name)
+    : undefined
+
+  useEffect(() => {
+    if (selected2) {
+      api.getModel(username, project_id, selected2.id).then(fill)
+    }
+  }, [selected2])
+
+  const [messageApi, contextHolder] = message.useMessage()
+
   const handleOk = () => {
-    message.open({
+    const origin = window.location.origin
+    const path = '/research/#/model-manage/model-repository'
+    const url = origin + path
+
+    messageApi.open({
       type: 'success',
       content: (
         <>
-          注册模型提交成功，<Typography.Link>查看模型</Typography.Link>。
+          注册模型提交成功，
+          <Typography.Link href={url}>查看模型</Typography.Link>。
         </>
       ),
     })
@@ -129,20 +156,22 @@ const ModelModal: React.FC<IProps> = ({
   const handleCancel = () => {
     form.resetFields()
     setIsModalOpen(false)
-    // onClose()
   }
 
-  const [value, setValue] = useState(0)
-
-  const [taskType, setTaskType] = useState([])
+  // 任务类型 根据 任务领域动态获取
+  const [taskTypeOptions, setTaskTypeOptions] = useState([])
   useEffect(() => {
-    form.setFieldValue('task_type', '')
-    const o = options.task_type[task_domain]
-    setTaskType(o ?? [])
+    if (!isFill) {
+      form.setFieldValue('task_type', '')
+    }
+    const o = options.task_type[task_domain] || []
+    setTaskTypeOptions(o)
+    setIsFill(false)
   }, [task_domain])
 
   return (
     <>
+      {contextHolder}
       <Modal
         title="注册模型"
         open={isModalOpen}
@@ -151,27 +180,26 @@ const ModelModal: React.FC<IProps> = ({
         afterClose={onClose}
         destroyOnClose
       >
-        <Form
-          {...layout}
-          form={form}
-          name="control-hooks"
-          initialValues={{ is_update: false }}
-        >
-          {!isITM && (
-            <Form.Item name="is_update" wrapperCol={{ offset: 4 }}>
-              <Radio.Group>
+        {!isItm && (
+          <Row style={{ marginBottom: 8 }}>
+            <Col span={20} offset={4}>
+              <Radio.Group
+                value={isUpdate}
+                onChange={(e) => setIsUpdate(e.target.value)}
+              >
                 <Radio value={false}>新建模型</Radio>
                 <Radio value={true}>更新模型</Radio>
               </Radio.Group>
-            </Form.Item>
-          )}
-
-          {isITM && !is_update ? (
+            </Col>
+          </Row>
+        )}
+        <Form {...layout} form={form} preserve={false}>
+          {!isItm && !isUpdate ? (
             <Form.Item
-              name="t100"
+              name="name"
               label="模型名称"
               rules={[
-                { required: true },
+                { required: true, message: '模型名称必填' },
                 {
                   pattern: /^[a-zA-Z0-9_\u4e00-\u9fa5]+$/,
                   message: '只支持中文、字母、数字及下划线',
@@ -192,32 +220,36 @@ const ModelModal: React.FC<IProps> = ({
             <Form.Item
               name="name"
               label="模型名称"
-              rules={[{ required: true }]}
+              rules={[{ required: true, message: '模型名称必填' }]}
             >
-              <Select options={isITM ? options2 : options1} showSearch />
+              <Select options={isItm ? options1 : options2} showSearch />
             </Form.Item>
           )}
 
           <Form.Item name="version" label="版本" rules={[{ required: true }]}>
             <Input disabled />
           </Form.Item>
+
           <Form.Item
             name="domain"
             label="所属领域"
-            rules={[{ required: true }]}
+            rules={[{ required: true, message: '所属领域必填' }]}
           >
-            <Select disabled={isITM || is_update} options={options.domain} />
+            <Select disabled={isItm} options={options.domain} />
           </Form.Item>
+
           <Form.Item name="task_domain" label="任务领域">
             <Select options={options.task_domain} />
           </Form.Item>
+
           <Form.Item name="task_type" label="任务类型">
-            <Select options={taskType} />
+            <Select options={taskTypeOptions} />
           </Form.Item>
+
           <Form.Item
             name="framework"
             label="模型框架"
-            rules={[{ required: true }]}
+            rules={[{ required: true, message: '模型框架必填' }]}
           >
             <Select options={options.framework} />
           </Form.Item>

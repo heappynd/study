@@ -1,8 +1,8 @@
 import { request } from '../utils/request'
-import { IModel, IITMModel } from './types'
+import { IModel, IItmModel } from './types'
 
 export function getNoRegisterModelsByProjectId(projectId: string) {
-  return request<IITMModel[]>({
+  return request<IItmModel[]>({
     url: `/v1/admin/projectConsole/external/itmPlan/getNoRegisterModelsByProjectId`,
     params: { projectId },
   })

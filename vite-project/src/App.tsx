@@ -5,21 +5,34 @@ import ReactDOM from 'react-dom'
 import { CloseOutlined, UpOutlined, DownOutlined } from '@ant-design/icons'
 import { useBoolean } from 'ahooks'
 import NasStorage from './nas/Storage'
+import { createRegisterModel } from 'biglab-utils'
 
-function createModal() {
-  const wrap = document.createElement('div')
+// function createModal() {
+//   const wrap = document.createElement('div')
 
-  wrap.className = 'reg-model-dialog'
+//   wrap.className = 'reg-model-dialog'
 
-  const close = () => {
-    // ReactDOM.unmountComponentAtNode(wrap)
-    // document.body.removeChild(wrap)
-  }
+//   const close = () => {
+//     ReactDOM.unmountComponentAtNode(wrap)
+//     document.body.removeChild(wrap)
+//   }
 
-  ReactDOM.render(<ModelModal onClose={close} />, wrap)
+//   ReactDOM.render(
+//     <ConfigProvider
+//       theme={{ token: { colorPrimary: '#2a60e6', borderRadius: 2 } }}
+//     >
+//       <ModelModal
+//         project_id={1}
+//         project_type={''}
+//         username="wuchao.zh"
+//         onClose={close}
+//       />
+//     </ConfigProvider>,
+//     wrap
+//   )
 
-  document.body.appendChild(wrap)
-}
+//   document.body.appendChild(wrap)
+// }
 
 const Desc: FC<{ threshold: number; diskUsedRatio: number }> = ({
   threshold,
@@ -67,12 +80,12 @@ function App() {
   return (
     <div className="App">
       <ConfigProvider
-      // theme={{ token: { colorPrimary: '#2a60e6', borderRadius: 2 } }}
+        theme={{ token: { colorPrimary: '#2a60e6', borderRadius: 2 } }}
       >
         <Button
           type="primary"
           onClick={() => {
-            createModal()
+            createRegisterModel(1, 'itm', 'wuchao.zh')
             // createNotification()
           }}
         >
