@@ -9,3 +9,5 @@
 5. <Fragment key={}>
 
 6. 纯函数
+
+7. createRoot(document.getElementById('root')).render(<App />)

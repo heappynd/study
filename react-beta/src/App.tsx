@@ -1,20 +1,12 @@
 import { useState } from 'react'
+import Parent from './components/Parent'
 
 let count = 0
 
 function App() {
-  console.log('render')
-
-  const [count, setCount] = useState(0)
-  function handleClick() {
-    setCount(count + 1)
-    console.log(count)
-  }
-
   return (
     <div className="App">
-      {count}
-      <button onClick={handleClick}>add</button>
+      <Parent />
     </div>
   )
 }
