@@ -1,0 +1,30 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "overrides": [],
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:react/jsx-runtime"
+  ],
+  "rules": {
+    // semi: ['error', 'always'],
+    // "prefer-destructuring": "error"
+    "prefer-destructuring": [
+      "error",
+      {
+        "array": false,
+        "object": true
+      }
+    ]
+  },
+  // 不指定的话 会向父目录找 一直到根目录或者用户的家目录
+  "root": true
+  // "ignorePatterns": ["yourfile.js"]
+}
