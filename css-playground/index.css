@@ -1,0 +1,23 @@
+:where(section, div) {
+  border: 1px solid #000;
+}
+
+/* 优先级为0 第一位元素选择器 第二位类选择器 第三位ID选择器 */
+p :where(.link, .btn) {
+  color: blue;
+}
+/* is取的优先级是参数里面最高的 */
+p :is(.link, .btn) {
+  color: blue;
+}
+/* 0,2,0 人为提高优先级 */
+.link.link {
+  position: relative;
+  color: aqua;
+}
+
+p .link,
+p .btn {
+  position: relative;
+}
+/* 对于以后想要覆盖的样式优先选择where */
