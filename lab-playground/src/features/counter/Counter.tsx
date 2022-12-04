@@ -1,5 +1,5 @@
 // import { useDispatch, useSelector } from 'react-redux'
-import { decrement, increment } from './counterSlice'
+import { decrement, increment, incrementAsync } from './counterSlice'
 import { useAppSelector, useAppDispatch } from '../../app/hooks'
 
 export function Counter() {
@@ -21,6 +21,10 @@ export function Counter() {
         onClick={() => dispatch(decrement())}
       >
         Decrement
+      </button>
+
+      <button onClick={() => dispatch(incrementAsync(5))}>
+        Increment Async
       </button>
     </div>
   )

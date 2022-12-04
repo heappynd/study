@@ -11,6 +11,17 @@ const initialState: CounterState = {
   value: 0,
 }
 
+// Thunks are written using two functions:
+// The outside creator function, which creates and returns the thunk function
+export const incrementAsync = (amount: number) => {
+  // An inside thunk function, which gets dispatch and getState as arguments
+  return (dispatch, getState) => {
+    setTimeout(() => {
+      dispatch(incrementByAmount(amount))
+    }, 1000)
+  }
+}
+
 export const counterSlice = createSlice({
   name: 'counter',
   initialState,
