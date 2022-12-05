@@ -1,1 +1,0 @@
-export { Dictionary } from './dictionary'

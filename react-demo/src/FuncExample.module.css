@@ -1,7 +1,0 @@
-.active {
-  color: #ff0;
-}
-
-:global(#list) {
-  display: flex;
-}

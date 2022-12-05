@@ -1,7 +1,5 @@
 # study
 
-## 0701
-
 1. 对象的内部方法和内部槽
 2. 常规对象和异质对象
 3. `in` 操作符的读取如何拦截
@@ -41,3 +39,33 @@
 
 1. [单文件组件 CSS 功能](https://staging-cn.vuejs.org/api/sfc-css-features.html)
 2. [深度作用选择器](https://vue-loader.vuejs.org/zh/guide/scoped-css.html#深度作用选择器)
+
+## 1205
+
+1. CSS3 :where
+
+```css
+:where(section, div) {
+  border: 1px solid #000;
+}
+
+/* 优先级为0 第一位元素选择器 第二位类选择器 第三位ID选择器 */
+p :where(.link, .btn) {
+  color: blue;
+}
+/* is取的优先级是参数里面最高的 */
+p :is(.link, .btn) {
+  color: blue;
+}
+/* 0,2,0 人为提高优先级 */
+.link.link {
+  position: relative;
+  color: aqua;
+}
+
+p .link,
+p .btn {
+  position: relative;
+}
+/* 对于以后想要覆盖的样式优先选择where */
+```
