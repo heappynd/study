@@ -3,13 +3,17 @@ import InfiniteList from './components/Music/InfiniteList'
 import SearchList from './components/Music/SearchList'
 import AddTodo from './components/Todos/AddTodo'
 import TodoList from './components/Todos/TodoList'
+import UseContext from './components/UseContext'
+import UseReducer from './components/UseReducer'
 import AddPostForm from './features/posts/AddPostForm'
 import PostsList from './features/posts/PostsList'
 
 function App() {
   return (
     <div className="App">
-      <AddTodo />
+      {/* <UseReducer /> */}
+      <UseContext />
+      {/* <AddTodo /> */}
       {/* <SearchList /> */}
       {/* <InfiniteList /> */}
     </div>
