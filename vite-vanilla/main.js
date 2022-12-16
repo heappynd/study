@@ -1,1 +1,1 @@
-import './Singleton/LoginLayer'
+import './Strategy/tween'
