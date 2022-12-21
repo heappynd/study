@@ -1,1 +1,1 @@
-import './Strategy/tween'
+import './Proxy/myImage'
