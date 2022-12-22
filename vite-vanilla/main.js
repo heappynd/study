@@ -1,1 +1,1 @@
-import './Proxy/myImage'
+import './Iterator/each'
