@@ -21,7 +21,11 @@ server.get("/", (req, res) => {
             }
           }
         </script>
-        <script type="module" src="/client.js"></script>
+        <script type="module">
+          import { createApp } from "./app.js";
+
+          createApp().mount("#app");
+        </script>
       </head>
       <body>
         <div id="app">${html}</div>
