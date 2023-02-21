@@ -4,7 +4,7 @@ const data = { ok: true, text: "hello vue3" };
 
 let activeEffect;
 // 用一个全局变量存储被注册的副作用函数
-function effect(fn) {
+export function effect(fn) {
   const effectFn = () => {
     // 调用 cleanup 函数完成清除工作
     cleanup(effectFn);
@@ -27,7 +27,7 @@ function cleanup(effectFn) {
   effectFn.deps.length = 0;
 }
 
-const obj = new Proxy(data, {
+export const obj = new Proxy(data, {
   get(target, key) {
     console.log("拦截读取操作", key);
 
@@ -36,10 +36,10 @@ const obj = new Proxy(data, {
     return target[key];
   },
   set(target, key, newVal) {
-    console.log("- 拦截设置操作 key", key);
-    console.log("- 拦截设置操作 newVal", newVal);
+    console.log("- 拦截设置操作", key, newVal);
     target[key] = newVal;
     trigger(target, key);
+    return true;
   },
 });
 
@@ -70,17 +70,3 @@ function trigger(target, key) {
   const effectsToTun = new Set(effects);
   effectsToTun && effectsToTun.forEach((effectFn) => effectFn());
 }
-
-effect(() => {
-  console.log("effect run");
-
-  document.body.innerText = obj.ok ? obj.text : "not";
-});
-
-setTimeout(() => {
-  obj.ok = false;
-}, 1000);
-
-setTimeout(() => {
-  obj.text = "hello world";
-}, 2000);
