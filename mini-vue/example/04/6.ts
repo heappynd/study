@@ -22,7 +22,7 @@ const obj = new Proxy(data, {
     console.log("- 拦截设置操作 newVal", newVal);
     target[key] = newVal;
     trigger(target, key);
-    return true
+    return true;
   },
 });
 
@@ -52,11 +52,11 @@ function trigger(target, key) {
 
 effect(() => {
   console.log(bucket);
-  
+
   console.log("effect run");
   document.body.innerText = obj.text;
 });
 
 setTimeout(() => {
-  obj.text2= "hello vue3";
+  obj.text = "hello vue3";
 }, 1000);
