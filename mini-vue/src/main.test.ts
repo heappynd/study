@@ -1,22 +1,31 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { effect, obj } from "./main";
 
-let dummy: string | undefined = undefined;
-
-describe("#sum", () => {
-  it("returns 0 with no numbers", () => {
+describe("basic test", () => {
+  it("reactive", () => {
+    let dummy: string | undefined = undefined;
     effect(() => {
-      console.log("effect run");
+      dummy = obj.text;
+    });
+    expect(dummy).toBe("hello vue3");
+    obj.text = "hello vue2";
+    expect(dummy).toBe("hello vue2");
+  });
+});
 
+describe("分支切换与 cleanup", () => {
+  it("one", () => {
+    let dummy: string | undefined = undefined;
+    const fn = vi.fn(() => {
       dummy = obj.ok ? obj.text : "not";
     });
-
-    expect(dummy).toBe("hello vue3");
+    effect(fn);
 
     obj.ok = false;
     expect(dummy).toBe("not");
 
     obj.text = "hello world";
     expect(dummy).toBe("not");
+    expect(fn).toHaveBeenCalledTimes(2);
   });
 });
