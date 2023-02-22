@@ -1,17 +1,36 @@
-import { effect, obj, bucket } from "./vue";
+import { reactive, effect } from "./reactivity/src";
 
-let temp1, temp2;
-debugger;
-effect(function effectFn1() {
-  console.log("effectFn1 执行");
+const obj = reactive({ foo: 1 });
 
-  effect(function effectFn2() {
-    console.log("effectFn2 执行");
-    // 在 effectFn2 中读取 obj.bar 属性
-    temp2 = obj.bar;
+const jobQueue = new Set();
+
+const p = Promise.resolve();
+
+let isFlushing = false;
+
+function flushJob() {
+  if (isFlushing) {
+    return;
+  }
+  isFlushing = true;
+  p.then(() => {
+    jobQueue.forEach((job) => job());
+  }).finally(() => {
+    isFlushing = false;
   });
-  // 在 effectFn1 中读取 obj.foo 属性
-  temp1 = obj.foo;
-});
+}
 
-obj.foo = false
+effect(
+  () => {
+    console.log(obj.foo);
+  },
+  {
+    scheduler(fn) {
+      jobQueue.add(fn);
+      flushJob();
+    },
+  }
+);
+
+obj.foo++;
+obj.foo++;

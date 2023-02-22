@@ -1,13 +1,22 @@
-export const bucket = new WeakMap();
-
-const data = { ok: true, text: "hello vue3", foo: true, bar: true };
+const bucket = new WeakMap();
 
 // 用一个全局变量存储当前激活的 effect 函数
 let activeEffect;
 // effect 栈
 const effectStack = [];
 
-export function effect(fn) {
+function cleanup(effectFn) {
+  for (let i = 0; i < effectFn.deps.length; i++) {
+    // deps 是依赖集合
+    const deps = effectFn.deps[i];
+    // 将 effectFn 从依赖集合中移除
+    deps.delete(effectFn);
+  }
+  // 最后需要重置 effectFn.deps 数组
+  effectFn.deps.length = 0;
+}
+
+export function effect(fn, options = {}) {
   const effectFn = () => {
     // 调用 cleanup 函数完成清除工作
     cleanup(effectFn);
@@ -21,39 +30,15 @@ export function effect(fn) {
     effectStack.pop();
     activeEffect = effectStack[effectStack.length - 1];
   };
+  // 将 options 挂载到 effectFn 上
+  effectFn.options = options;
   // activeEffect.deps 用来存储所有与该副作用函数相关联的依赖集合
   effectFn.deps = [];
   // 执行副作用函数
   effectFn();
 }
-function cleanup(effectFn) {
-  for (let i = 0; i < effectFn.deps.length; i++) {
-    // deps 是依赖集合
-    const deps = effectFn.deps[i];
-    // 将 effectFn 从依赖集合中移除
-    deps.delete(effectFn);
-  }
-  // 最后需要重置 effectFn.deps 数组
-  effectFn.deps.length = 0;
-}
 
-export const obj = new Proxy(data, {
-  get(target, key) {
-    // console.log("拦截读取操作", key);
-
-    track(target, key);
-
-    return target[key];
-  },
-  set(target, key, newVal) {
-    // console.log("- 拦截设置操作", key, newVal);
-    target[key] = newVal;
-    trigger(target, key);
-    return true;
-  },
-});
-
-function track(target, key) {
+export function track(target, key) {
   // 没有 activeEffect，直接 return
   if (!activeEffect) {
     return;
@@ -73,10 +58,26 @@ function track(target, key) {
   // 将其添加到 activeEffect.deps 数组中
   activeEffect.deps.push(deps); // 新增
 }
-function trigger(target, key) {
+export function trigger(target, key) {
   const depsMap = bucket.get(target);
   if (!depsMap) return;
   const effects = depsMap.get(key);
-  const effectsToTun = new Set(effects);
-  effectsToTun && effectsToTun.forEach((effectFn) => effectFn());
+  const effectsToTun = new Set();
+  effects &&
+    effects.forEach((effectFn) => {
+      // 如果 trigger 触发执行的副作用函数与当前正在执行的副作用函数相同，
+      // 则不触发执行,就能够避免无限递归调用，从而避免栈溢出
+      if (effectFn !== activeEffect) {
+        effectsToTun.add(effectFn);
+      }
+    });
+  effectsToTun.forEach((effectFn) => {
+    // 如果一个副作用函数存在调度器，则调用该调度器，并将副作用函数作为参数传递
+    if (effectFn.options.scheduler) {
+      effectFn.options.scheduler(effectFn);
+    } else {
+      // 否则直接执行副作用函数（之前的默认行为）
+      effectFn();
+    }
+  });
 }
