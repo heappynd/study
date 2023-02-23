@@ -14,13 +14,25 @@ export function watch(source, cb, options = {}) {
   }
   // 定义旧值与新值
   let oldValue, newValue;
+  // cleanup 用来存储用户注册的过期回调
+  let cleanup;
+  // 定义 onInvalidate 函数
+  function onInvalidate(fn) {
+    // 将过期回调存储到 cleanup 中
+    cleanup = fn;
+  }
   // 提取 scheduler 调度函数为一个独立的 job 函数
   const job = () => {
     // 在 scheduler 中重新执行副作用函数，得到的是新值
     newValue = effectFn();
+    // 在调用回调函数 cb 之前，先调用过期回调
+    if (cleanup) {
+      cleanup();
+    }
     // 当数据变化时，调用回调函数 cb
     // 将旧值和新值作为回调函数的参数
-    cb(newValue, oldValue);
+    // 将 onInvalidate 作为回调函数的第三个参数，以便用户使用
+    cb(newValue, oldValue, onInvalidate);
     // 更新旧值，不然下一次会得到错误的旧值
     oldValue = newValue;
   };
