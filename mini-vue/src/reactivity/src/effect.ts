@@ -34,8 +34,13 @@ export function effect(fn, options = {}) {
   effectFn.options = options;
   // activeEffect.deps 用来存储所有与该副作用函数相关联的依赖集合
   effectFn.deps = [];
-  // 执行副作用函数
-  effectFn();
+  if (!options.lazy) {
+    // 只有非 lazy 的时候，才执行
+    // 执行副作用函数
+    effectFn();
+  }
+  // 将副作用函数作为返回值返回
+  return effectFn;
 }
 
 export function track(target, key) {
