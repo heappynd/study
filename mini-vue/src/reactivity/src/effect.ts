@@ -24,11 +24,13 @@ export function effect(fn, options = {}) {
     activeEffect = effectFn;
     // 在调用副作用函数之前将当前副作用函数压入栈中
     effectStack.push(effectFn);
-    fn();
+    // 将 fn 的执行结果存储到 res 中
+    const res = fn();
     // 在当前副作用函数执行完毕后，将当前副作用函数弹出栈，
     // 并把activeEffect 还原为之前的值
     effectStack.pop();
     activeEffect = effectStack[effectStack.length - 1];
+    return res;
   };
   // 将 options 挂载到 effectFn 上
   effectFn.options = options;
