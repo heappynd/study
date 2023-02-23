@@ -2,10 +2,19 @@ import { effect } from "./effect";
 
 // watch 函数接收两个参数，source 是响应式数据，cb 是回调函数
 export function watch(source, cb) {
+  // 定义 getter
+  let getter;
+  // 如果 source 是函数，说明用户传递的是 getter，所以直接把 source 赋值给 getter
+  if (typeof source === "function") {
+    getter = source;
+  } else {
+    // 否则按照原来的实现调用 traverse 递归地读取
+    getter = () => traverse(source);
+  }
   effect(
     // 触发读取操作，从而建立联系
     // 调用 traverse 递归地读取
-    () => traverse(source),
+    () => getter(),
     {
       scheduler() {
         // 当数据变化时，调用回调函数 cb
