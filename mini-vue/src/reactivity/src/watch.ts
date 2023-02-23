@@ -34,7 +34,16 @@ export function watch(source, cb, options = {}) {
     {
       lazy: true,
       // 使用 job 函数作为调度器函数
-      scheduler: job,
+      scheduler: () => {
+        // 在调度函数中判断 flush 是否为 'post'，
+        // 如果是，将其放到微任务队列中执行
+        if (options.flush === "post") {
+          const p = Promise.resolve();
+          p.then(job);
+        } else {
+          job();
+        }
+      },
     }
   );
   if (options.immediate) {
