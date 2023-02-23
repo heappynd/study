@@ -8,6 +8,9 @@ watch(
   (newValue, oldValue) => {
     console.log(newValue, oldValue);
     console.log("数据变化了");
+  },
+  {
+    immediate: true,
   }
 );
-obj.foo++;
+// obj.foo++;

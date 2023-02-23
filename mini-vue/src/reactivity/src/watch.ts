@@ -1,7 +1,7 @@
 import { effect } from "./effect";
 
 // watch 函数接收两个参数，source 是响应式数据，cb 是回调函数
-export function watch(source, cb) {
+export function watch(source, cb, options = {}) {
   // 定义 getter
   let getter;
   // 如果 source 是函数，说明用户传递的是 getter，
@@ -14,6 +14,17 @@ export function watch(source, cb) {
   }
   // 定义旧值与新值
   let oldValue, newValue;
+  // 提取 scheduler 调度函数为一个独立的 job 函数
+  const job = () => {
+    // 在 scheduler 中重新执行副作用函数，得到的是新值
+    newValue = effectFn();
+    // 当数据变化时，调用回调函数 cb
+    // 将旧值和新值作为回调函数的参数
+    cb(newValue, oldValue);
+    // 更新旧值，不然下一次会得到错误的旧值
+    oldValue = newValue;
+  };
+
   // 使用 effect 注册副作用函数时，开启 lazy 选项，
   // 并把返回值存储到effectFn 中以便后续手动调用
   const effectFn = effect(
@@ -22,19 +33,17 @@ export function watch(source, cb) {
     () => getter(),
     {
       lazy: true,
-      scheduler() {
-        // 在 scheduler 中重新执行副作用函数，得到的是新值
-        newValue = effectFn();
-        // 当数据变化时，调用回调函数 cb
-        // 将旧值和新值作为回调函数的参数
-        cb(newValue, oldValue);
-        // 更新旧值，不然下一次会得到错误的旧值
-        oldValue = newValue;
-      },
+      // 使用 job 函数作为调度器函数
+      scheduler: job,
     }
   );
-  // 手动调用副作用函数，拿到的值就是旧值
-  oldValue = effectFn();
+  if (options.immediate) {
+    // 当 immediate 为 true 时立即执行 job，从而触发回调执行
+    job();
+  } else {
+    // 手动调用副作用函数，拿到的值就是旧值
+    oldValue = effectFn();
+  }
 }
 
 function traverse(value, seen = new Set()) {
