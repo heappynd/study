@@ -5,9 +5,9 @@ const obj = reactive(data);
 
 watch(
   () => obj.foo,
-  () => {
+  (newValue, oldValue) => {
+    console.log(newValue, oldValue);
     console.log("数据变化了");
   }
 );
-obj.foo++;
 obj.foo++;
