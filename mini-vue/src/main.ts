@@ -1,8 +1,10 @@
-import { reactive, effect, computed } from "./reactivity/src";
+import { reactive, effect, computed, watch } from "./reactivity/src";
 
-const data = { foo: 1, bar: 2 };
+const data = { foo: 1 };
 const obj = reactive(data);
 
-const sumRes = computed(() => obj.foo + obj.bar);
-
-console.log(sumRes.value);
+watch(obj, () => {
+  console.log("数据变化了");
+});
+obj.foo++;
+obj.foo++;
