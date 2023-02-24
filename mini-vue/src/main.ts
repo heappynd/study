@@ -1,20 +1,20 @@
 import { reactive, effect, computed, watch } from "./reactivity/src";
 
-const data = { foo: 1 };
-const obj = reactive(data);
-
-
-watch(
-  obj,
-  async (newValue, oldValue, onInvalidate) => {
-    let expired = false;
-    onInvalidate(()=>{
-      expired = true;
-    })
-    const res = await
+const obj = {
+  foo: 1,
+  get bar() {
+    console.log(this);
+    
+    return this.foo;
   },
-  {
-    immediate: true,
-  }
-);
-// obj.foo++;
+};
+
+const p = reactive(obj);
+
+effect(() => {
+  console.log(p.bar);
+});
+
+p.foo = 100
+
+
