@@ -1,20 +1,14 @@
-import { reactive, effect, computed, watch } from "./reactivity/src";
+import { reactive, effect, computed, watch } from './reactivity/src'
 
 const obj = {
   foo: 1,
-  get bar() {
-    console.log(this);
-    
-    return this.foo;
+}
+
+const p = new Proxy(obj, {
+  has(target, p) {
+    console.log(target, p)
+    return Reflect.has(target, p)
   },
-};
+})
 
-const p = reactive(obj);
-
-effect(() => {
-  console.log(p.bar);
-});
-
-p.foo = 100
-
-
+console.log('foo' in p)
