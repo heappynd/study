@@ -1,5 +1,11 @@
 import { describe, expect, it, vi } from 'vitest'
-import { effect, reactive } from '../src'
+import {
+  effect,
+  reactive,
+  shallowReactive,
+  readonly,
+  shallowReadonly,
+} from '../src'
 
 describe('reactive/test', () => {
   it('Reflect vs target', () => {
@@ -90,5 +96,62 @@ describe('reactive/test', () => {
     expect(dummy).toBe(1)
     child.bar = 2
     expect(fn).toHaveBeenCalledTimes(2)
+  })
+
+  it('深响应', () => {
+    let dummy
+    const obj = reactive({
+      foo: { bar: 1 },
+    })
+    const fn = vi.fn(() => {
+      dummy = obj.foo.bar
+    })
+    effect(fn)
+    expect(dummy).toBe(1)
+    obj.foo.bar = 2
+    expect(dummy).toBe(2)
+    expect(fn).toHaveBeenCalledTimes(2)
+  })
+
+  it('浅响应 shallowReactive', () => {
+    let dummy
+    const obj = shallowReactive({
+      foo: { bar: 1 },
+    })
+    const fn = vi.fn(() => {
+      dummy = obj.foo.bar
+    })
+    effect(fn)
+    expect(dummy).toBe(1)
+    obj.foo.bar = 2
+    expect(fn).toHaveBeenCalledTimes(1)
+  })
+
+  it('readonly test', () => {
+    let dummy
+    const obj = shallowReadonly({
+      foo: 1,
+    })
+    const fn = vi.fn(() => {
+      dummy = obj.foo
+    })
+    effect(fn)
+    obj.foo = 2
+    expect(dummy).toBe(1)
+    expect(fn).toHaveBeenCalledTimes(1)
+  })
+
+  it('deep readonly test', () => {
+    let dummy
+    const obj = readonly({
+      foo: { bar: 1 },
+    })
+    const fn = vi.fn(() => {
+      dummy = obj.foo.bar
+    })
+    effect(fn)
+    obj.foo.bar = 2
+    expect(dummy).toBe(1)
+    expect(fn).toHaveBeenCalledTimes(1)
   })
 })

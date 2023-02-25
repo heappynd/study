@@ -1,21 +1,43 @@
 import { track, trigger, TriggerType } from './effect'
 export const ITERATE_KEY = Symbol()
 
-export function reactive(data) {
+// 封装 createReactive 函数，接收一个参数 isShallow，代表是否为浅响应，
+// 默认为 false，即非浅响应
+// 增加第三个参数 isReadonly，代表是否只读，默认为 false，即非只读
+function createReactive(data, isShallow = false, isReadonly = false) {
   return new Proxy(data, {
+    // 拦截读取操作
     get(target, key, receiver) {
-      // console.log("拦截读取操作", key);
       // 代理对象可以通过 raw 属性访问原始数据
       if (key === 'raw') {
         return target
       }
+      // 非只读的时候才需要建立响应联系
+      if (!isReadonly) {
+        track(target, key)
+      }
 
-      track(target, key)
+      // 得到原始值结果
+      const res = Reflect.get(target, key, receiver)
+      // 如果是浅响应，则直接返回原始值
+      if (isShallow) {
+        return res
+      }
+      if (typeof res === 'object' && res !== null) {
+        // 调用 reactive 将结果包装成响应式数据并返回
+        // 如果数据为只读，则调用 readonly 对值进行包装
+        return isReadonly ? readonly(res) : reactive(res)
+      }
 
-      return Reflect.get(target, key, receiver)
+      return res
     },
+    // 拦截设置操作
     set(target, key, newVal, receiver) {
-      // console.log("- 拦截设置操作", key, newVal);
+      // 如果是只读的，则打印警告信息并返回
+      if (isReadonly) {
+        console.warn(`属性 ${key} 是只读的`)
+        return true
+      }
       // 先获取旧值
       const oldVal = target[key]
       // 如果属性不存在，则说明是在添加新属性，否则是设置已有属性
@@ -43,6 +65,11 @@ export function reactive(data) {
       return Reflect.ownKeys(target)
     },
     deleteProperty(target, p) {
+      // 如果是只读的，则打印警告信息并返回
+      if (isReadonly) {
+        console.warn(`属性 ${p} 是只读的`)
+        return true
+      }
       // 检查被操作的属性是否是对象自己的属性
       const hasKey = Object.prototype.hasOwnProperty.call(target, p)
       // 使用 Reflect.deleteProperty 完成属性的删除
@@ -55,4 +82,17 @@ export function reactive(data) {
       return res
     },
   })
+}
+
+export function reactive(data) {
+  return createReactive(data)
+}
+export function shallowReactive(data) {
+  return createReactive(data, true)
+}
+export function readonly(data) {
+  return createReactive(data, false, true)
+}
+export function shallowReadonly(data) {
+  return createReactive(data, true, true)
 }
