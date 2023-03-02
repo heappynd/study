@@ -16,6 +16,10 @@ function createReactive(data, isShallow = false, isReadonly = false) {
       if (!isReadonly) {
         track(target, key)
       }
+      // 添加判断，如果 key 的类型是 symbol，则不进行追踪
+      if (!isReadonly && typeof key !== 'symbol') {
+        track(target, key)
+      }
 
       // 得到原始值结果
       const res = Reflect.get(target, key, receiver)
@@ -56,7 +60,8 @@ function createReactive(data, isShallow = false, isReadonly = false) {
         // 比较新值与旧值，只要当不全等的时候才触发响应
         // 比较新值与旧值，只有当它们不全等，并且不都是 NaN 的时候才触发响应
         if (oldVal !== newVal && (oldVal === oldVal || newVal === newVal)) {
-          trigger(target, key, type)
+          // 增加第四个参数，即触发响应的新值
+          trigger(target, key, type, newVal)
         }
       }
 
@@ -67,7 +72,7 @@ function createReactive(data, isShallow = false, isReadonly = false) {
       return Reflect.has(target, p)
     },
     ownKeys(target) {
-      track(target, ITERATE_KEY)
+      track(target, Array.isArray(target) ? 'length' : ITERATE_KEY)
       return Reflect.ownKeys(target)
     },
     deleteProperty(target, p) {

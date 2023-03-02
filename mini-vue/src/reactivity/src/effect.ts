@@ -73,7 +73,8 @@ export function track(target, key) {
   // 将其添加到 activeEffect.deps 数组中
   activeEffect.deps.push(deps) // 新增
 }
-export function trigger(target, key, type) {
+// 为 trigger 函数增加第四个参数，newVal，即新值
+export function trigger(target, key, type, newVal) {
   const depsMap = bucket.get(target)
   if (!depsMap) return
   const effects = depsMap.get(key)
@@ -100,6 +101,20 @@ export function trigger(target, key, type) {
           effectsToTun.add(effectFn)
         }
       })
+  }
+  // 如果操作目标是数组，并且修改了数组的 length 属性
+  if (Array.isArray(target) && key === 'length') {
+    // 对于索引大于或等于新的 length 值的元素，
+    // 需要把所有相关联的副作用函数取出并添加到 effectsToRun 中待执行
+    depsMap.forEach((effects, key) => {
+      if (key >= newVal) {
+        effects.forEach((effectFn) => {
+          if (effectFn !== activeEffect) {
+            effectsToTun.add(effectFn)
+          }
+        })
+      }
+    })
   }
 
   // 只有当操作类型为 'ADD' 时，才触发与 ITERATE_KEY 相关联的副作用函数重新执行

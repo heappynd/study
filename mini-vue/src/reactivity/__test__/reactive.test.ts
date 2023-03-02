@@ -189,4 +189,17 @@ describe('reactive/test', () => {
     arr.length = 100
     expect(fn).toHaveBeenCalledTimes(1)
   })
+
+  it('for in array', () => {
+    const arr = reactive(['foo'])
+    const fn = vi.fn(() => {
+      for (const key in arr) {
+      }
+    })
+    effect(fn)
+    arr[1] = 'bar'
+    expect(fn).toHaveBeenCalledTimes(2)
+    arr.length = 0
+    expect(fn).toHaveBeenCalledTimes(3)
+  })
 })
