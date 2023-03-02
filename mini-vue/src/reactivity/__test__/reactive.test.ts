@@ -154,4 +154,39 @@ describe('reactive/test', () => {
     expect(dummy).toBe(1)
     expect(fn).toHaveBeenCalledTimes(1)
   })
+
+  it('set array element', () => {
+    const arr = reactive(['foo'])
+    const fn1 = vi.fn(() => {
+      console.log(arr[0])
+    })
+    const fn2 = vi.fn(() => {
+      console.log(arr.length)
+    })
+    effect(fn1)
+    effect(fn2)
+    arr[1] = 'bar'
+    expect(fn1).toHaveBeenCalledTimes(1)
+    expect(fn2).toHaveBeenCalledTimes(2)
+  })
+
+  it('modify array length', () => {
+    const arr = reactive(['foo'])
+    const fn = vi.fn(() => {
+      console.log(arr[0])
+    })
+    effect(fn)
+    arr.length = 0
+    expect(fn).toHaveBeenCalledTimes(2)
+  })
+
+  it('modify array length part two', () => {
+    const arr = reactive(['foo'])
+    const fn = vi.fn(() => {
+      console.log(arr[0])
+    })
+    effect(fn)
+    arr.length = 100
+    expect(fn).toHaveBeenCalledTimes(1)
+  })
 })

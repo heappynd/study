@@ -41,7 +41,13 @@ function createReactive(data, isShallow = false, isReadonly = false) {
       // 先获取旧值
       const oldVal = target[key]
       // 如果属性不存在，则说明是在添加新属性，否则是设置已有属性
-      const type = Object.prototype.hasOwnProperty.call(target, key)
+      //  如果代理目标是数组，则检测被设置的索引值是否小于数组长度，
+      // 如果是，则视作 SET 操作，否则是 ADD 操作
+      const type = Array.isArray(target)
+        ? Number(key) < target.length
+          ? TriggerType.SET
+          : TriggerType.ADD
+        : Object.prototype.hasOwnProperty.call(target, key)
         ? TriggerType.SET
         : TriggerType.ADD
       const res = Reflect.set(target, key, newVal, receiver)

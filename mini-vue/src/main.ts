@@ -1,23 +1,13 @@
 import { reactive, effect, computed, watch } from './reactivity/src'
 
-const obj = {
-  foo: 1,
-  get bar() {
-    console.log(this);
-    
-    return this.foo
-  }
-}
+const arr = reactive(['foo'])
 
-const p = new Proxy(obj, {
-  get(target, p, receiver) {
-    console.log(target, p, receiver);
-    // return target[p]
-    return Reflect.get(target, p, receiver)
-  },
-  set(target, p, newValue, receiver) {
-    
-  },
+effect(() => {
+  console.log(arr[0])
 })
 
-console.log(p.bar);
+effect(() => {
+  console.log(arr.length)
+})
+
+arr[0] = 'bar'

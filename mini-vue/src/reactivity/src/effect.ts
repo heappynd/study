@@ -89,6 +89,19 @@ export function trigger(target, key, type) {
         effectsToTun.add(effectFn)
       }
     })
+  // 当操作类型为 ADD 并且目标对象是数组时，应该取出并执行那些与 length属性相关联的副作用函数
+  if (type === TriggerType.ADD && Array.isArray(target)) {
+    // 取出与 length 相关联的副作用函数
+    const lengthEffects = depsMap.get('length')
+    // 将这些副作用函数添加到 effectsToRun 中，待执行
+    lengthEffects &&
+      lengthEffects.forEach((effectFn) => {
+        if (effectFn !== activeEffect) {
+          effectsToTun.add(effectFn)
+        }
+      })
+  }
+
   // 只有当操作类型为 'ADD' 时，才触发与 ITERATE_KEY 相关联的副作用函数重新执行
   if (type === TriggerType.ADD || type === TriggerType.DELETE) {
     // 将与 ITERATE_KEY 相关联的副作用函数也添加到 effectsToRun
