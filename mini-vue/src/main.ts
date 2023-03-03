@@ -6,8 +6,5 @@ effect(() => {
   console.log(arr[0])
 })
 
-effect(() => {
-  console.log(arr.length)
-})
-
-arr[0] = 'bar'
+debugger
+arr.length = 0

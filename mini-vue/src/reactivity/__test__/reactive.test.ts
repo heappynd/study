@@ -202,4 +202,40 @@ describe('reactive/test', () => {
     arr.length = 0
     expect(fn).toHaveBeenCalledTimes(3)
   })
+
+  it('array for..of', () => {
+    const arr = reactive([1, 2, 3, 4, 5])
+    const fn = vi.fn(() => {
+      for (const val of arr) {
+      }
+    })
+    effect(fn)
+    arr[1] = 'bar'
+    arr.length = 0
+    expect(fn).toHaveBeenCalledTimes(3)
+  })
+
+  it('array includes', () => {
+    let dummy: boolean = true
+    const arr = reactive([1, 2])
+    const fn = vi.fn(() => {
+      dummy = arr.includes(1)
+    })
+    effect(fn)
+    expect(dummy).toBe(true)
+    arr[0] = 3
+    expect(fn).toHaveBeenCalledTimes(2)
+    expect(dummy).toBe(false)
+  })
+
+  it('array includes part 2', () => {
+    let dummy: boolean = false
+    const obj = {}
+    const arr = reactive([obj])
+    const fn = vi.fn(() => {
+      dummy = arr.includes(arr[0])
+    })
+    effect(fn)
+    expect(dummy).toBe(true)
+  })
 })

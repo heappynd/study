@@ -13,9 +13,6 @@ function createReactive(data, isShallow = false, isReadonly = false) {
         return target
       }
       // 非只读的时候才需要建立响应联系
-      if (!isReadonly) {
-        track(target, key)
-      }
       // 添加判断，如果 key 的类型是 symbol，则不进行追踪
       if (!isReadonly && typeof key !== 'symbol') {
         track(target, key)
@@ -72,6 +69,7 @@ function createReactive(data, isShallow = false, isReadonly = false) {
       return Reflect.has(target, p)
     },
     ownKeys(target) {
+      // 如果操作目标 target 是数组，则使用 length 属性作为 key 并建立响应联系
       track(target, Array.isArray(target) ? 'length' : ITERATE_KEY)
       return Reflect.ownKeys(target)
     },
@@ -95,8 +93,21 @@ function createReactive(data, isShallow = false, isReadonly = false) {
   })
 }
 
+// 定义一个 Map 实例，存储原始对象到代理对象的映射
+const reactiveMap = new Map()
+
 export function reactive(data) {
-  return createReactive(data)
+  // 优先通过原始对象 obj 寻找之前创建的代理对象，
+  // 如果找到了，直接返回已有的代理对象
+  const existionProxy = reactiveMap.get(data)
+  if (existionProxy) {
+    return existionProxy
+  }
+  // 如果不存在，则创建一个新的代理对象
+  const proxy = createReactive(data)
+  // 存储到 Map 中，从而避免重复创建
+  reactiveMap.set(data, proxy)
+  return proxy
 }
 export function shallowReactive(data) {
   return createReactive(data, true)
