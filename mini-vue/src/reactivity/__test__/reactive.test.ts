@@ -249,4 +249,14 @@ describe('reactive/test', () => {
     effect(fn)
     expect(dummy).toBe(true)
   })
+
+  it('array push', () => {
+    const arr = reactive([])
+    effect(() => {
+      arr.push(1)
+    })
+    effect(() => {
+      arr.push(1)
+    })
+  })
 })

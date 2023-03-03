@@ -1,4 +1,4 @@
-import { ITERATE_KEY } from './reactive'
+import { ITERATE_KEY, shouldTrack } from './reactive'
 
 const bucket = new WeakMap()
 
@@ -55,7 +55,8 @@ export function effect(fn, options = {}) {
 
 export function track(target, key) {
   // 没有 activeEffect，直接 return
-  if (!activeEffect) {
+  // 当禁止追踪时，直接返回
+  if (!activeEffect || !shouldTrack) {
     return
   }
 
