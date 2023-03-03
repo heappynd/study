@@ -238,4 +238,15 @@ describe('reactive/test', () => {
     effect(fn)
     expect(dummy).toBe(true)
   })
+
+  it('array includes part 3', () => {
+    let dummy: boolean = false
+    const obj = {}
+    const arr = reactive([obj])
+    const fn = vi.fn(() => {
+      dummy = arr.includes(obj)
+    })
+    effect(fn)
+    expect(dummy).toBe(true)
+  })
 })

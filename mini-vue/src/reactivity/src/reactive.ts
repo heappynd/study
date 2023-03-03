@@ -1,6 +1,24 @@
 import { track, trigger, TriggerType } from './effect'
 export const ITERATE_KEY = Symbol()
 
+const arrayInstrumentations = {}
+
+const originMethod = Array.prototype.includes
+;['includes', 'indexOf', 'lastIndexOf'].forEach((method) => {
+  const originMethod = Array.prototype[method]
+  arrayInstrumentations[method] = function (...args) {
+    // this 是代理对象，先在代理对象中查找，将结果存储到 res 中
+    let res = originMethod.apply(this, args)
+
+    if (res === false || res === -1) {
+      // res 为 false 说明没找到，通过 this.raw 拿到原始数组，再去其中查找并更新 res 值
+      res = originMethod.apply(this.raw, args)
+    }
+    // 返回最终结果
+    return res
+  }
+})
+
 // 封装 createReactive 函数，接收一个参数 isShallow，代表是否为浅响应，
 // 默认为 false，即非浅响应
 // 增加第三个参数 isReadonly，代表是否只读，默认为 false，即非只读
@@ -11,6 +29,11 @@ function createReactive(data, isShallow = false, isReadonly = false) {
       // 代理对象可以通过 raw 属性访问原始数据
       if (key === 'raw') {
         return target
+      }
+      //  如果操作的目标对象是数组，并且 key 存在于arrayInstrumentations 上
+      if (Array.isArray(target) && arrayInstrumentations.hasOwnProperty(key)) {
+        // 那么返回定义在 arrayInstrumentations 上的值
+        return Reflect.get(arrayInstrumentations, key, receiver)
       }
       // 非只读的时候才需要建立响应联系
       // 添加判断，如果 key 的类型是 symbol，则不进行追踪
