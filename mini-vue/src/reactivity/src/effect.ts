@@ -1,3 +1,4 @@
+import { MAP_KEY_ITERATE_KEY } from './collection'
 import { ITERATE_KEY, shouldTrack } from './reactive'
 
 const bucket = new WeakMap()
@@ -118,8 +119,29 @@ export function trigger(target, key, type, newVal) {
     })
   }
 
+  if (
+    (type === TriggerType.ADD || type === TriggerType.DELETE) &&
+    Object.prototype.toString.call(target) === '[object Map]'
+  ) {
+    // 则取出那些与 MAP_KEY_ITERATE_KEY 相关联的副作用函数并执行
+    const iterateEffects = depsMap.get(MAP_KEY_ITERATE_KEY)
+    iterateEffects &&
+      iterateEffects.forEach((effectFn) => {
+        if (effectFn !== activeEffect) {
+          effectsToTun.add(effectFn)
+        }
+      })
+  }
+
   // 只有当操作类型为 'ADD' 时，才触发与 ITERATE_KEY 相关联的副作用函数重新执行
-  if (type === TriggerType.ADD || type === TriggerType.DELETE) {
+  if (
+    type === TriggerType.ADD ||
+    type === TriggerType.DELETE ||
+    // 如果操作类型是 SET，并且目标对象是 Map 类型的数据，
+    // 也应该触发那些与 ITERATE_KEY 相关联的副作用函数重新执行
+    (type === TriggerType.SET &&
+      Object.prototype.toString.call(target) === '[object Map]')
+  ) {
     // 将与 ITERATE_KEY 相关联的副作用函数也添加到 effectsToRun
     iterateEffects &&
       iterateEffects.forEach((effectFn) => {
