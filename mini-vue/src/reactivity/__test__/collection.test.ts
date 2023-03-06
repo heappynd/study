@@ -17,7 +17,13 @@ describe('collection', () => {
       dummy = p.size
     })
     effect(fn)
+    p.add(4)
+    expect(fn).toHaveBeenCalledTimes(2)
     p.add(1)
     expect(fn).toHaveBeenCalledTimes(2)
+    p.delete(3)
+    expect(fn).toHaveBeenCalledTimes(3)
+    p.delete(5)
+    expect(fn).toHaveBeenCalledTimes(3)
   })
 })

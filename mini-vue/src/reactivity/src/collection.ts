@@ -17,11 +17,26 @@ const mutableInstrumentations = {
   add(key) {
     // this 仍然指向的是代理对象，通过 raw 属性获取原始数据对象
     const target = this.raw
+    // 先判断值是否已经存在
+    // 只有在值不存在的情况下，才需要触发响应
+    const hasKey = target.has(key)
     // 通过原始数据对象执行 add 方法添加具体的值，
     // 注意，这里不再需要 .bind 了，因为是直接通过 target 调用并执行的
     const res = target.add(key)
-    // 调用 trigger 函数触发响应，并指定操作类型为 ADD
-    trigger(target, key, 'ADD')
+    if (!hasKey) {
+      // 调用 trigger 函数触发响应，并指定操作类型为 ADD
+      trigger(target, key, 'ADD')
+    }
+    return res
+  },
+  delete(key) {
+    const target = this.raw
+    const hasKey = target.has(key)
+    const res = target.delete(key)
+    // 当要删除的元素确实存在时，才触发响应
+    if (hasKey) {
+      trigger(target, key, 'DELETE')
+    }
     return res
   },
 }
