@@ -32,7 +32,11 @@ describe('renderer', () => {
     expect(dummy).toEqual({
       type: 'root',
       children: { tag: 'h1', textContent: 'hello' },
-      _vnode: { type: 'h1', children: 'hello' },
+      _vnode: {
+        type: 'h1',
+        children: 'hello',
+        el: { tag: 'h1', textContent: 'hello' },
+      },
     })
   })
 

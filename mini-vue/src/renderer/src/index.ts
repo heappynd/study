@@ -10,13 +10,21 @@ export function createRenderer(options) {
       patch(container._vnode, vnode, container)
     } else {
       if (container._vnode) {
-        // 旧 vnode 存在，且新 vnode 不存在，说明是卸载（unmount）操作
-        // 只需要将 container 内的 DOM 清空即可
-        container.innerHTML = ''
+        unmount(container._vnode)
       }
     }
     // 把 vnode 存储到 container._vnode 下，即后续渲染中的旧 vnode
     container._vnode = vnode
+  }
+
+  function unmount(vnode) {
+    // 旧 vnode 存在，且新 vnode 不存在，说明是卸载（unmount）操作
+    // 只需要将 container 内的 DOM 清空即可
+    // 根据 vnode 获取要卸载的真实 DOM 元素
+    // 获取 el 的父元素
+    const parent = vnode.el.parentNode
+    // 调用 removeChild 移除元素
+    if (parent) parent.removeChild(vnode.el)
   }
 
   /**
@@ -36,7 +44,8 @@ export function createRenderer(options) {
 
   function mountElement(vnode, container) {
     // 创建 DOM 元素
-    const el = createElement(vnode.type)
+    // 让 vnode.el 引用真实 DOM 元素
+    const el = (vnode.el = createElement(vnode.type))
     // 处理子节点，如果子节点是字符串，代表元素具有文本节点
     if (typeof vnode.children === 'string') {
       // 因此只需要设置元素的 textContent 属性即可
