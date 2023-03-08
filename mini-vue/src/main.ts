@@ -1,39 +1,11 @@
 import { createRenderer } from './renderer/src'
-import { reactive, effect } from './reactivity/src'
-import { normalizeClass, shouldSetAsProps } from './renderer/src/utils'
+import { shouldSetAsProps } from './renderer/src/utils'
 
 // test
-const vnode1 = reactive({
-  type: 'h1',
-  // 使用 props 描述一个元素的属性
-  props: {
-    id: 'foo',
-  },
-  children: [
-    {
-      type: 'p',
-      children: 'hello',
-      props: {
-        class: normalizeClass('foo bar'),
-      },
-    },
-    {
-      type: 'button',
-      props: {
-        disabled: '',
-        class: normalizeClass({ foo: true, bar: false }),
-      },
-      children: 'click me',
-    },
-    {
-      type: 'div',
-      props: {
-        class: normalizeClass(['foo bar', { baz: true }]),
-      },
-      children: 'div',
-    },
-  ],
-})
+const vnode1 = {
+  type: 'p',
+  children: 'hello',
+}
 
 // 在创建 renderer 时传入配置项
 const renderer = createRenderer({
@@ -70,15 +42,14 @@ const renderer = createRenderer({
   },
 })
 
-effect(() => {
-  console.log(1)
+renderer.render(vnode1, document.querySelector('#app'))
 
-  renderer.render(vnode1, document.querySelector('#app'))
-})
 
 setTimeout(() => {
-  vnode1.children = 'world'
+  const vnode2 = {
+    type: 'input',
+    children: 'world',
+  }
+  renderer.render(vnode2, document.querySelector('#app'))
+  // renderer.render(null, document.querySelector('#app'))
 }, 1000)
-
-// renderer.render(vnode2, document.querySelector('#app'))
-// renderer.render(null, document.querySelector('#app'))
