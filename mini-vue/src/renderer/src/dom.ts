@@ -75,4 +75,10 @@ export const options = {
       el.setAttribute(key, nextValue)
     }
   },
+  createText(text) {
+    return document.createTextNode(text)
+  },
+  setText(el: Text, text) {
+    el.nodeValue = text
+  },
 }
