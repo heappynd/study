@@ -1,24 +1,8 @@
 import { createRenderer } from './renderer/src'
 import { shouldSetAsProps } from './renderer/src/utils'
+import { ref, effect } from './reactivity/src'
 
 // test
-const vnode1 = {
-  type: 'p',
-  children: 'text',
-  props: {
-    onClick: [
-      () => {
-        alert('clicked')
-      },
-      () => {
-        alert('clicked again')
-      },
-    ],
-    onContextmenu: () => {
-      alert('contextmenu')
-    },
-  },
-}
 
 // 在创建 renderer 时传入配置项
 const renderer = createRenderer({
@@ -91,13 +75,29 @@ const renderer = createRenderer({
   },
 })
 
-renderer.render(vnode1, document.querySelector('#app'))
-
-setTimeout(() => {
-  const vnode2 = {
-    type: 'input',
-    children: 'world',
+const bol = ref(false)
+effect(() => {
+  const vnode1 = {
+    type: 'div',
+    props: bol.value
+      ? {
+          onClick: () => {
+            console.log('父元素 clicked')
+          },
+        }
+      : {},
+    children: [
+      {
+        type: 'p',
+        props: {
+          onClick: () => {
+            bol.value = true
+          },
+        },
+        children: 'text',
+      },
+    ],
   }
-  // renderer.render(vnode2, document.querySelector('#app'))
-  // renderer.render(null, document.querySelector('#app'))
-}, 1000)
+
+  renderer.render(vnode1, document.querySelector('#app'))
+})
