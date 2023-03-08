@@ -39,6 +39,4 @@ describe('renderer', () => {
       },
     })
   })
-
-  it('value', () => {})
 })
