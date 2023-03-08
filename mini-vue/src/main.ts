@@ -1,5 +1,4 @@
 import { createRenderer } from './renderer/src'
-import { ref, effect } from './reactivity/src'
 import { options } from './renderer/src/dom'
 
 // test
@@ -7,29 +6,27 @@ import { options } from './renderer/src/dom'
 // 在创建 renderer 时传入配置项
 const renderer = createRenderer(options)
 
-const bol = ref(false)
-effect(() => {
-  const vnode1 = {
+const oldVNode = {
+  type: 'div',
+  children: [
+    { type: 'p', children: '1' },
+    { type: 'p', children: '2' },
+    { type: 'p', children: '3' },
+  ],
+}
+
+
+renderer.render(oldVNode, document.querySelector('#app'))
+
+setTimeout(() => {
+  debugger
+  const newVNode = {
     type: 'div',
-    props: bol.value
-      ? {
-          onClick: () => {
-            console.log('父元素 clicked')
-          },
-        }
-      : {},
     children: [
-      {
-        type: 'p',
-        props: {
-          onClick: () => {
-            bol.value = true
-          },
-        },
-        children: 'text',
-      },
+      { type: 'p', children: '4' },
+      { type: 'p', children: '5' },
+      { type: 'p', children: '6' },
     ],
   }
-
-  renderer.render(vnode1, document.querySelector('#app'))
-})
+  renderer.render(newVNode, document.querySelector('#app'))
+}, 1000)
