@@ -35,4 +35,6 @@ describe('renderer', () => {
       _vnode: { type: 'h1', children: 'hello' },
     })
   })
+
+  it('value', () => {})
 })

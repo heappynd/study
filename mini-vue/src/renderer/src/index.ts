@@ -1,7 +1,8 @@
+import { shouldSetAsProps } from './utils'
 
 export function createRenderer(options) {
   // 通过 options 得到操作 DOM 的 API
-  const { createElement, insert, setElementText } = options
+  const { createElement, insert, setElementText, patchProps } = options
 
   function render(vnode, container) {
     if (vnode) {
@@ -40,6 +41,16 @@ export function createRenderer(options) {
     if (typeof vnode.children === 'string') {
       // 因此只需要设置元素的 textContent 属性即可
       setElementText(el, vnode.children)
+    } else if (Array.isArray(vnode.children)) {
+      // 如果 children 是数组，则遍历每一个子节点，并调用 patch 函数挂载它
+      vnode.children.forEach((child) => {
+        patch(null, child, el)
+      })
+    }
+    if (vnode.props) {
+      for (const key in vnode.props) {
+        patchProps(el, key, null, vnode.props[key])
+      }
     }
     // 将元素添加到容器中
     insert(el, container)
