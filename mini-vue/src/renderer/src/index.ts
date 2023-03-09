@@ -1,4 +1,5 @@
 import { doubleDiff } from './double-diff'
+import { fastDiff } from './fast-diff'
 import { simpleDiff } from './simple-diff'
 import { Fragment, Text } from './vnode-type'
 
@@ -163,7 +164,7 @@ export function createRenderer(options) {
   }
 
   function patchKeyedChildren(n1, n2, container) {
-    doubleDiff(n1, n2, container, { patch, insert, unmount })
+    fastDiff(n1, n2, container, { patch, insert, unmount })
   }
 
   function mountElement(vnode, container, anchor) {
