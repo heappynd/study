@@ -1,4 +1,4 @@
-import { lis } from './utils'
+import { lis } from '../utils'
 
 export function fastDiff(n1, n2, container, { patch, insert, unmount }) {
   const newChildren = n2.children

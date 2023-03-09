@@ -1,6 +1,6 @@
-import { doubleDiff } from './double-diff'
-import { fastDiff } from './fast-diff'
-import { simpleDiff } from './simple-diff'
+import { doubleDiff } from './diff/double-diff'
+import { fastDiff } from './diff/fast-diff'
+import { simpleDiff } from './diff/simple-diff'
 import { Fragment, Text } from './vnode-type'
 
 export function createRenderer(options) {
