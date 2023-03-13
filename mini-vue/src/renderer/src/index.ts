@@ -2,6 +2,8 @@ import { doubleDiff } from './diff/double-diff'
 import { fastDiff } from './diff/fast-diff'
 import { simpleDiff } from './diff/simple-diff'
 import { Fragment, Text } from './vnode-type'
+import { reactive, effect, shallowReactive } from '@vue/reactivity'
+import { queueJob } from './utils'
 
 export function createRenderer(options) {
   // 通过 options 得到操作 DOM 的 API
@@ -71,6 +73,11 @@ export function createRenderer(options) {
       }
     } else if (typeof type === 'object') {
       // 如果 n2.type 的值的类型是对象，则它描述的是组件
+      if (!n1) {
+        mountComponent(n2, container, null)
+      } else {
+        patchComponent(n1, n2, anchor)
+      }
     } else if (type === Text) {
       // 如果新 vnode 的类型是 Text，则说明该 vnode 描述的是文本节点
       // 如果没有旧节点，则进行挂载
@@ -95,6 +102,166 @@ export function createRenderer(options) {
         patchChildren(n1, n2, container)
       }
     }
+  }
+
+  // resolveProps 函数用于解析组件 props 和 attrs 数据
+  function resolveProps(options, propsData) {
+    const props = {}
+    const attrs = {}
+    // 遍历为组件传递的 props 数据
+    for (const key in propsData) {
+      // 如果为组件传递的 props 数据在组件自身的 props 选项中有定义，则将其视为合法的 props
+      if ((options && key in options) || key.startsWith('on')) {
+        props[key] = propsData[key]
+      } else {
+        attrs[key] = propsData[key]
+      }
+    }
+
+    return [props, attrs]
+  }
+
+  function patchComponent(n1, n2, anchor) {
+    // 获取组件实例，即 n1.component，
+    // 同时让新的组件虚拟节点 n2.component也指向组件实例
+    const instance = (n2.component = n1.component)
+    // 获取当前的 props 数据
+    const { props } = instance
+    // 调用 hasPropsChanged 检测为子组件传递的 props 是否发生变化，
+    // 如果没有变化，则不需要更新
+    if (hasPropsChanged(n1.props, n2.props)) {
+      // 调用 resolveProps 函数重新获取 props 数据
+      const [nextProps, nextAttrs] = resolveProps(n2.type.props, n2.props)
+      for (const k in nextProps) {
+        // 更新 props
+        props[k] = nextProps[k]
+      }
+      // 删除不存在的 props
+      for (const k in props) {
+        if (!(k in nextProps)) delete props[k]
+      }
+    }
+  }
+
+  function hasPropsChanged(prevProps, nextProps) {
+    const nextKeys = Object.keys(nextProps)
+    if (nextKeys.length !== Object.keys(prevProps).length) {
+      // 如果新旧 props 的数量变了，则说明有变化
+      return true
+    }
+    for (let i = 0; i < nextKeys.length; i++) {
+      const key = nextKeys[i]
+      // 有不相等的 props，则说明有变化
+      return nextProps[key] !== prevProps[key]
+    }
+    return false
+  }
+
+  function mountComponent(vnode, container, anchor) {
+    // 通过 vnode 获取组件的选项对象，即 vnode.type
+    const componentOptions = vnode.type
+    // 获取组件的渲染函数 render
+    // 从组件选项对象中取得组件的生命周期函数
+    const {
+      render,
+      data,
+      beforeCreate,
+      created,
+      beforeMount,
+      mounted,
+      beforeUpdate,
+      updated,
+      // 从组件选项对象中取出 props 定义，即 propsOption
+      props: propsOption,
+    } = componentOptions
+
+    // 在这里调用 beforeCreate 钩子
+    beforeCreate && beforeCreate()
+
+    // 调用 data 函数得到原始数据，并调用 reactive 函数将其包装为响应式数据
+    const state = reactive(data())
+    // 调用 resolveProps 函数解析出最终的 props 数据与 attrs 数据
+    const [props, attrs] = resolveProps(propsOption, vnode.props)
+    // 定义组件实例，一个组件实例本质上就是一个对象，它包含与组件有关的状态信息
+    const instance = {
+      // 组件自身的状态数据，即 data
+      state,
+      // 将解析出的 props 数据包装为 shallowReactive 并定义到组件实例上
+      props: shallowReactive(props),
+      // 一个布尔值，用来表示组件是否已经被挂载，初始值为 false
+      isMounted: false,
+      // 组件所渲染的内容，即子树（subTree）
+      subTree: null,
+    }
+    // 将组件实例设置到 vnode 上，用于后续更新
+    vnode.component = instance
+    // 创建渲染上下文对象，本质上是组件实例的代理
+    const renderContext = new Proxy(instance, {
+      get(t, k, r) {
+        // 取得组件自身状态与 props 数据
+        const { state, props } = t
+
+        if (state && k in state) {
+          return state[k]
+        } else if (k in props) {
+          return props[k]
+        } else {
+          console.error('不存在')
+        }
+      },
+      set(t, k, v, r) {
+        const { state, props } = t
+        if (state && k in state) {
+          state[k] = v
+        } else if (k in props) {
+          console.warn(`Attempting to mutate prop "${k}". Props
+are readonly.`)
+        } else {
+          console.error('不存在')
+        }
+      },
+    })
+
+    // 在这里调用 created 钩子
+    created && created.call(renderContext)
+
+    effect(
+      () => {
+        // 调用组件的渲染函数，获得子树
+        // 调用 render 函数时，将其 this 设置为 state，
+        // 从而 render 函数内部可以通过 this 访问组件自身状态数据
+        // 执行渲染函数，获取组件要渲染的内容，即 render 函数返回的虚拟 DOM
+        const subTree = render.call(renderContext, renderContext)
+        // 检查组件是否已经被挂载
+        if (!instance.isMounted) {
+          // 在这里调用 beforeMount 钩子
+          beforeMount && beforeMount.call(renderContext)
+          // 初次挂载，调用 patch 函数第一个参数传递 null
+          // 最后调用 patch 函数来挂载组件所描述的内容，即 subTree
+          patch(null, subTree, container, anchor)
+          // 重点：将组件实例的 isMounted 设置为 true，这样当更新发生时就不会再次进行挂载操作，
+          // 而是会执行更新
+          instance.isMounted = true
+          // 在这里调用 mounted 钩子
+          mounted && mounted.call(renderContext)
+        } else {
+          // 在这里调用 beforeUpdate 钩子
+          beforeUpdate && beforeUpdate.call(renderContext)
+          // 当 isMounted 为 true 时，说明组件已经被挂载，只需要完成自更新即可，
+          // 所以在调用 patch 函数时，第一个参数为组件上一次渲染的子树，
+          // 意思是，使用新的子树与上一次渲染的子树进行打补丁操作
+          patch(instance.subTree, subTree, container, anchor)
+          // 在这里调用 updated 钩子
+          updated && updated.call(renderContext)
+        }
+        // 更新组件实例的子树
+        instance.subTree = subTree
+      },
+      {
+        // 指定该副作用函数的调度器为 queueJob 即可
+        // scheduler: queueJob,
+      }
+    )
   }
 
   /**
