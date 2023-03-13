@@ -83,3 +83,80 @@ const vnode1 = {
   ],
 }
 ```
+
+# Example 4
+```ts
+const MyComponent = {
+  name: 'MyComponent',
+  props: {
+    title: String,
+  },
+  data() {
+    return {
+      foo: 'hello world',
+    }
+  },
+  mounted() {
+    setTimeout(() => {
+      console.log(this);
+    }, 1000)
+  },
+  render() {
+    return {
+      type: 'div',
+      children: `foo 的值是: ${this.title}`,
+    }
+  },
+}
+
+const oldVNode = {
+  type: MyComponent,
+  props: {
+    title: 'A small component',
+  },
+}
+```
+
+# Example 5
+```ts
+const MyComponent = {
+  name: 'MyComponent',
+  setup() {
+    // setup 函数可以返回一个函数，该函数将作为组件的渲染函数
+    return () => {
+      return { type: 'div', children: 'hello setup' }
+    }
+  },
+}
+```
+
+# Example 6 emit
+```ts
+const Comp = {
+  props: {
+    foo: String,
+  },
+  setup(props, setupContext) {
+    const { slots, emit, attrs, expose } = setupContext
+    emit('change', 'sss')
+    const count = ref(1000)
+    // 返回一个对象，对象中的数据会暴露到渲染函数中
+    return {
+      count,
+    }
+  },
+  render() {
+    return { type: 'div', children: `count is: ${this.count.value}` }
+  },
+}
+
+const oldVNode = {
+  type: Comp,
+  props: {
+    foo: 'A small component',
+    onChange: () => {
+      console.log('onChange')
+    },
+  },
+}
+```

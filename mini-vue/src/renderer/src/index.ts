@@ -2,7 +2,12 @@ import { doubleDiff } from './diff/double-diff'
 import { fastDiff } from './diff/fast-diff'
 import { simpleDiff } from './diff/simple-diff'
 import { Fragment, Text } from './vnode-type'
-import { reactive, effect, shallowReactive } from '@vue/reactivity'
+import {
+  reactive,
+  effect,
+  shallowReactive,
+  shallowReadonly,
+} from '@vue/reactivity'
 import { queueJob } from './utils'
 
 export function createRenderer(options) {
@@ -162,8 +167,8 @@ export function createRenderer(options) {
     const componentOptions = vnode.type
     // 获取组件的渲染函数 render
     // 从组件选项对象中取得组件的生命周期函数
+    let render = componentOptions.render
     const {
-      render,
       data,
       beforeCreate,
       created,
@@ -173,15 +178,20 @@ export function createRenderer(options) {
       updated,
       // 从组件选项对象中取出 props 定义，即 propsOption
       props: propsOption,
+      // 从组件选项中取出 setup 函数
+      setup,
     } = componentOptions
 
     // 在这里调用 beforeCreate 钩子
     beforeCreate && beforeCreate()
 
     // 调用 data 函数得到原始数据，并调用 reactive 函数将其包装为响应式数据
-    const state = reactive(data())
+    const state = data ? reactive(data()) : null
     // 调用 resolveProps 函数解析出最终的 props 数据与 attrs 数据
     const [props, attrs] = resolveProps(propsOption, vnode.props)
+    // 直接使用编译好的 vnode.children 对象作为 slots 对象即可
+    const slots = vnode.children || {}
+
     // 定义组件实例，一个组件实例本质上就是一个对象，它包含与组件有关的状态信息
     const instance = {
       // 组件自身的状态数据，即 data
@@ -192,19 +202,65 @@ export function createRenderer(options) {
       isMounted: false,
       // 组件所渲染的内容，即子树（subTree）
       subTree: null,
+      // 将插槽添加到组件实例上
+      slots,
     }
+
+    // 定义 emit 函数，它接收两个参数
+    // event: 事件名称
+    // payload: 传递给事件处理函数的参数
+    function emit(event, ...payload) {
+      // 根据约定对事件名称进行处理，例如 change --> onChange
+      const eventName = `on${event[0].toUpperCase() + event.slice(1)}`
+      // 根据处理后的事件名称去 props 中寻找对应的事件处理函数
+      const handler = instance.props[eventName]
+      if (handler) {
+        // 调用事件处理函数并传递参数
+        handler(...payload)
+      } else {
+        console.error('事件不存在')
+      }
+    }
+
+    // setupContext，由于我们还没有讲解 emit 和 slots，所以暂时只需要attrs
+    // 将 emit 函数添加到 setupContext 中，用户可以通过 setupContext 取得 emit 函数
+    // 将 slots 对象添加到 setupContext 中
+    const setupContext = { attrs, emit, slots }
+    // 调用 setup 函数，将只读版本的 props 作为第一个参数传递，
+    // 避免用户意外地修改 props 的值，
+    // 将 setupContext 作为第二个参数传递
+    const setupResult = setup(shallowReadonly(instance.props), setupContext)
+    // setupState 用来存储由 setup 返回的数据
+    let setupState = null
+    //  如果 setup 函数的返回值是函数，则将其作为渲染函数
+    if (typeof setupResult === 'function') {
+      // 报告冲突
+      if (render) console.error('setup 函数返回渲染函数，render 选项将被忽略')
+      // 将 setupResult 作为渲染函数
+      render = setupResult
+    } else {
+      // 如果 setup 函数的返回值不是函数，则作为数据状态赋值给 setupState
+      setupState = setupResult
+    }
+
     // 将组件实例设置到 vnode 上，用于后续更新
     vnode.component = instance
     // 创建渲染上下文对象，本质上是组件实例的代理
     const renderContext = new Proxy(instance, {
       get(t, k, r) {
         // 取得组件自身状态与 props 数据
-        const { state, props } = t
-
+        const { state, props, slots } = t
+        // 当 k 的值为 $slots 时，直接返回组件实例上的 slots
+        if (k === '$slots') {
+          return slots
+        }
         if (state && k in state) {
           return state[k]
         } else if (k in props) {
           return props[k]
+        } else if (setupState && k in setupState) {
+          // 渲染上下文需要增加对 setupState 的支持
+          return setupState[k]
         } else {
           console.error('不存在')
         }
@@ -216,6 +272,9 @@ export function createRenderer(options) {
         } else if (k in props) {
           console.warn(`Attempting to mutate prop "${k}". Props
 are readonly.`)
+        } else if (setupState && k in setupState) {
+          // 渲染上下文需要增加对 setupState 的支持
+          setupState[k] = v
         } else {
           console.error('不存在')
         }

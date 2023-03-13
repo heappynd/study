@@ -1,3 +1,4 @@
+import { ref } from '@vue/reactivity'
 import { createRenderer } from './renderer/src'
 import { options } from './renderer/src/dom'
 
@@ -8,43 +9,58 @@ const renderer = createRenderer(options)
 
 const MyComponent = {
   name: 'MyComponent',
-  props: {
-    title: String,
-  },
-  data() {
-    return {
-      foo: 'hello world',
+  setup() {
+    // setup 函数可以返回一个函数，该函数将作为组件的渲染函数
+    return () => {
+      return { type: 'div', children: 'hello setup' }
     }
   },
-  mounted() {
-    setTimeout(() => {
-      console.log(this);
-      
-    }, 1000)
+}
+const Comp = {
+  props: {
+    foo: String,
+  },
+  setup(props, setupContext) {
+    const { slots, emit, attrs, expose } = setupContext
+    console.log(setupContext)
+
+    const count = ref(1000)
+    // 返回一个对象，对象中的数据会暴露到渲染函数中
+    return {
+      count,
+    }
   },
   render() {
     return {
-      type: 'div',
-      children: `foo 的值是: ${this.title}`,
+      type: MyComponent,
+      children: {
+        header() {
+          return { type: 'h1', children: 'header' }
+        },
+        body() {
+          return { type: 'section', children: 'body' }
+        },
+        footer() {
+          return { type: 'p', children: 'footer' }
+        },
+      },
     }
   },
 }
 
 const oldVNode = {
-  type: MyComponent,
-  props: {
-    title: 'A small component',
-  },
+  type: Comp,
+  props: {},
 }
 
 renderer.render(oldVNode, document.querySelector('#app'))
 
 setTimeout(() => {
-  const newVNode = {
-    type: MyComponent,
-    props: {
-      title: 'A small',
-    },
-  }
-  renderer.render(newVNode, document.querySelector('#app'))
+  // const newVNode = {
+  //   type: MyComponent,
+  //   props: {
+  //     title: 'A small',
+  //   },
+  // }
+  // renderer.render(newVNode, document.querySelector('#app'))
 }, 1000)
