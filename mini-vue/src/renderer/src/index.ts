@@ -9,6 +9,7 @@ import {
   shallowReadonly,
 } from '@vue/reactivity'
 import { queueJob } from './utils'
+import { setCurrentInstance } from './life-cycle'
 
 export function createRenderer(options) {
   // 通过 options 得到操作 DOM 的 API
@@ -204,6 +205,8 @@ export function createRenderer(options) {
       subTree: null,
       // 将插槽添加到组件实例上
       slots,
+      // 在组件实例中添加 mounted 数组，用来存储通过 onMounted 函数注册的生命周期钩子函数
+      mounted: [],
     }
 
     // 定义 emit 函数，它接收两个参数
@@ -226,10 +229,14 @@ export function createRenderer(options) {
     // 将 emit 函数添加到 setupContext 中，用户可以通过 setupContext 取得 emit 函数
     // 将 slots 对象添加到 setupContext 中
     const setupContext = { attrs, emit, slots }
+    // 在调用 setup 函数之前，设置当前组件实例
+    setCurrentInstance(instance)
     // 调用 setup 函数，将只读版本的 props 作为第一个参数传递，
     // 避免用户意外地修改 props 的值，
     // 将 setupContext 作为第二个参数传递
     const setupResult = setup(shallowReadonly(instance.props), setupContext)
+    // 在 setup 函数执行完毕之后，重置当前组件实例
+    setCurrentInstance(null)
     // setupState 用来存储由 setup 返回的数据
     let setupState = null
     //  如果 setup 函数的返回值是函数，则将其作为渲染函数
@@ -303,6 +310,9 @@ are readonly.`)
           instance.isMounted = true
           // 在这里调用 mounted 钩子
           mounted && mounted.call(renderContext)
+          // 遍历 instance.mounted 数组并逐个执行即可
+          instance.mounted &&
+            instance.mounted.forEach((hook) => hook.call(renderContext))
         } else {
           // 在这里调用 beforeUpdate 钩子
           beforeUpdate && beforeUpdate.call(renderContext)

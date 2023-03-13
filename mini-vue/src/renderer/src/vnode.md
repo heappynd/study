@@ -160,3 +160,31 @@ const oldVNode = {
   },
 }
 ```
+
+# Example 7 onMounted
+```ts
+const Comp = {
+  props: {
+    foo: String,
+  },
+  setup(props, setupContext) {
+    const { slots, emit, attrs, expose } = setupContext
+
+    onMounted(() => {
+      console.log('on', setupContext)
+    })
+
+    const count = ref(1000)
+    // 返回一个对象，对象中的数据会暴露到渲染函数中
+    return {
+      count,
+    }
+  },
+  render() {
+    return {
+      type: 'div',
+      children: 'xsda',
+    }
+  },
+}
+```
