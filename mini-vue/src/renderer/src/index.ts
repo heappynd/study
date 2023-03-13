@@ -42,6 +42,10 @@ export function createRenderer(options) {
     if (vnode.type === Fragment) {
       vnode.children.forEach((c) => unmount(c))
       return
+    } else if (typeof vnode.type === 'object') {
+      // 对于组件的卸载，本质上是要卸载组件所渲染的内容，即 subTree
+      unmount(vnode.component.subTree)
+      return
     }
     // 旧 vnode 存在，且新 vnode 不存在，说明是卸载（unmount）操作
     // 只需要将 container 内的 DOM 清空即可

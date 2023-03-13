@@ -13,3 +13,7 @@ export function onMounted(fn) {
     console.error('onMounted 函数只能在 setup 中调用')
   }
 }
+
+export function onUnmounted(fn) {
+  
+}
