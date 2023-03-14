@@ -1,25 +1,11 @@
-import { ref } from '@vue/reactivity'
-import { createRenderer } from './renderer/src'
-import { options } from './renderer/src/dom'
-import { onMounted } from './renderer/src/life-cycle'
+import { parse } from './compiler/parse'
+import { transform } from './compiler/traverse'
+import { dump } from './compiler/utils'
 
-// test
+const template = `<div><p>Vue</p><p>Template</p></div>`
 
-// 在创建 renderer 时传入配置项
-const renderer = createRenderer(options)
+const ast = parse(template)
 
-function MyFuncComp(props) {
-  return { type: 'h1', children: props.title }
-}
-MyFuncComp.props = {
-  title: String,
-}
+console.log('ast', ast)
 
-const oldVNode = {
-  type: MyFuncComp,
-  props: {},
-}
-
-renderer.render(oldVNode, document.querySelector('#app'))
-
-setTimeout(() => {}, 1000)
+transform(ast)
