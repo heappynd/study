@@ -1,3 +1,6 @@
+import { transformRoot } from './transforms'
+import { transformText } from './transforms/transformText'
+import { transformElement } from './transforms/transformElement'
 import { dump } from './utils'
 
 function traverseNode(ast, context) {
@@ -38,15 +41,6 @@ function traverseNode(ast, context) {
   }
 }
 
-function transformElement(node) {
-  console.log('// 进入节点', node)
-  // 返回一个会在退出节点时执行的回调函数
-  return () => {
-    // 在这里编写退出节点的逻辑，当这里的代码运行时，当前转换节点的子节点一定处理完毕了
-    console.log('// 退出节点', node)
-  }
-}
-
 export function transform(ast) {
   const context = {
     // 增加 currentNode，用来存储当前正在转换的节点
@@ -71,7 +65,7 @@ export function transform(ast) {
         context.currentNode = null
       }
     },
-    nodeTransforms: [transformElement],
+    nodeTransforms: [transformRoot, transformElement, transformText],
   }
 
   // 调用 traverseNode 完成转换

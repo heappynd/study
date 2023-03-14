@@ -1,4 +1,4 @@
-import { tokenize } from './'
+import { tokenize } from './tokenize'
 
 export function parse(str) {
   const tokens = tokenize(str)

@@ -1,11 +1,14 @@
-import { parse } from './compiler/parse'
-import { transform } from './compiler/traverse'
-import { dump } from './compiler/utils'
+import { compiler } from './compiler'
 
 const template = `<div><p>Vue</p><p>Template</p></div>`
 
-const ast = parse(template)
+const code = compiler(template)
 
-console.log('ast', ast)
+console.log(code)
 
-transform(ast)
+// function render() {
+//   return h('div', [
+//     h('p', 'Vue'),
+//     h('p', 'Template')
+//   ])
+// }
