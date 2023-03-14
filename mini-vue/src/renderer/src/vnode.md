@@ -85,6 +85,7 @@ const vnode1 = {
 ```
 
 # Example 4
+
 ```ts
 const MyComponent = {
   name: 'MyComponent',
@@ -98,7 +99,7 @@ const MyComponent = {
   },
   mounted() {
     setTimeout(() => {
-      console.log(this);
+      console.log(this)
     }, 1000)
   },
   render() {
@@ -118,6 +119,7 @@ const oldVNode = {
 ```
 
 # Example 5
+
 ```ts
 const MyComponent = {
   name: 'MyComponent',
@@ -131,6 +133,7 @@ const MyComponent = {
 ```
 
 # Example 6 emit
+
 ```ts
 const Comp = {
   props: {
@@ -162,6 +165,7 @@ const oldVNode = {
 ```
 
 # Example 7 onMounted
+
 ```ts
 const Comp = {
   props: {
@@ -186,5 +190,21 @@ const Comp = {
       children: 'xsda',
     }
   },
+}
+```
+
+# Example 8 functional components
+
+```javascript
+function MyFuncComp(props) {
+  return { type: 'h1', children: props.title }
+}
+MyFuncComp.props = {
+  title: String,
+}
+
+const oldVNode = {
+  type: MyFuncComp,
+  props: {},
 }
 ```
