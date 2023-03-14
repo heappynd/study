@@ -3,17 +3,10 @@ import { dump } from './utils'
 function traverseNode(ast, context) {
   // 设置当前转换的节点信息 context.currentNode
   context.currentNode = ast
-  // 1. 增加退出阶段的回调函数数组
-  const exitFns = []
+
   const transforms = context.nodeTransforms
   for (let i = 0; i < transforms.length; i++) {
-    // 2. 转换函数可以返回另外一个函数，该函数即作为退出阶段的回调函数
-    const onExit = transforms[i](context.currentNode, context)
-    if (onExit) {
-      // 将退出阶段的回调函数添加到 exitFns 数组中
-      exitFns.push(onExit)
-    }
-
+    transforms[i](context.currentNode, context)
     // 由于任何转换函数都可能移除当前节点，因此每个转换函数执行完毕后，
     // 都应该检查当前节点是否已经被移除，如果被移除了，直接返回即可
     if (!context.currentNode) return
@@ -29,21 +22,21 @@ function traverseNode(ast, context) {
       traverseNode(children[i], context)
     }
   }
-
-  // 在节点处理的最后阶段执行缓存到 exitFns 中的回调函数
-  // 注意，这里我们要反序执行
-  let i = exitFns.length
-  while (i--) {
-    exitFns[i]()
-  }
 }
 
 function transformElement(node) {
-  console.log('// 进入节点', node)
-  // 返回一个会在退出节点时执行的回调函数
-  return () => {
-    // 在这里编写退出节点的逻辑，当这里的代码运行时，当前转换节点的子节点一定处理完毕了
-    console.log('// 退出节点', node)
+  if (node.type === 'Element' && node.tag === 'p') {
+    node.tag = 'h1'
+  }
+}
+
+function transformText(node, context) {
+  if (node.type === 'Text') {
+    // context.replaceNode({
+    //   type: 'Element',
+    //   tag: 'span',
+    // })
+    context.removeNode()
   }
 }
 
@@ -71,7 +64,7 @@ export function transform(ast) {
         context.currentNode = null
       }
     },
-    nodeTransforms: [transformElement],
+    nodeTransforms: [transformElement, transformText],
   }
 
   // 调用 traverseNode 完成转换
