@@ -1,14 +1,5 @@
-import { compiler } from './compiler'
+import { parse } from './parse'
 
-const template = `<div><p>Vue</p><p>Template</p></div>`
+const template = `<div :id="dynamicId" @click="handler" v-on:mousedown="onMouseDown" ></div>`
 
-const code = compiler(template)
-
-console.log(code)
-
-// function render() {
-//   return h('div', [
-//     h('p', 'Vue'),
-//     h('p', 'Template')
-//   ])
-// }
+console.log(parse(template))
