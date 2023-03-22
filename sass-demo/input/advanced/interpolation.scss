@@ -1,0 +1,30 @@
+@mixin corner-icon($name, $top-or-bottom, $left-or-right) {
+  .icon-#{$name} {
+    background-image: url('/icons/#{$name}.svg');
+    position: absolute;
+    #{$top-or-bottom}: 0;
+    #{$left-or-right}: 0;
+  }
+}
+
+@include corner-icon('mail', top, left);
+
+
+@mixin inline-animation($duration) {
+  $name: inline-#{unique-id()};
+
+  @keyframes #{$name} {
+    @content;
+  }
+
+  animation-name: $name;
+  animation-duration: $duration;
+  animation-iteration-count: infinite;
+}
+
+.pulse {
+  @include inline-animation(2s) {
+    from { background-color: yellow }
+    to { background-color: red }
+  }
+}
