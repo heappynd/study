@@ -1,0 +1,36 @@
+@forward "element-plus/theme-chalk/src/common/var.scss" with (
+  $colors: (
+    "primary": (
+      "base": #2a60e6,
+    ),
+  ),
+  $border-radius: (
+    "base": 2px,
+  )
+);
+
+@use "element-plus/theme-chalk/src/index.scss" as *;
+
+.el-dialog {
+  &__header {
+    border-bottom: 1px solid #f0f0f0;
+    margin-right: 0;
+    font-size: 16px;
+    line-height: 24px;
+  }
+
+  &__footer {
+    border-top: 1px solid #f0f0f0;
+  }
+
+  &__title {
+    font-size: 16px;
+    color: rgba(0, 0, 0, 0.85);
+    font-weight: 700;
+  }
+
+  &__body {
+    max-height: 560px;
+    overflow-y: auto;
+  }
+}
