@@ -1,7 +1,7 @@
-<style lang="scss" module src="./hint.module.scss"></style>
+<style lang="scss" module src="./tips.module.scss" />
 
 <template>
-  <ElDialog v-model="visible" :width="480" title="提示" @close="remove">
+  <ElDialog v-model="state.visible" :width="480" title="提示">
     <div :class="$style.message">
       <ElIcon :size="20" color="#E5A23C">
         <WarningFilled />
@@ -12,14 +12,18 @@
     <template v-if="content">
       <div :class="$style.content">
         <span>{{ content }}</span>
-        <span v-show="validatedText">：{{ validatedText }}</span>
+        <span v-show="validatedText">{{ validatedText }}</span>
       </div>
 
       <div v-show="validatedText" :class="$style.input">
-        <ElInput v-model="userText" clearable :placeholder="placeholder" />
+        <ElInput
+          v-model="state.userText"
+          clearable
+          :placeholder="placeholder"
+        />
       </div>
 
-      <div v-show="userText && !isPass" :class="$style.errorMsg">
+      <div v-show="state.userText && !isPass" :class="$style.errorMsg">
         {{ errorMsg }}
       </div>
     </template>
@@ -36,39 +40,45 @@
 <script lang="ts" setup>
 import { WarningFilled } from "@element-plus/icons-vue";
 import { ElButton, ElDialog, ElIcon, ElInput, ElMessage } from "element-plus";
-import { computed, ref } from "vue";
+import { computed, reactive } from "vue";
 
-export interface HintProps {
+export interface IProps {
   message: string;
   content?: string;
   validatedText?: string;
   placeholder?: string;
   errorMsg?: string;
-  remove?(): void;
 }
 
-const props = withDefaults(defineProps<HintProps>(), {
+const props = withDefaults(defineProps<IProps>(), {
   errorMsg: "校验失败",
-  remove: () => {},
 });
 
-const visible = ref(true);
-const userText = ref("");
+const state = reactive({
+  visible: false,
+  type: "",
+  userText: "",
+});
 // 是否通过验证
 const isPass = computed(() => {
-  return props.validatedText === userText.value;
+  return props.validatedText === state.userText;
 });
 
 const ok = () => {
   if (isPass.value) {
-    props.remove();
-    visible.value = false;
+    state.type = "ok";
+    state.visible = false;
   } else {
+    state.type = "cancel";
     ElMessage.error(props.errorMsg);
   }
 };
 const cancel = () => {
-  props.remove();
-  visible.value = false;
+  state.type = "cancel";
+  state.visible = false;
 };
+
+defineExpose({
+  state,
+});
 </script>
