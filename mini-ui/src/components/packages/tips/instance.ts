@@ -1,10 +1,10 @@
 import { createApp, watch } from "vue";
-import Hint, { type IProps } from "./tips.vue";
+import Tips, { type IProps } from "./tips.vue";
 
 type PromiseParams = { resolve(value?: unknown): void; reject(): void };
 
 const createInstance = (props: IProps, { resolve, reject }: PromiseParams) => {
-  const app = createApp(Hint, { ...props });
+  const app = createApp(Tips, { ...props });
 
   const show = () => {
     const node = document.createElement("div");

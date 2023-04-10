@@ -65,7 +65,7 @@ const isPass = computed(() => {
 });
 
 const ok = () => {
-  if (isPass.value) {
+  if (!props.validatedText || isPass.value) {
     state.type = "ok";
     state.visible = false;
   } else {
