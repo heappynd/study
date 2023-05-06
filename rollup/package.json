@@ -1,0 +1,46 @@
+{
+  "name": "rollups",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "exports": {
+    ".": {
+      "types": "index.d.ts",
+      "module": "index.js",
+      "import": "index.js",
+      "require": "index.cjs",
+      "default": "index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": [
+    "module.js"
+  ],
+  "module": "index.mjs",
+  "unpkg": "./dist/index.umd.js",
+  "jsdelivr": "./dist/index.umd.js",
+  "browser": "",
+  "types": "index.d.ts",
+  "peerDependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "scripts": {
+    "build:iife": "rollup main.js --file bundle.js --format iife",
+    "build:cjs": "rollup main.js --file bundle.js --format cjs",
+    "build:umd": "rollup main.js --file bundle.js --format umd --name myBundle",
+    "build": "rollup -c"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@rollup/plugin-json": "^6.0.0",
+    "@rollup/plugin-terser": "^0.4.1",
+    "rollup": "^3.21.5"
+  }
+}
