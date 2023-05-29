@@ -1,10 +1,14 @@
 import { useState } from "react";
-import MyForm from "./components/MyForm";
+import Content from "./components/SWR/Content";
+import Avatar from "./components/SWR/Avatar";
 
 function App() {
-  return <div>
-    <MyForm />
-  </div>;
+  return (
+    <div>
+      <Content id={1} />
+      <Avatar id={1} />
+    </div>
+  );
 }
 
 export default App;
