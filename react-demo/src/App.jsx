@@ -1,7 +1,19 @@
-import { forwardRef, useRef } from "react";
+import { forwardRef, useRef, useImperativeHandle } from "react";
 
 const MyInput = forwardRef(function MyInput(props, ref) {
-  return <input type="text" ref={ref} />;
+  const inputRef = useRef(null);
+
+  useImperativeHandle(ref, () => {
+    return {
+      // defineExpose({})
+      focus() {
+        console.log(123);
+        inputRef.current.focus();
+      },
+    };
+  });
+
+  return <input type="text" ref={inputRef} />;
 });
 
 function App() {
@@ -9,7 +21,8 @@ function App() {
 
   const ok = () => {
     myRef.current.focus();
-    myRef.current.style.color = "red";
+    // !not work
+    // myRef.current.style.color = "red";
   };
 
   return (
