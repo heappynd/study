@@ -1,16 +1,22 @@
-import { useState } from "react";
+import { forwardRef, useRef } from "react";
+
+const MyInput = forwardRef(function MyInput(props, ref) {
+  return <input type="text" ref={ref} />;
+});
 
 function App() {
-  const [count, setCount] = useState(0);
+  const myRef = useRef(null);
 
-  const handleClick = () => {
-    setCount(count + 1);
+  const ok = () => {
+    myRef.current.focus();
+    myRef.current.style.color = "red";
   };
 
   return (
     <div>
-      {count}
-      <button onClick={handleClick}>add</button>
+      Input:
+      <MyInput ref={myRef} />
+      <button onClick={ok}>ok</button>
     </div>
   );
 }
