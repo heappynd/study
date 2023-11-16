@@ -1,39 +1,28 @@
-function render(oldVNode, newVNode, container) {
-  if (!oldVNode) {
-    mount(newVNode, container);
-  } else {
-    patch(oldVNode, newVNode, container);
-  }
-}
+// import { h } from "vue";
+import { h } from "./runtime-core/h";
+import { Text, Comment, Fragment } from "./runtime-core/vnode";
 
-function patch(oldVNode, newVNode, container) {
-  unmount(container);
+// debugger;
 
-  const el = document.createElement(newVNode.type);
-  el.innerText = newVNode.children;
-  container.appendChild(el);
-}
+//* @example 1
+const vnode1 = h("div", { class: "test" }, "hello render");
 
-function unmount(container: Element) {
-  container.innerHTML = "";
-}
+//* @example 2
+const vnode2 = h("div", { class: { red: true, yellow: true } }, "hello render");
 
-function mount(vnode, container: Element) {
-  const el = document.createElement(vnode.type);
-  el.innerText = vnode.children;
-  container.appendChild(el);
-}
+//* @example 3
+const vnode3 = h("div", { class: "test" }, [
+  h("p", "p1"),
+  h("p", "p2"),
+  h("p", "p3"),
+]);
 
-const vnode = {
-  type: "div",
-  children: "111",
+//* @example 4
+const component = {
+  render() {
+    const vnode = h("div", "component");
+    return vnode;
+  },
 };
-render(null, vnode, document.querySelector("#app"));
 
-setTimeout(() => {
-  const vnode2 = {
-    type: "div",
-    children: "222",
-  };
-  render(vnode, vnode2, document.querySelector("#app"));
-}, 2000);
+const vnode4 = h(component);
