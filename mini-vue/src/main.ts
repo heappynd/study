@@ -1,6 +1,7 @@
 // import { h } from "vue";
 import { h } from "./runtime-core/h";
 import { Text, Comment, Fragment } from "./runtime-core/vnode";
+import { render } from "./runtime-dom";
 
 // debugger;
 
@@ -8,7 +9,11 @@ import { Text, Comment, Fragment } from "./runtime-core/vnode";
 const vnode1 = h("div", { class: "test" }, "hello render");
 
 //* @example 2
-const vnode2 = h("div", { class: { red: true, yellow: true } }, "hello render");
+const vnode2 = h(
+  "div",
+  { class: { red: true, yellow: true } },
+  "hello render2"
+);
 
 //* @example 3
 const vnode3 = h("div", { class: "test" }, [
@@ -26,3 +31,9 @@ const component = {
 };
 
 const vnode4 = h(component);
+
+render(vnode1, document.querySelector("#app"));
+
+setTimeout(() => {
+  render(vnode2, document.querySelector("#app"));
+}, 2000);

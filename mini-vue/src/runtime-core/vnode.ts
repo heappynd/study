@@ -12,6 +12,7 @@ export interface VNode {
   props: any;
   children: any;
   shapeFlag: number;
+  key: number | string
 }
 
 export function isVNode(value: any): value is VNode {
@@ -61,4 +62,8 @@ function normalizeChildren(vnode: VNode, children: any) {
   }
   vnode.children = children;
   vnode.shapeFlag |= type;
+}
+
+export function isSameVNodeType(n1: VNode, n2: VNode) {
+  return n1.type === n2.type && n1.key === n2.key;
 }
