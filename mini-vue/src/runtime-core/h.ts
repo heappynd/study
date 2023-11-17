@@ -1,6 +1,5 @@
-import { isVNode } from "vue";
-import { VNode, createVNode } from "./vnode";
-import { isObject, isArray } from "../shared";
+import { isArray, isObject } from "../shared";
+import { VNode, createVNode, isVNode } from "./vnode";
 
 export function h(type: any, propsOrChildren?: any, children?: any): VNode {
   const l = arguments.length;

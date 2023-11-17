@@ -1,5 +1,5 @@
 import { isArray, isString } from ".";
-import { isObject } from "@vue/shared";
+import { isObject } from "../shared";
 
 export function normalizeCss(value: unknown): string {
   let res = "";

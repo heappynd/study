@@ -32,8 +32,10 @@ const component = {
 
 const vnode4 = h(component);
 
-render(vnode1, document.querySelector("#app"));
+const vnode = h("textarea", {
+  class: "test-class",
+  value: "textarea value",
+  type: "text",
+});
 
-setTimeout(() => {
-  render(vnode2, document.querySelector("#app"));
-}, 2000);
+render(vnode, document.querySelector("#app"));
