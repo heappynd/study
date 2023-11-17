@@ -32,10 +32,18 @@ const component = {
 
 const vnode4 = h(component);
 
-const vnode = h("textarea", {
+const vnode5 = h("textarea", {
   class: "test-class",
   value: "textarea value",
   type: "text",
 });
 
+const vnode = h("div", { style: { color: "red" } }, "Hello World");
+
 render(vnode, document.querySelector("#app"));
+
+setTimeout(() => {
+  const vnode = h("div", { style: { fontSize: "32px" } }, "Hello World");
+
+  render(vnode, document.querySelector("#app"));
+}, 2000);
