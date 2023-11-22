@@ -38,12 +38,37 @@ const vnode5 = h("textarea", {
   type: "text",
 });
 
-const vnode = h("div", { style: { color: "red" } }, "Hello World");
+// const vnode = h("div", { style: { color: "red" } }, "Hello World");
 
+// render(vnode, document.querySelector("#app"));
+
+// setTimeout(() => {
+//   const vnode = h("div", { style: { fontSize: "32px" } }, "Hello World");
+
+//   render(vnode, document.querySelector("#app"));
+// }, 2000);
+
+const vnode = h(
+  "button",
+  {
+    onClick() {
+      console.log("click");
+    },
+  },
+  "点击"
+);
 render(vnode, document.querySelector("#app"));
 
 setTimeout(() => {
-  const vnode = h("div", { style: { fontSize: "32px" } }, "Hello World");
+  const vnode = h(
+    "button",
+    {
+      onDblclick() {
+        console.log("dblclick");
+      },
+    },
+    "双击"
+  );
 
   render(vnode, document.querySelector("#app"));
 }, 2000);

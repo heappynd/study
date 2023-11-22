@@ -10,16 +10,31 @@
     <div id="app"></div>
 
     <script>
-      const { reactive, effect } = Vue
+      const { reactive, effect, h, render } = Vue
 
-      const obj = reactive({
-        name: 'zhangsan'
-      })
-      effect(() => {
-        document.querySelector('#app').innerHTML = obj.name
-      })
+      const vnode = h(
+        'button',
+        {
+          onClick() {
+            console.log('click')
+          }
+        },
+        '点击'
+      )
+      render(vnode, document.querySelector('#app'))
+
       setTimeout(() => {
-        obj.name = 'lisr'
+        const vnode = h(
+          'button',
+          {
+            onDblclick() {
+              console.log('dblclick')
+            }
+          },
+          '双击'
+        )
+
+        render(vnode, document.querySelector('#app'))
       }, 2000)
     </script>
   </body>
