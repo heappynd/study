@@ -48,27 +48,46 @@ const vnode5 = h("textarea", {
 //   render(vnode, document.querySelector("#app"));
 // }, 2000);
 
-const vnode = h(
-  "button",
-  {
-    onClick() {
-      console.log("click");
-    },
-  },
-  "点击"
-);
+// const vnode = h(
+//   "button",
+//   {
+//     onClick() {
+//       console.log("click");
+//     },
+//   },
+//   "点击"
+// );
+// render(vnode, document.querySelector("#app"));
+
+// setTimeout(() => {
+//   const vnode = h(
+//     "button",
+//     {
+//       onDblclick() {
+//         console.log("dblclick");
+//       },
+//     },
+//     "双击"
+//   );
+
+//   render(vnode, document.querySelector("#app"));
+// }, 2000);
+
+// const vnode = h(Text, "Hello");
+// render(vnode, document.querySelector("#app"));
+
+// setTimeout(() => {
+//   const vnode = h(Text, "World");
+//   render(vnode, document.querySelector("#app"));
+// }, 2000);
+
+// const vnode = h(Comment, "Hello");
+// render(vnode, document.querySelector("#app"));
+
+const vnode = h(Fragment, "hello world");
 render(vnode, document.querySelector("#app"));
 
-setTimeout(() => {
-  const vnode = h(
-    "button",
-    {
-      onDblclick() {
-        console.log("dblclick");
-      },
-    },
-    "双击"
-  );
-
-  render(vnode, document.querySelector("#app"));
-}, 2000);
+// setTimeout(() => {
+//   const vnode = h(Fragment, "你好，世界");
+//   render(vnode, document.querySelector("#app"));
+// }, 2000);

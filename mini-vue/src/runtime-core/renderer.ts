@@ -1,4 +1,5 @@
-import { EMPTY_OBJ } from "../shared";
+import { EMPTY_OBJ, isString } from "../shared";
+import { normalizeVNode } from "./componentRenderUtils";
 import { ShapeFlags } from "./shapeFlags";
 import { Fragment, Comment, Text, isSameVNodeType } from "./vnode";
 
@@ -8,6 +9,9 @@ interface RendererOptions {
   insert(el: Element, parent: Element, anchor?: any): void;
   createElement(type: string): Element;
   remove(el: Element): void;
+  createText(text: string): void;
+  setText(node, text: string): void;
+  createComment(text: string): void;
 }
 
 export function createRenderer(options: RendererOptions) {
@@ -21,6 +25,9 @@ function baseCreateRenderer(options: RendererOptions) {
     patchProp: hostPatchProp,
     setElementText: hostSetElementText,
     remove: hostRemove,
+    createText: hostCreateText,
+    setText: hostSetText,
+    createComment: hostCreateComment,
   } = options;
 
   const processElement = (oldVNode, newVNode, container, anchor) => {
@@ -32,6 +39,53 @@ function baseCreateRenderer(options: RendererOptions) {
       patchElement(oldVNode, newVNode);
     }
   };
+
+  const processFragment = (oldVNode, newVNode, container, anchor) => {
+    if (oldVNode == null) {
+      // mount
+      mountChildren(newVNode.children, container, anchor);
+    } else {
+      patchChildren(oldVNode, newVNode, container, anchor);
+    }
+  };
+
+  const mountChildren = (children, container, anchor) => {
+    if (isString(children)) {
+      children = children.split("");
+      console.log("children", children);
+    }
+
+    for (let i = 0; i < children.length; i++) {
+      const child = (children[i] = normalizeVNode(children[i]));
+      patch(null, child, container, anchor);
+    }
+  };
+
+  const processCommentNode = (oldVNode, newVNode, container, anchor) => {
+    if (oldVNode == null) {
+      // mount
+      newVNode.el = hostCreateComment(newVNode.children);
+      hostInsert(newVNode.el, container, anchor);
+    } else {
+      // 无更新
+      newVNode.el = oldVNode.el;
+    }
+  };
+
+  const processText = (oldVNode, newVNode, container, anchor) => {
+    if (oldVNode == null) {
+      // mount
+      newVNode.el = hostCreateText(newVNode.children);
+      hostInsert(newVNode.el, container, anchor);
+    } else {
+      // update
+      const el = (newVNode.el = oldVNode.el!);
+      if (newVNode.children !== oldVNode.children) {
+        hostSetText(el, newVNode.children);
+      }
+    }
+  };
+
   const patchElement = (oldVNode, newVNode) => {
     const el = (newVNode.el = oldVNode.el);
     const newProps = newVNode.props || EMPTY_OBJ;
@@ -136,10 +190,14 @@ function baseCreateRenderer(options: RendererOptions) {
 
     switch (type) {
       case Text:
+        processText(oldVNode, newVNode, container, anchor);
         break;
       case Comment:
+        processCommentNode(oldVNode, newVNode, container, anchor);
         break;
       case Fragment:
+        // 包裹性的容器 本身不会渲染
+        processFragment(oldVNode, newVNode, container, anchor);
         break;
 
       default:

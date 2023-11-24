@@ -17,4 +17,13 @@ export const nodeOps = {
       parent.removeChild(child);
     }
   },
+  createText(text: string) {
+    return document.createTextNode(text);
+  },
+  setText(node, text: string) {
+    node.nodeValue = text;
+  },
+  createComment(text: string) {
+    return document.createComment(text);
+  },
 };
