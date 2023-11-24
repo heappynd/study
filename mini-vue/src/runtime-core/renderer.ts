@@ -1,7 +1,10 @@
 import { EMPTY_OBJ, isString } from "../shared";
-import { normalizeVNode } from "./componentRenderUtils";
+import { createComponentInstance, setupComponent } from "./component";
+import { normalizeVNode, renderComponentRoot } from "./componentRenderUtils";
 import { ShapeFlags } from "./shapeFlags";
 import { Fragment, Comment, Text, isSameVNodeType } from "./vnode";
+import { ReactiveEffect } from "@vue/reactivity";
+import { queuePostFlushCb } from "@vue/runtime-core";
 
 interface RendererOptions {
   patchProp(el: Element, key: string, prevValue: any, nextValue: any): void;
@@ -58,6 +61,56 @@ function baseCreateRenderer(options: RendererOptions) {
     for (let i = 0; i < children.length; i++) {
       const child = (children[i] = normalizeVNode(children[i]));
       patch(null, child, container, anchor);
+    }
+  };
+
+  const mountComponent = (initialVNode, container, anchor) => {
+    // 生成实例
+    initialVNode.component = createComponentInstance(initialVNode);
+    const instance = initialVNode.component;
+
+    // instance 绑定 render 函数
+    setupComponent(instance);
+    // 渲染组件
+    setupRenderEffect(instance, initialVNode, container, anchor);
+  };
+
+  const setupRenderEffect = (instance, initialVNode, container, anchor) => {
+    // 挂载操作
+    const componentFn = () => {
+      // 挂载 subTree
+      if (!instance.isMounted) {
+        const { bm, m } = instance;
+
+        if (bm) {
+          bm();
+        }
+
+        const subTree = (instance.subTree = renderComponentRoot(instance));
+
+        patch(null, subTree, container, anchor);
+
+        if (m) {
+          m();
+        }
+
+        initialVNode.el = subTree.el;
+      } else {
+      }
+    };
+    const effect = (instance.effect = new ReactiveEffect(componentFn, () =>
+      // queuePreFlushCb(update)
+      queuePostFlushCb(update)
+    ));
+
+    const update = (instance.update = () => effect.run());
+
+    update();
+  };
+
+  const processComponent = (oldVNode, newVNode, container, anchor) => {
+    if (oldVNode == null) {
+      mountComponent(newVNode, container, anchor);
     }
   };
 
@@ -204,6 +257,8 @@ function baseCreateRenderer(options: RendererOptions) {
         if (shapeFlag & ShapeFlags.ELEMENT) {
           processElement(oldVNode, newVNode, container, anchor);
         } else if (shapeFlag & ShapeFlags.COMPONENT) {
+          // 组件的挂载
+          processComponent(oldVNode, newVNode, container, anchor);
         }
     }
   }

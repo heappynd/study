@@ -12,18 +12,15 @@ const component1 = {
   render() {
     return h("div", this.msg);
   },
-  beforeCreate() {
-    console.log("beforeCreate");
-  },
-  created() {
-    console.log("created");
-  },
-  beforeMount() {
-    console.log("beforeMount");
-  },
-  mounted() {
-    console.log("mounted");
-  },
 };
 const vnode = h(component1);
 render(vnode, document.querySelector("#app"));
+// setTimeout(() => {
+//   const component1 = {
+//     render() {
+//       return h("div", "update component");
+//     },
+//   };
+//   const vnode = h(component1);
+//   render(vnode, document.querySelector("#app"));
+// }, 2000);
