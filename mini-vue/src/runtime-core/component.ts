@@ -1,10 +1,10 @@
 import { reactive } from "@vue/reactivity";
-import { isObject } from "../shared";
+import { isFunction, isObject } from "../shared";
 import { onBeforeMount, onMounted } from "./apiLifecycle";
 
 let uid = 0;
 
-export const enum LifecycleHooks {
+export enum LifecycleHooks {
   BEFORE_CREATE = "bc",
   CREATED = "c",
   BEFORE_MOUNT = "bm",
@@ -37,13 +37,32 @@ export function setupComponent(instance) {
 }
 
 function setupStatefulComponent(instance) {
+  const Component = instance.type;
+
+  const { setup } = Component;
+
+  if (setup) {
+    const setupResult = setup();
+    handleSetupResult(instance, setupResult);
+  } else {
+    finishComponentSetup(instance);
+  }
+}
+
+export function handleSetupResult(instance, setupResult) {
+  if (isFunction(setupResult)) {
+    instance.render = setupResult;
+  }
   finishComponentSetup(instance);
 }
 
 export function finishComponentSetup(instance) {
   const Component = instance.type;
 
-  instance.render = Component.render;
+  // composition api used
+  if (!instance.render) {
+    instance.render = Component.render;
+  }
 
   applyOptions(instance);
 }
@@ -69,17 +88,17 @@ function applyOptions(instance: any) {
   }
 
   if (created) {
-    callHook(created);
+    callHook(created, instance.data);
   }
 
   function registerLifecycleHook(register: Function, hook?: Function) {
-    register(hook, instance);
+    register(hook?.bind(instance.data), instance);
   }
 
   registerLifecycleHook(onBeforeMount, beforeMount);
   registerLifecycleHook(onMounted, mounted);
 }
 
-function callHook(hook: Function) {
-  hook();
+function callHook(hook: Function, proxy) {
+  hook.bind(proxy)();
 }

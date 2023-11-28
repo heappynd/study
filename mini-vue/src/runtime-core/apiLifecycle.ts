@@ -1,7 +1,14 @@
-import { LifecycleHooks } from "./component";
+// TODO: Remove
+export enum LifecycleHooks {
+  BEFORE_CREATE = "bc",
+  CREATED = "c",
+  BEFORE_MOUNT = "bm",
+  MOUNTED = "m",
+}
 
 export function injectHook(type: LifecycleHooks, hook: Function, target) {
   if (target) {
+    // 往 instance 里面注册了生命周期
     target[type] = hook;
     return hook;
   }

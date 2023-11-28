@@ -1,28 +1,22 @@
 // import { h } from "vue";
+import { reactive } from "@vue/reactivity";
 import { h } from "./runtime-core/h";
 import { Text, Comment, Fragment } from "./runtime-core/vnode";
 import { render } from "./runtime-dom";
 
 const component1 = {
-  data() {
-    return {
-      msg: "hello comp",
+  setup() {
+    const obj = reactive({
+      name: "zhangsan",
+    });
+
+    setTimeout(() => {
+      obj.name = "lisi";
+    }, 2000);
+
+    return () => {
+      return h("div", obj.name);
     };
-  },
-  render() {
-    return h("div", this.msg);
-  },
-  beforeCreate() {
-    console.log("beforeCreate");
-  },
-  created() {
-    console.log("created");
-  },
-  beforeMount() {
-    console.log("beforeMount");
-  },
-  mounted() {
-    console.log("mounted");
   },
 };
 const vnode = h(component1);
