@@ -183,6 +183,7 @@ function baseCreateRenderer(options: RendererOptions) {
     }
   };
 
+  // 更新子节点
   const patchChildren = (oldVNode, newVNode, container, anchor) => {
     const c1 = oldVNode && oldVNode.children;
     const prevShapeFlag = oldVNode ? oldVNode.shapeFlag : 0;
@@ -205,7 +206,13 @@ function baseCreateRenderer(options: RendererOptions) {
       // 旧节点是 数组
       if (prevShapeFlag & ShapeFlags.ARRAY_CHILDREN) {
         if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
-          // todo: diff
+          // todo: diff 新旧子节点都是数组
+          patchKeyedChildren(
+            oldVNode.children,
+            newVNode.children,
+            container,
+            anchor
+          );
         } else {
           // unmount
         }
@@ -221,6 +228,63 @@ function baseCreateRenderer(options: RendererOptions) {
     }
   };
 
+  const patchKeyedChildren = (
+    oldChildren,
+    newChildren,
+    container,
+    parentAnchor
+  ) => {
+    let i = 0;
+    const newChildrenLength = newChildren.length;
+    let oldChildrenEnd = oldChildren.length - 1;
+    let newChildrenEnd = newChildrenLength - 1;
+
+    // 1 自前向后 diff
+    while (i <= oldChildrenEnd && i <= newChildrenEnd) {
+      const oldVNode = oldChildren[i];
+      const newVNode = normalizeVNode(newChildren[i]);
+
+      if (isSameVNodeType(oldVNode, newVNode)) {
+        patch(oldVNode, newVNode, container, null);
+      } else {
+        break;
+      }
+      i++;
+    }
+    // 2 自后向前 diff
+    while (i <= oldChildrenEnd && i <= newChildrenEnd) {
+      const oldVNode = oldChildren[oldChildrenEnd];
+      const newVNode = newChildren[newChildrenEnd];
+      if (isSameVNodeType(oldVNode, newVNode)) {
+        patch(oldVNode, newVNode, container, null);
+      } else {
+        break;
+      }
+      oldChildrenEnd--;
+      newChildrenEnd--;
+    }
+
+    // 3.新节点多余旧节点
+    if (i > oldChildrenEnd) {
+      if (i <= newChildrenEnd) {
+        const nextPos = newChildrenEnd + 1;
+        const anchor =
+          nextPos < newChildrenLength ? newChildren[nextPos].el : parentAnchor;
+        while (i <= newChildrenEnd) {
+          patch(null, normalizeVNode(newChildren[i]), container, anchor);
+          i++;
+        }
+      }
+    }
+    // 4. 旧节点多于新节点
+    else if (i > newChildrenEnd) {
+      while (i <= oldChildrenEnd) {
+        unmount(oldChildren[i]);
+        i++;
+      }
+    }
+  };
+
   const mountElement = (vnode, container, anchor) => {
     const { type, props, shapeFlag } = vnode;
     // 创建 element
@@ -229,6 +293,7 @@ function baseCreateRenderer(options: RendererOptions) {
     if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
       hostSetElementText(el, vnode.children);
     } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+      mountChildren(vnode.children, el, anchor);
     }
     // 设置 props
     if (props) {
