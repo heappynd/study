@@ -35,6 +35,11 @@ module.exports = {
           },
         ],
       },
+      {
+        test: /\.html$/,
+        type: "asset/source",
+        include: path.resolve(__dirname, "./src/inline"),
+      },
     ],
   },
   plugins: [
@@ -43,20 +48,4 @@ module.exports = {
     }),
     new MiniCssExtractPlugin(),
   ],
-  // optimization: {
-  //   splitChunks: {
-  //     chunks: "all",
-  //     // minChunks: 0,
-  //     // minSize: 200000000,
-  //   },
-  // },
-  externals: {
-    // jquery1: "jQuery",
-    // axios: "axios",
-    axios: [
-      "https://cdn.bootcdn.net/ajax/libs/axios/1.5.0/axios.min.js",
-      "axios",
-    ],
-  },
-  externalsType: "script",
 };
