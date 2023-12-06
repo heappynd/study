@@ -17,9 +17,6 @@ const config = {
     index: {
       import: "./src/index.js",
     },
-    index2: {
-      import: "./src/index2.js",
-    },
   },
   output: {
     path: path.resolve(__dirname, "dist"),
@@ -37,10 +34,6 @@ const config = {
           options: {
             presets: ["@babel/preset-env"],
           },
-          // loader: "esbuild-loader",
-          // options: {
-          //   target: "es2015",
-          // },
         },
       },
       {
@@ -52,9 +45,22 @@ const config = {
   plugins: [new HtmlWebpackPlugin()],
   optimization: {
     splitChunks: {
-      chunks: "initial",
+      chunks: "all",
       minChunks: 1,
       minSize: 1,
+      cacheGroups: {
+        // defaultVendors: false,
+        reactVendor: {
+          test: /node_modules\/react/,
+          reuseExistingChunk: true,
+          priority: 120,
+        },
+        axiosVendor: {
+          test: /node_modules\/axios/,
+          reuseExistingChunk: true,
+          priority: 120,
+        },
+      },
     },
   },
 };
