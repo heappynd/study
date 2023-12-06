@@ -1,3 +1,6 @@
-import React from "react";
+import "./bar";
+import "./foo";
 
-console.log(React);
+// import("./foo").then((res) => {
+//   console.log(res);
+// });
