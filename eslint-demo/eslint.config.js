@@ -1,6 +1,7 @@
 // import babelParser from "@babel/eslint-parser";
 import jsdoc from "eslint-plugin-jsdoc";
 import markdown from "eslint-plugin-markdown";
+import js from "@eslint/js";
 
 // console.log(jsdoc.configs.recommended);
 
@@ -67,6 +68,8 @@ export default [
       markdown,
     },
     processor: "markdown/markdown",
+    // ESLint 支持在配置文件中添加共享设置。
+    // 当在配置对象中添加 settings 对象，它将提供给所有规则。
     settings: {
       sharedData: "Hello",
     },
@@ -78,4 +81,8 @@ export default [
       strict: "off",
     },
   },
+  // ESLint 有两个针对 JavaScript 的预定义配置：
+  // js.configs.recommended - 启用 ESLint 推荐大家使用的规则，以避免潜在错误
+  // js.configs.all - 启用所有 ESLint 提供的规则
+  js.configs.recommended,
 ];

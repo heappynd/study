@@ -1,6 +1,6 @@
 let a = "1";
 // ?
-MY_CUSTOM_GLOBA.x = 1;
+MY_CUSTOM_GLOBAL.x = 1;
 
 [].includes(1);
 
