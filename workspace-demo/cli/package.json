@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -11,5 +10,8 @@
   "license": "ISC",
   "bin": {
     "orange-cli": "bin/cli.mjs"
+  },
+  "dependencies": {
+    "@orange/test-a": "^1.0.0"
   }
 }
