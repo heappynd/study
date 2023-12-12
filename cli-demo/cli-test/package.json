@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "bin": {
-    "cli-test": "./bin/cli-test.js"
+    "cli-test": "./bin/index.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -13,7 +13,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/node": "^20.10.4",
+    "chalk": "^5.3.0",
+    "commander": "^11.1.0",
     "dedent": "^1.5.1",
+    "inquirer": "^9.2.12",
+    "ora": "^7.0.1",
     "yargs": "^17.7.2"
   }
 }
