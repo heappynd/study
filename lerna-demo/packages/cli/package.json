@@ -1,0 +1,38 @@
+{
+  "name": "@samtestgroup/lerna-test-cli",
+  "version": "1.0.0",
+  "description": "> TODO: description",
+  "author": "heappynd <heappynd@163.com>",
+  "homepage": "https://github.com/heappynd/study#readme",
+  "license": "ISC",
+  "main": "dist/cli.js",
+  "module": "dist/cli.module.js",
+  "bin": {
+    "lerna-test-cli": "bin/cli"
+  },
+  "directories": {
+    "lib": "dist",
+    "test": "__tests__"
+  },
+  "files": [
+    "bin",
+    "dist"
+  ],
+  "publishConfig": {
+    "registry": "https://registry.npmmirror.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/heappynd/study.git"
+  },
+  "scripts": {
+    "test": "node ./__tests__/cli.test.js"
+  },
+  "dependencies": {
+    "yargs": "^17.7.2"
+  },
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/heappynd/study/issues"
+  }
+}
