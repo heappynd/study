@@ -1,6 +1,7 @@
-const log = require('npmlog')
+import log from 'npmlog'
+import isDebug from './isDebug.js'
 
-if (process.argv.includes('--debug') || process.argv.includes('-d')) {
+if (isDebug()) {
   log.level = 'verbose'
 } else {
   log.level = 'info'
@@ -10,4 +11,4 @@ if (process.argv.includes('--debug') || process.argv.includes('-d')) {
 log.heading = 'imooc'
 log.addLevel('success', 2000, { fg: 'green', bold: true })
 
-module.exports = log
+export default log

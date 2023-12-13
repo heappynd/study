@@ -1,7 +1,7 @@
 'use strict'
 
-const Command = require('@imooccom/command')
-const { log } = require('@imooccom/utils')
+import Command from '@imooccom/command'
+import { log } from '@imooccom/utils'
 
 class InitCommand extends Command {
   get command() {
@@ -28,4 +28,4 @@ function Init(instance) {
   return new InitCommand(instance)
 }
 
-module.exports = Init
+export default Init

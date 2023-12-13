@@ -43,4 +43,4 @@ class Command {
   postAction() {}
 }
 
-module.exports = Command
+export default Command

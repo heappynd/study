@@ -25,5 +25,6 @@
   },
   "bugs": {
     "url": "https://github.com/heappynd/study/issues"
-  }
+  },
+  "type": "module"
 }
