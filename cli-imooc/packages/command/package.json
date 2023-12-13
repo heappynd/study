@@ -1,0 +1,29 @@
+{
+  "name": "@imooccom/command",
+  "version": "0.0.0",
+  "description": "common command class",
+  "author": "heappynd <heappynd@163.com>",
+  "homepage": "https://github.com/heappynd/study#readme",
+  "license": "ISC",
+  "main": "lib/index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "publishConfig": {
+    "registry": "https://registry.npmmirror.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/heappynd/study.git"
+  },
+  "scripts": {
+    "test": "node ./__tests__/command.test.js"
+  },
+  "bugs": {
+    "url": "https://github.com/heappynd/study/issues"
+  }
+}
