@@ -19,8 +19,14 @@ class InitCommand extends Command {
   }
 
   action([name, opts]) {
-    console.log(1);
+    console.log(1)
     log.verbose('init', name, opts)
+
+    new Promise((resolve) => {
+      resolve()
+    }).then(() => {
+      throw new Error('error from promise')
+    })
   }
 }
 
