@@ -1,0 +1,12 @@
+{
+  "name": "@imooccom/template-react18",
+  "version": "1.0.0",
+  "description": "cli-imooc react template",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "publishConfig": {
+    "access": "public"
+  }
+}
+
