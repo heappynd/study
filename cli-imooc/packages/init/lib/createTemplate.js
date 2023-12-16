@@ -1,10 +1,18 @@
-import { getLatestVersion, log, makeInput, makeList } from '@imooccom/utils'
+import {
+  getLatestVersion,
+  log,
+  makeInput,
+  makeList,
+  printErrorLog,
+} from '@imooccom/utils'
 import { homedir } from 'node:os'
 import path from 'node:path'
+import { request } from '@imooccom/utils'
+
 const ADD_TYPE_PROJECT = 'project'
 const ADD_TYPE_PAGE = 'page'
 
-const ADD_TEMPLATE = [
+/* const ADD_TEMPLATE = [
   {
     name: 'vue3项目模板',
     value: 'template-vue3',
@@ -17,13 +25,28 @@ const ADD_TEMPLATE = [
     npmName: '@imooc.com/template-react18',
     version: '1.0.0',
   },
-]
+] */
 const ADD_TYPE = [
   { name: '项目', value: ADD_TYPE_PROJECT },
   { name: '页面', value: ADD_TYPE_PAGE },
 ]
 // 缓存目录
 const TEMP_HOME = '.cli-imooc'
+
+// 通过 API 获取项目模板
+async function getTemplateFromAPI() {
+  try {
+    const data = await request({
+      url: '/v1/project',
+      method: 'get',
+    })
+    log.verbose('template', data)
+    return data
+  } catch (error) {
+    printErrorLog(error)
+    return null
+  }
+}
 
 function getAddType() {
   return makeList({
@@ -46,7 +69,7 @@ function getAddName() {
   })
 }
 
-function getAddTemplate() {
+function getAddTemplate(ADD_TEMPLATE) {
   return makeList({
     message: '选择项目模板',
     choices: ADD_TEMPLATE,
@@ -60,11 +83,17 @@ function makeTargetPath() {
 }
 
 /**
- * @example 
+ * @example
  * cli-imooc init aaa -t project -tp template-vue3 -f
  * cli-imooc init
  */
 export default async function createTemplate(name, opts) {
+  // 获取项目模板
+  const ADD_TEMPLATE = await getTemplateFromAPI()
+  if (!ADD_TEMPLATE) {
+    throw new Error('获取项目模板失败')
+  }
+
   const { type = null, template = null } = opts
   //! 获取类型
   let addType
@@ -92,7 +121,7 @@ export default async function createTemplate(name, opts) {
         throw new Error(`项目模板 ${template} 不存在`)
       }
     } else {
-      const addTemplate = await getAddTemplate()
+      const addTemplate = await getAddTemplate(ADD_TEMPLATE)
       selectedTemplate = ADD_TEMPLATE.find((item) => item.value === addTemplate)
       log.verbose('addTemplate', addTemplate)
     }
