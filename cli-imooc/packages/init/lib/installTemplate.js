@@ -3,6 +3,43 @@ import fse from 'fs-extra'
 import path from 'node:path'
 import { pathExistsSync } from 'path-exists'
 import ora from 'ora'
+import ejs from 'ejs'
+import glob from 'glob'
+
+function ejsRender(installDir, template, name) {
+  log.verbose('ejsRender', installDir, template)
+  const { ignore, value } = template
+  glob(
+    '**',
+    {
+      cwd: installDir,
+      nodir: true,
+      ignore: [...ignore, 'node_modules/**'],
+    },
+    (err, files) => {
+      files.forEach((file) => {
+        const filePath = path.join(installDir, file)
+        // console.log(filePath)
+        log.verbose('filePath', filePath)
+        ejs.renderFile(
+          filePath,
+          {
+            data: {
+              name,
+            },
+          },
+          (err, result) => {
+            if (err) {
+              log.error(err)
+            } else {
+              fse.writeFileSync(filePath, result)
+            }
+          }
+        )
+      })
+    }
+  )
+}
 
 export default function installTemplate(selectedTemplate, opts) {
   const { force = false } = opts
@@ -23,6 +60,7 @@ export default function installTemplate(selectedTemplate, opts) {
   }
 
   copyFile(targetPath, template, installDir)
+  ejsRender(installDir, template, selectedTemplate.name)
 }
 
 //复制文件函数，用于复制文件到指定路径
