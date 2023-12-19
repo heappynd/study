@@ -17,7 +17,7 @@ const ADD_TEMPLATE = [
     name: 'vue3项目模板',
     value: 'template-vue3',
     npmName: '@imooc.com/template-vue3',
-    version: '1.0.2',
+    version: '1.0.5',
     // team: '移动端团队',
     ignore: ['public/**', 'node_modules/**'],
   },

@@ -1,4 +1,4 @@
-import { log } from '@imooccom/utils'
+import { log, makeInput, makeList } from '@imooccom/utils'
 import fse from 'fs-extra'
 import path from 'node:path'
 import { pathExistsSync } from 'path-exists'
@@ -6,8 +6,25 @@ import ora from 'ora'
 import ejs from 'ejs'
 import glob from 'glob'
 
-function ejsRender(installDir, template, name) {
+async function ejsRender(targetPath, installDir, template, name) {
   log.verbose('ejsRender', installDir, template)
+  const pluginPath = getPluginFilePath(targetPath, template)
+  // console.log('pluginPath', pluginPath)
+  let data = {}
+  if (pathExistsSync(pluginPath)) {
+    const pluginFn = (await import(pluginPath)).default
+    const api = {
+      makeList: makeList,
+      makeInput: makeInput,
+    }
+    data = await pluginFn(api)
+  }
+  const ejsData = {
+    data: {
+      name,
+      ...data,
+    },
+  }
   const { ignore, value } = template
   glob(
     '**',
@@ -21,27 +38,19 @@ function ejsRender(installDir, template, name) {
         const filePath = path.join(installDir, file)
         // console.log(filePath)
         log.verbose('filePath', filePath)
-        ejs.renderFile(
-          filePath,
-          {
-            data: {
-              name,
-            },
-          },
-          (err, result) => {
-            if (err) {
-              log.error(err)
-            } else {
-              fse.writeFileSync(filePath, result)
-            }
+        ejs.renderFile(filePath, ejsData, (err, result) => {
+          if (err) {
+            log.error(err)
+          } else {
+            fse.writeFileSync(filePath, result)
           }
-        )
+        })
       })
     }
   )
 }
 
-export default function installTemplate(selectedTemplate, opts) {
+export default async function installTemplate(selectedTemplate, opts) {
   const { force = false } = opts
   const { targetPath, template, name } = selectedTemplate
   const rootDir = process.cwd()
@@ -60,7 +69,7 @@ export default function installTemplate(selectedTemplate, opts) {
   }
 
   copyFile(targetPath, template, installDir)
-  ejsRender(installDir, template, selectedTemplate.name)
+  await ejsRender(targetPath, installDir, template, selectedTemplate.name)
 }
 
 //复制文件函数，用于复制文件到指定路径
@@ -77,4 +86,8 @@ function copyFile(targetPath, template, installDir) {
 
 function getCacheFilePath(targetPath, template) {
   return path.resolve(targetPath, 'node_modules', template.npmName, 'template')
+}
+
+function getPluginFilePath(targetPath, template) {
+  return path.resolve(targetPath, 'node_modules', template.npmName, 'plugins')
 }
