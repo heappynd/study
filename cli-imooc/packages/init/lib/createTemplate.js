@@ -12,12 +12,14 @@ import { request } from '@imooccom/utils'
 const ADD_TYPE_PROJECT = 'project'
 const ADD_TYPE_PAGE = 'page'
 
-/* const ADD_TEMPLATE = [
+const ADD_TEMPLATE = [
   {
     name: 'vue3项目模板',
     value: 'template-vue3',
     npmName: '@imooc.com/template-vue3',
-    version: '1.0.1',
+    version: '1.0.5',
+    // team: '移动端团队',
+    ignore: ['public/**', 'node_modules/**'],
   },
   {
     name: 'react18项目模板',
@@ -25,7 +27,7 @@ const ADD_TYPE_PAGE = 'page'
     npmName: '@imooc.com/template-react18',
     version: '1.0.0',
   },
-] */
+]
 const ADD_TYPE = [
   { name: '项目', value: ADD_TYPE_PROJECT },
   { name: '页面', value: ADD_TYPE_PAGE },
@@ -36,12 +38,12 @@ const TEMP_HOME = '.cli-imooc'
 // 通过 API 获取项目模板
 async function getTemplateFromAPI() {
   try {
-    const data = await request({
-      url: '/v1/project',
-      method: 'get',
-    })
-    log.verbose('template', data)
-    return data
+    // const data = await request({
+    //   url: '/v1/project',
+    //   method: 'get',
+    // })
+    // log.verbose('template', data)
+    return ADD_TEMPLATE
   } catch (error) {
     printErrorLog(error)
     return null
