@@ -1,1 +1,0 @@
-npm i chalk -w a
