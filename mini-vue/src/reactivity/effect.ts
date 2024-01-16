@@ -1,6 +1,11 @@
+import { extend } from '../shared'
+
 class ReactiveEffect {
   private _fn: any
   public scheduler?: any
+  deps = []
+  active = true
+  onStop?: () => void
 
   constructor(fn, scheduler?) {
     this._fn = fn
@@ -12,6 +17,20 @@ class ReactiveEffect {
     // 执行fn
     return this._fn()
   }
+
+  stop() {
+    if (this.active) {
+      cleanupEffect(this)
+      if (this.onStop) {
+        this.onStop()
+      }
+      this.active = false
+    }
+  }
+}
+
+function cleanupEffect(effect: any) {
+  effect.deps.forEach((dep) => dep.delete(effect))
 }
 
 let activeEffect: ReactiveEffect | null = null
@@ -19,10 +38,17 @@ let activeEffect: ReactiveEffect | null = null
 export function effect(fn, options = {}) {
   const scheduler = options.scheduler
   const _effect = new ReactiveEffect(fn, scheduler)
+  // _effect.onStop = options.onStop
+  // options
+  // extend
+  extend(_effect, options)
 
   _effect.run()
 
-  return _effect.run.bind(_effect)
+  const runner = _effect.run.bind(_effect)
+  runner.effect = _effect
+
+  return runner
 }
 
 const targetMap: Map<object, Map<string, Set<ReactiveEffect>>> = new Map()
@@ -40,7 +66,9 @@ export function track(target, key) {
     dep = new Set()
     depsMap.set(key, dep)
   }
-  dep.add(activeEffect!)
+  if (!activeEffect) return
+  dep.add(activeEffect)
+  activeEffect.deps.push(dep)
 }
 
 export function trigger(target, key) {
@@ -56,4 +84,8 @@ export function trigger(target, key) {
       }
     })
   }
+}
+
+export function stop(runner: any) {
+  runner.effect.stop()
 }
