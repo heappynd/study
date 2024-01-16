@@ -1,23 +1,28 @@
 class ReactiveEffect {
   private _fn: any
+  public scheduler?: any
 
-  constructor(fn) {
+  constructor(fn, scheduler?) {
     this._fn = fn
+    this.scheduler = scheduler
   }
 
   run() {
     activeEffect = this
     // 执行fn
-    this._fn()
+    return this._fn()
   }
 }
 
 let activeEffect: ReactiveEffect | null = null
 
-export function effect(fn) {
-  const _effect = new ReactiveEffect(fn)
+export function effect(fn, options = {}) {
+  const scheduler = options.scheduler
+  const _effect = new ReactiveEffect(fn, scheduler)
 
   _effect.run()
+
+  return _effect.run.bind(_effect)
 }
 
 const targetMap: Map<object, Map<string, Set<ReactiveEffect>>> = new Map()
@@ -44,7 +49,11 @@ export function trigger(target, key) {
   const dep = depsMap.get(key)
   if (dep) {
     dep.forEach((effect) => {
-      effect.run()
+      if (effect.scheduler) {
+        effect.scheduler()
+      } else {
+        effect.run()
+      }
     })
   }
 }
