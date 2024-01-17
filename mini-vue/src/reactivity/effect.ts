@@ -2,7 +2,7 @@ import { extend } from '../shared'
 
 class ReactiveEffect {
   private _fn: any
-  public scheduler?: any
+  scheduler?: any
   deps = []
   active = true
   onStop?: () => void
@@ -36,8 +36,7 @@ function cleanupEffect(effect: any) {
 let activeEffect: ReactiveEffect | null = null
 
 export function effect(fn, options = {}) {
-  const scheduler = options.scheduler
-  const _effect = new ReactiveEffect(fn, scheduler)
+  const _effect = new ReactiveEffect(fn, options.scheduler)
   // _effect.onStop = options.onStop
   // options
   // extend
