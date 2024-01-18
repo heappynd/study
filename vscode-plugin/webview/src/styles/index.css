@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body.vscode-light {
+  background: rgb(246, 248, 250);
+}
+
+body.vscode-dark {
+  background: rgb(20, 20, 20);
+}
