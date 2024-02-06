@@ -1,5 +1,8 @@
-import { describe, it, expect, vi } from 'vitest'
-import { reactive, effect, computed } from '..'
+import { describe, expect, it, vi } from 'vitest'
+import { reactive } from '..'
+import { computed } from '../computed'
+import { effect } from '../effect'
+import { watch } from '../watch'
 
 describe('1', () => {
   it('1-1', () => {
@@ -234,5 +237,58 @@ describe('1', () => {
     expect(fn).toBeCalledTimes(1)
     obj.foo++
     expect(fn).toBeCalledTimes(2)
+  })
+
+  it('watch', () => {
+    const obj = reactive({ foo: 1 })
+    const fn = vi.fn(() => {})
+    watch(obj, fn)
+    obj.foo++
+    expect(fn).toHaveBeenCalledTimes(1)
+  })
+
+  it('watch getter', () => {
+    const obj = reactive({ foo: 1 })
+    const fn = vi.fn(() => {})
+    watch(() => obj.foo, fn)
+    obj.foo++
+    expect(fn).toHaveBeenCalledTimes(1)
+  })
+
+  it('watch 新值旧值', () => {
+    const obj = reactive({ foo: 1 })
+    let newVal, oldVal
+    const fn = vi.fn((newValue, oldValue) => {
+      newVal = newValue
+      oldVal = oldValue
+    })
+    watch(() => obj.foo, fn)
+    obj.foo = 100
+    expect(newVal).toBe(100)
+    expect(oldVal).toBe(1)
+  })
+
+  it('watch immediate', () => {
+    const obj = reactive({ foo: 1 })
+    let newVal, oldVal
+    const fn = vi.fn((newValue, oldValue) => {
+      newVal = newValue
+      oldVal = oldValue
+    })
+    watch(() => obj.foo, fn, { immediate: true })
+    expect(fn).toHaveBeenCalledTimes(1)
+    expect(newVal).toBe(1)
+    expect(oldVal).toBe(undefined)
+  })
+
+  it('watch onInvalidate', () => {
+    const obj = reactive({ foo: 1 })
+    const fn = vi.fn()
+    watch(obj, (newValue, oldValue, onInvalidate) => {
+      onInvalidate(fn)
+    })
+    obj.foo++
+    obj.foo++
+    expect(fn).toHaveBeenCalledTimes(1)
   })
 })
