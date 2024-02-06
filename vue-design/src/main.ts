@@ -1,31 +1,21 @@
-const jobQueue = new Set()
+export {}
 
-let isFlushing = false
-const p = Promise.resolve()
-
-function flushJob() {
-  if (isFlushing) {
-    return
-  }
-  isFlushing = true
-  p.then(() => {
-    jobQueue.forEach((fn) => fn())
-  })
-    .catch(() => {})
-    .finally(() => {
-      isFlushing = false
-    })
+const fn = (name: string) => {
+  console.log('name', name)
 }
+const data = { foo: 1, fn: fn }
 
-console.log('-----start-----')
+const obj = new Proxy(data, {
+  apply(target, thisArg, argArray) {
+    console.log('apply', target, thisArg, argArray)
+  },
+  get(target, key, receiver) {
+    console.log('get', target, key, receiver)
+    return target[key]
+  },
+  
+})
 
-const fn = () => {
-  console.log(1)
-}
+// obj.fn('le')
 
-for (let i = 0; i < 3; i++) {
-  jobQueue.add(fn)
-  flushJob()
-}
-
-console.log('-----end-----')
+console.log(Object.getOwnPropertyDescriptors(obj));
