@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { reactive, effect } from '..'
+import { reactive, effect, computed } from '..'
 
 describe('1', () => {
   it('1-1', () => {
@@ -186,5 +186,53 @@ describe('1', () => {
     obj.foo++
     obj.foo++
     expect(dummy).toEqual([1, 3])
+  })
+
+  it('lazy effect', () => {
+    const obj = reactive({ foo: 1 })
+    const fn = vi.fn(() => {
+      obj.foo
+    })
+    // 则不立即执行副作用函数：
+    const effectFn = effect(fn, { lazy: true })
+    expect(fn).toHaveBeenCalledTimes(0)
+    effectFn()
+    expect(fn).toHaveBeenCalledTimes(1)
+  })
+
+  it('传递给 effect 的函数看作一个 getter', () => {
+    const obj = reactive({ foo: 1, bar: 2 })
+    const fn = vi.fn(() => {
+      return obj.foo + obj.bar
+    })
+    const effectFn = effect(fn, { lazy: true })
+    expect(fn).toHaveBeenCalledTimes(0)
+    const value = effectFn()
+    expect(fn).toHaveBeenCalledTimes(1)
+    expect(value).toBe(3)
+  })
+
+  it('使用 computed 函数来创建一个计算属性', () => {
+    const obj = reactive({ foo: 1, bar: 2 })
+    const fn = vi.fn(() => obj.foo + obj.bar)
+    const sumRes = computed(fn)
+    expect(sumRes.value).toBe(3)
+    expect(sumRes.value).toBe(3)
+    expect(fn).toHaveBeenCalledTimes(1)
+
+    obj.foo++
+    expect(sumRes.value).toBe(4)
+  })
+
+  it('在另外一个 effect 中读取计算属性的值时', () => {
+    const obj = reactive({ foo: 1, bar: 2 })
+    const sumRes = computed(() => obj.foo + obj.bar)
+    const fn = vi.fn(() => {
+      sumRes.value
+    })
+    effect(fn)
+    expect(fn).toBeCalledTimes(1)
+    obj.foo++
+    expect(fn).toBeCalledTimes(2)
   })
 })
