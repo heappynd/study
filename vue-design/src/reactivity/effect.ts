@@ -1,5 +1,7 @@
+import { ITERATE_KEY, TriggerType } from '.'
+
 // 存储副作用函数的桶
-const bucket = new WeakMap<object, Map<string, Set<ReactiveEffect>>>()
+const bucket = new WeakMap<object, Map<string | symbol, Set<ReactiveEffect>>>()
 
 // effect 函数用于注册副作用函数
 export function effect(fn, options = {}) {
@@ -32,7 +34,7 @@ export function track(target, key) {
   // 将其添加到 activeEffect.deps 数组中
   activeEffect.deps.push(deps)
 }
-export function trigger(target, key) {
+export function trigger(target, key, type: TriggerType) {
   // 根据 target 从桶中取得 depsMap，它是 key --> effects
   const depsMap = bucket.get(target)
   if (!depsMap) {
@@ -51,6 +53,17 @@ export function trigger(target, key) {
         effectsToRun.add(effectFn)
       }
     })
+  // 将与 ITERATE_KEY 相关联的副作用函数也添加到 effectsToRun
+  if (type === TriggerType.ADD || type === TriggerType.DELETE) {
+    // 取得与 ITERATE_KEY 相关联的副作用函数
+    const iterateEffects = depsMap.get(ITERATE_KEY)
+    iterateEffects &&
+      iterateEffects.forEach((effectFn) => {
+        if (effectFn !== activeEffect) {
+          effectsToRun.add(effectFn)
+        }
+      })
+  }
 
   effectsToRun.forEach((effectFn) => {
     // 如果一个副作用函数存在调度器，则调用该调度器，并将副作用函数作为参数传递
