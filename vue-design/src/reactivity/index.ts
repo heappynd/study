@@ -40,7 +40,11 @@ function createReactive(obj, isShallow = false, isReadonly = false) {
       // 先获取旧值
       const oldValue = target[key]
       // 如果属性不存在，则说明是在添加新属性，否则是设置已有属性
-      const type = Object.prototype.hasOwnProperty.call(target, key)
+      const type = Array.isArray(target)
+        ? Number(key) < target.length
+          ? TriggerType.SET
+          : TriggerType.ADD
+        : Object.prototype.hasOwnProperty.call(target, key)
         ? TriggerType.SET
         : TriggerType.ADD
       const res = Reflect.set(target, key, newValue, receiver)
@@ -53,7 +57,8 @@ function createReactive(obj, isShallow = false, isReadonly = false) {
           oldValue !== newValue &&
           (oldValue === oldValue || newValue === newValue)
         ) {
-          trigger(target, key, type)
+          // 增加第四个参数，即触发响应的新值
+          trigger(target, key, type, newValue)
         }
       }
 

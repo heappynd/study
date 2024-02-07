@@ -131,3 +131,29 @@ describe('2', () => {
     expect(fn).toHaveBeenCalledTimes(1)
   })
 })
+
+describe('arr', () => {
+  it('arr', () => {
+    const arr = reactive(['foo'])
+    const fn = vi.fn(() => arr[0])
+    effect(fn)
+    arr[0] = 'bar'
+    expect(fn).toHaveBeenCalledTimes(2)
+  })
+
+  it('set 会影响 length', () => {
+    const arr = reactive(['foo'])
+    const fn = vi.fn(() => arr.length)
+    effect(fn)
+    arr[1] = 'bar'
+    expect(fn).toHaveBeenCalledTimes(2)
+  })
+
+  it('设置 length 也会影响到数组获取', () => {
+    const arr = reactive(['foo'])
+    const fn = vi.fn(() => arr[0])
+    effect(fn)
+    arr.length = 0
+    expect(fn).toHaveBeenCalledTimes(2)
+  })
+})

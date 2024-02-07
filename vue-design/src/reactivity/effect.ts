@@ -34,7 +34,7 @@ export function track(target, key) {
   // 将其添加到 activeEffect.deps 数组中
   activeEffect.deps.push(deps)
 }
-export function trigger(target, key, type: TriggerType) {
+export function trigger(target, key, type: TriggerType, newValue) {
   // 根据 target 从桶中取得 depsMap，它是 key --> effects
   const depsMap = bucket.get(target)
   if (!depsMap) {
@@ -44,6 +44,33 @@ export function trigger(target, key, type: TriggerType) {
   // 副作用函数集合称为 key 的依赖集合。
   const effects = depsMap.get(key)
   const effectsToRun = new Set<ReactiveEffect>()
+
+  // 如果操作目标是数组，并且修改了数组的 length 属性
+  if (Array.isArray(target) && key === 'length') {
+    // 对于索引大于或等于新的 length 值的元素，
+    // 需要把所有相关联的副作用函数取出并添加到 effectsToRun 中待执行
+    depsMap.forEach((effects, key) => {
+      if (key >= newValue) {
+        effects.forEach((effectFn) => {
+          if (effectFn !== activeEffect) {
+            effectsToRun.add(effectFn)
+          }
+        })
+      }
+    })
+  }
+
+  // 当操作类型为 ADD 并且目标对象是数组时，应该取出并执行那些与 length
+  // 属性相关联的副作用函数
+  if (type === TriggerType.ADD && Array.isArray(target)) {
+    const lengthEffects = depsMap.get('length')
+    lengthEffects &&
+      lengthEffects.forEach((effectFn) => {
+        if (effectFn !== activeEffect) {
+          effectsToRun.add(effectFn)
+        }
+      })
+  }
 
   effects &&
     effects.forEach((effectFn) => {
