@@ -25,7 +25,7 @@ t1.right = t3
 t2.left = t4
 t2.right = t5
 
-levelTraverse(t1)
+levelOrder(t1)
 
 function levelTraverse(root: TreeNode | null) {
   if (root === null) {
@@ -53,4 +53,26 @@ function levelTraverse(root: TreeNode | null) {
   console.log(res)
 
   return res
+}
+
+function levelOrder(root: TreeNode | null) {
+  if (root === null) {
+    return []
+  }
+  let queue = [root]
+  let res: number[][] = []
+  let currLevel: number[] = []
+
+  while (queue.length > 0) {
+    let size = queue.length
+    for (let i = 0; i < size; i++) {
+      const currNode = queue.shift()!
+      currLevel.push(currNode.val)
+      currNode.left && queue.push(currNode.left)
+      currNode.right && queue.push(currNode.right)
+    }
+    res.push(currLevel)
+    currLevel = []
+  }
+  console.log(res)
 }
