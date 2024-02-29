@@ -3,32 +3,22 @@
  * @return {boolean}
  */
 var isSymmetric = function (root) {
-  let inOrderRes = []
-  function inOrder(root) {
-    if (root === null) {
-      return null
-    }
-
-    inOrder(root.left)
-    inOrderRes.push(root.val)
-    inOrder(root.right)
-  }
-  inOrder(root)
-  if (inOrderRes.length % 2 === 0) {
-    return false
-  } else {
-    let left = 0
-    let right = inOrderRes.length - 1
-    while (left < right) {
-      if (inOrderRes[left] !== inOrderRes[right]) {
-        return false
-      }
-      left++
-      right--
-    }
+  if (root === null) {
     return true
   }
-  // 2 2 1 2 2
-  // 1 2 2 2 2
-  // 2 2 2 2 1
+  return compare(root.left, root.right)
+}
+
+function compare(left, right) {
+  if (left === null && right !== null) {
+    return false
+  } else if (left !== null && right === null) {
+    return false
+  } else if (left === null && right === null) {
+    return true
+  } else if (left.val !== right.val) {
+    return false
+  } else if (left.val === right.val) {
+    return compare(left.left, right.right) && compare(left.right, right.left)
+  }
 }
