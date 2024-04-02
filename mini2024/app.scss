@@ -1,15 +1,10 @@
-/**app.wxss**/
-.container {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  padding: 200rpx 0;
-  box-sizing: border-box;
-} 
+@use './iconfont/iconfont.scss';
 
-text {
-  color: lightgreen;
-  font-size: 50rpx;
+input {
+  border: 1px solid #000;
+}
+
+.line {
+  border-top: 1px solid lightgreen;
+  margin-top: 100rpx;
 }

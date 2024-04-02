@@ -1,2 +1,13 @@
-<!--pages/cate/cate.wxml-->
-<text>pages/cate/cate.wxml</text>
+<view>
+  <view wx:for="{{list}}" wx:key="index">
+    {{index}} -> {{item}}
+  </view>
+  <view class="line"></view>
+  <view wx:for="{{obj}}" wx:key="index" wx:for-item="value" wx:for-index="key">
+    {{key}} -> {{value}}
+  </view>
+
+  <block wx:for="{{list}}" wx:key="index">
+    {{index}}
+  </block>
+</view>

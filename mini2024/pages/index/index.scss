@@ -1,0 +1,36 @@
+.info {
+  .iconfont {
+    font-size: 150rpx;
+  }
+}
+
+.scroll-cont {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  view {
+    border-radius: 4px;
+    flex: none;
+    width: 300rpx;
+    height: 200rpx;
+    background: #000;
+    color: #fff;
+  }
+}
+
+.bg-image {
+  height: 440rpx;
+  background: lightblue;
+  // bg 不支持本地路径
+  // background-image: url('../../assets/tabbar/cart-active.png');
+  background-size: cover;
+
+  background-image: url('https://gimg3.baidu.com/gimg/app=2028&src=img.py1080p.com//2022/12/ef9c82a768d593-360x528.jpg');
+}
+
+.catch {
+  display: flex;
+  height: 300rpx;
+  background: skyblue;
+  align-items: center;
+}
