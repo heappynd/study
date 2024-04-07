@@ -1,1 +1,7 @@
-<view class="box">hello cart</view>
+<view class="box">
+
+</view>
+<!-- redirect 销毁当前页面，跳转到下个页面 -->
+<navigator url="/pages/list/list" open-type="redirect">list</navigator>
+<!-- 保留当前页面，跳转到下个页面 -->
+<navigator url="/pages/list/list" open-type="navigate">list navigate</navigator>
