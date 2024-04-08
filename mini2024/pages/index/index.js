@@ -1,70 +1,98 @@
-// index.js
 Page({
+  /**
+   * 页面的初始数据
+   */
   data: {
-    id: 1,
-    school: '大学',
-    obj: {
-      name: 'tom',
-    },
-    isChecked: false,
-    count: 0,
-    userInfo: {
-      name: '',
-      age: 0,
-    },
-    list: [
-      { id: 1, name: 'one' },
-      { id: 2, name: 'two' },
-    ],
-    value: "12345",
-    checked: false
+    todos: [],
   },
 
-  updateList() {
-    // this.setData({
-    //   list: [1, 2, 3, 4, 5],
-    // })
-    // this.setData({
-    // 'list[1]': 100,
-    // 'list[0].name': 'music',
-    // })
-  },
-
-  updateUserInfo() {
-    // this.setData({
-    //   'userInfo.name': 'tom',
-    //   'userInfo.age': 10,
-    // })
-    // delete this.data.userInfo.age
-  },
-
-  add() {
-    console.log(this.data.count)
-    // 1 更新数据 2 驱动试图更新
-    this.setData({
-      count: this.data.count + 1,
+  async deleteData() {
+    const res = await wx.showModal({
+      title: '提示',
+      content: '是否删除该商品',
     })
-    // console.log(this.data.count)
+    console.log(res)
+    const { confirm, cancel } = res
+    if (confirm) {
+      wx.showToast({
+        title: '删除成功',
+        icon: 'none',
+        duration: 2000,
+      })
+    } else {
+      wx.showToast({
+        title: '取消删除',
+        icon: 'error',
+        duration: 2000,
+      })
+    }
   },
 
-  handler(event) {
-    console.log('event ....', event)
+  getData() {
+    wx.showLoading({
+      title: '数据加载中',
+      mask: true,
+    })
+    wx.request({
+      url: 'https://jsonplaceholder.typicode.com/todos',
+      method: 'GET',
+      data: {},
+      header: {},
+      success: (res) => {
+        console.log('success', res)
+        if (res.statusCode === 200) {
+          this.setData({
+            todos: res.data,
+          })
+        }
+      },
+      fail(err) {
+        console.log('fail', err)
+      },
+      complete() {
+        console.log('complete')
+        wx.hideLoading()
+      },
+    })
   },
 
-  handleInput(event) {
-    console.log(event)
-    console.log(event.detail.value)
-  },
+  /**
+   * 生命周期函数--监听页面加载
+   */
+  onLoad: function (options) {},
 
-  btnHandler(event) {
-    // currentTarget 事件绑定者
-    // target 事件触发者
-    console.log('btnHandler', event.currentTarget.dataset)
-    // mark获取的是事件触发者 到绑定者的所有数据
-    console.log('btnHandler', event.mark)
-  },
+  /**
+   * 生命周期函数--监听页面初次渲染完成
+   */
+  onReady: function () {},
 
-  parentHandler() {
-    console.log('parentHandler')
-  },
+  /**
+   * 生命周期函数--监听页面显示
+   */
+  onShow: function () {},
+
+  /**
+   * 生命周期函数--监听页面隐藏
+   */
+  onHide: function () {},
+
+  /**
+   * 生命周期函数--监听页面卸载
+   */
+  onUnload: function () {},
+
+  /**
+   * 页面相关事件处理函数--监听用户下拉动作
+   */
+  onPullDownRefresh: function () {},
+
+  /**
+   * 页面上拉触底事件的处理函数
+   */
+  onReachBottom: function () {},
+
+  /**
+   * 用户点击右上角分享
+   */
+  onShareAppMessage: function () {},
 })

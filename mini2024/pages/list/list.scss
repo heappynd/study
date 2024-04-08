@@ -1,0 +1,17 @@
+page {
+  // height: 1000px;
+}
+
+view {
+  height: 700rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+view:nth-child(odd) {
+  background-color: lightblue;
+}
+view:nth-child(even) {
+  background: lightyellow;
+}

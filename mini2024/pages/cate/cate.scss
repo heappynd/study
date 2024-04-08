@@ -1,6 +1,5 @@
-/* pages/cate/cate.wxss */
-$color: blue;
-
-text {
-  color: $color;
+.button-group {
+  margin-top: 36rpx;
+  display: flex;
+  justify-content: space-between;
 }

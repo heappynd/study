@@ -1,7 +1,5 @@
-<view class="box">
-
-</view>
-<!-- redirect 销毁当前页面，跳转到下个页面 -->
-<navigator url="/pages/list/list" open-type="redirect">list</navigator>
-<!-- 保留当前页面，跳转到下个页面 -->
-<navigator url="/pages/list/list" open-type="navigate">list navigate</navigator>
+<button plain type="warn" bind:tap="navt">navigateTo</button>
+<button plain type="warn" bind:tap="red">redirectTo</button>
+<button plain type="warn" bind:tap="swi">switchTab</button>
+<button plain type="warn" bind:tap="rel">reLaunch</button>
+<button plain type="warn" bind:tap="navb">navigateBack</button>

@@ -3,6 +3,6 @@
   "projectname": "mini2024",
   "setting": {
     "compileHotReLoad": true,
-    "urlCheck": true
+    "urlCheck": false
   }
 }

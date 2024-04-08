@@ -1,70 +1,7 @@
-<view class="swiper">
-  <view>{{ school }}</view>
-  <view>{{ obj.name }}</view>
+<button type="primary" bind:tap="getData">获取数据</button>
 
-  <view id="{{id}}">id {{ id * 10 }}</view>
+<button type="warn" bind:tap="deleteData">modal</button>
 
-  <checkbox checked="{{true}}" />
-  <checkbox checked="{{isChecked}}" />
-  <checkbox checked="{{false}}" />
-
-  <view>{{ count }}</view>
-  <button bind:tap="add">add</button>
-
-  <view class="line"></view>
-
-  <view>1 {{ userInfo.name }}</view>
-  <view>1 {{ userInfo.age }}</view>
-  <button type="warn" bind:tap="updateUserInfo">修改对象</button>
-
-  <view class="line"></view>
-
-  <view wx:for="{{list}}" wx:key="index">{{item.name}}</view>
-
-  <button type="primary" bind:tap="updateList">修改数组</button>
-
-  <view class="line"></view>
-
-  <view>{{ value }}</view>
-  <input type="text" model:value="{{value}}" />
-
-  <checkbox model:checked="{{ checked }}" />是否同意
-
-  <view class="line"></view>
-
-  <!-- <view wx:for="{{list}}" wx:key="*this">{{item.name}}</view> -->
-</view>
-<view class="info">
-  <view>
-    <text class="iconfont icon-Apple"></text>
-  </view>
-</view>
-<view class="good-nav"></view>
-<view class="good-hot">
-  <view>
-    <scroll-view scroll-x>
-
-      <view class="scroll-cont">
-        <view>1</view>
-        <view>2</view>
-        <view>3</view>
-        <view>4</view>
-      </view>
-
-    </scroll-view>
-  </view>
-
-  <view class="bg-image"></view>
-  <!-- 第一种 -->
-  <button type="primary" bind:tap="handler">绑定事件</button>
-
-  <button type="warn" bindtap="handler">绑定事件2</button>
-
-  <input type="text" bindinput="handleInput" />
-
-  <view class="line"></view>
-
-  <view class="catch" catch:tap="parentHandler">
-    <button catch:tap="btnHandler" data-id="1" data-name="tom" data-nick-name="nickName" data-userName="username" mark:city="chongqing" mark:cityName="cityName">按钮</button>
-  </view>
+<view wx:for="{{todos}}" wx:key="id">
+  {{item.title}}
 </view>

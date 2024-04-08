@@ -1,2 +1,4 @@
 <!--pages/list/list.wxml-->
-<text>pages/list/list.wxml1</text>
+<view wx:for="{{numList}}" wx:key="*this">
+  {{ item }}
+</view>

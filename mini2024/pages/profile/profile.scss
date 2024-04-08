@@ -1,0 +1,18 @@
+.scroll-y {
+  height: 100vh;
+  background: #efefef;
+
+  view {
+    height: 700rpx;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    &:nth-child(odd) {
+      background-color: lightblue;
+    }
+    &:nth-child(even) {
+      background-color: lightcoral;
+    }
+  }
+}

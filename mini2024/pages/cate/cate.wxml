@@ -1,13 +1,6 @@
-<view>
-  <view wx:for="{{list}}" wx:key="index">
-    {{index}} -> {{item}}
-  </view>
-  <view class="line"></view>
-  <view wx:for="{{obj}}" wx:key="index" wx:for-item="value" wx:for-index="key">
-    {{key}} -> {{value}}
-  </view>
-
-  <block wx:for="{{list}}" wx:key="index">
-    {{index}}
-  </block>
+<view class="button-group">
+  <button size="mini" plain type="primary" bind:tap="setStorage">存储</button>
+  <button size="mini" plain bind:tap="getStorage">获取</button>
+  <button size="mini" plain type="primary" bind:tap="removeStorage">删除</button>
+  <button size="mini" plain bind:tap="clearStorage">清空</button>
 </view>
