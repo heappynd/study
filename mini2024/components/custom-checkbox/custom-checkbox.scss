@@ -1,0 +1,19 @@
+.custom-checkbox-container {
+  display: inline-block;
+
+  .custom-checkbox-box {
+    display: flex;
+    align-items: center;
+
+    &.left {
+      flex-direction: row-reverse;
+    }
+    &.right {
+      flex-direction: row;
+    }
+
+    .custom-checkbox {
+      margin-left: 20rpx;
+    }
+  }
+}

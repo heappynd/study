@@ -1,12 +1,6 @@
 {
   "entryPagePath": "pages/index/index",
-  "pages": [
-    "pages/index/index",
-    "pages/list/list",
-    "pages/cart/cart",
-    "pages/cate/cate",
-    "pages/profile/profile"
-  ],
+  "pages": ["pages/index/index", "pages/list/list", "pages/cart/cart", "pages/cate/cate", "pages/profile/profile"],
   "window": {
     "navigationBarTitleText": "木星标题",
     "navigationBarBackgroundColor": "#1296db",
@@ -58,5 +52,9 @@
   },
   "componentFramework": "glass-easel",
   "sitemapLocation": "sitemap.json",
-  "lazyCodeLoading": "requiredComponents"
+  "lazyCodeLoading": "requiredComponents",
+  "usingComponents": {
+    "custom-checkbox": "./components/custom-checkbox/custom-checkbox",
+    "custom01": "./components/custom01/custom01"
+  }
 }

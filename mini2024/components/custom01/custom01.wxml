@@ -1,0 +1,6 @@
+<!--components/custom01/custom01.wxml-->
+<view>
+  <slot name="top" />
+  <view>1</view>
+  <slot />
+</view>

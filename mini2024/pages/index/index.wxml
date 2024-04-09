@@ -5,3 +5,16 @@
 <view wx:for="{{todos}}" wx:key="id">
   {{item.title}}
 </view>
+
+<custom-checkbox label="我已阅读并同意用户协议" position="right" />
+
+<view class="line"></view>
+
+<custom-checkbox label="匿名提交" position="left" />
+
+<custom01>
+  <text slot="top">top</text>
+  你卡上
+</custom01>
+
+<!-- <custom-swiper /> -->
