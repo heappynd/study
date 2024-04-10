@@ -17,3 +17,17 @@
     }
   }
 }
+
+.custom-checkbox .wx-checkbox-input {
+  width: 124rpx !important;
+  height: 124rpx !important;
+  border-radius: 50% !important;
+  border: 1px solid #fda007 !important;
+}
+.wx-checkbox-input-checked {
+  background-color: #fda007 !important;
+}
+.wx-checkbox-input.wx-checkbox-input-checked:before {
+  font-size: 122rpx !important;
+  color: #fff !important;
+}

@@ -6,7 +6,11 @@
   {{item.title}}
 </view>
 
-<custom-checkbox label="我已阅读并同意用户协议" position="right" />
+<view class="custom">
+  <custom-checkbox label="我已阅读并同意用户协议" position="right" />
+</view>
+
+<checkbox />
 
 <view class="line"></view>
 

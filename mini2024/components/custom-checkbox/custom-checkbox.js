@@ -1,5 +1,8 @@
 // components/custom-checkbox/custom-checkbox.js
 Component({
+  options: {
+    styleIsolation: 'shared',
+  },
   /**
    * 组件的属性列表
    */
@@ -27,7 +30,7 @@ Component({
    */
   methods: {
     updateChecked() {
-      console.log(this.properties);
+      console.log(this.properties)
       this.setData({
         isChecked: !this.data.isChecked,
       })

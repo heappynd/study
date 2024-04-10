@@ -3,3 +3,7 @@
 <button plain type="warn" bind:tap="swi">switchTab</button>
 <button plain type="warn" bind:tap="rel">reLaunch</button>
 <button plain type="warn" bind:tap="navb">navigateBack</button>
+
+<custom04 class="child" bind:myevent="getData" />
+
+<button bind:tap="getChild">获取子组件实例</button>

@@ -16,6 +16,15 @@ Page({
     })
   },
 
+  getData(e) {
+    console.log(e.detail)
+  },
+
+  getChild() {
+    const res = this.selectComponent('.child')
+    console.log(res)
+  },
+
   swi() {
     // 不能传参数
     wx.switchTab({

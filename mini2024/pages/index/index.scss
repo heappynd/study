@@ -34,3 +34,11 @@
   background: skyblue;
   align-items: center;
 }
+
+.custom .custom-checkbox .wx-checkbox-input {
+  border: 1px solid lightblue !important;
+}
+
+.custom .custom-checkbox .wx-checkbox-input-checked {
+  background-color: lightblue !important;
+}
