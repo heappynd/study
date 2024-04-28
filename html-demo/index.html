@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <!-- application/x-www-form-urlencoded -->
+    <form id="userForm" action="http://172.20.10.3:3000/api/upload" method="post" enctype="multipart/form-data">
+      <!-- <fieldset disabled>
+        <legend>学生情况登记</legend>
+        <p>年龄：<input type="text" name="age"></p>
+        <p>性别：<input type="text" name="gender"></p>
+      </fieldset> -->
+
+      <label for="username">用户名：</label>
+      <input
+        type="search"
+        id="username"
+        name="username"
+        autofocus
+        form="userForm"
+        pattern="[a-z]{4,8}"
+        placeholder="sss"
+        spellcheck="true"
+      />
+      <label for="username"><abbr title="required">*</abbr></label>
+      <br />
+      <input type="button" value="点击" />
+
+      <fieldset>
+        <legend>你的兴趣</legend>
+        <div>
+          <input type="checkbox" id="coding" name="interest" value="coding" />
+          <label for="coding">编码</label>
+        </div>
+        <div>
+          <input type="checkbox" id="music" name="interest" value="music" />
+          <label for="music">音乐</label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>性别</legend>
+        <div>
+          <input type="radio" id="male" name="gender" value="male" />
+          <label for="male">男</label>
+        </div>
+        <div>
+          <input type="radio" id="female" name="gender" value="female" />
+          <label for="female">女</label>
+        </div>
+      </fieldset>
+
+      <input type="email" size="40" list="defaultEmails" />
+
+      <datalist id="defaultEmails">
+        <option value="jbond007@mi6.defence.gov.uk"></option>
+        <option value="jbourne@unknown.net"></option>
+        <option value="nfury@shield.org"></option>
+        <option value="tony@starkindustries.com"></option>
+        <option value="hulk@grrrrrrrr.arg"></option>
+      </datalist>
+
+      <input type="password" id="pass" name="password" minlength="8" required inputmode="numeric" />
+
+      <input type="file" id="avatar" name="avatar" capture="environment" multiple />
+
+      <input type="number" id="tentacles" name="tentacles" min="10" max="100" />
+
+      <input type="range" id="start" name="volume" min="0" max="11" />
+
+      <input type="range" list="tickmarks" />
+
+      <datalist id="tickmarks">
+        <option value="0" label="0%"></option>
+        <option value="10"></option>
+        <option value="20"></option>
+        <option value="30"></option>
+        <option value="40"></option>
+        <option value="50" label="50%"></option>
+        <option value="60"></option>
+        <option value="70"></option>
+        <option value="80"></option>
+        <option value="90"></option>
+        <option value="100" label="100%"></option>
+      </datalist>
+
+      <input type="tel" id="phone" name="phone" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required />
+
+      <input type="color" id="background" name="background" value="#e66465" />
+
+      <input type="date" id="start" name="start" value="2018-07-22" min="2018-01-01" max="2018-12-31" />
+
+      <input type="time" id="appt" name="appt" min="9:00" max="18:00" required />
+
+      <small>营业时间上午9点到下午6点</small>
+
+      <input type="month" id="start" name="start" min="2018-03" value="2018-05" />
+
+      <input type="week" name="week" id="camp-week" min="2018-W18" max="2018-W26" required />
+
+      <br />
+
+      <label
+        >宠物：
+        <select name="pets" multiple size="4">
+          <optgroup label="四条腿的宠物">
+            <option value="dog">狗</option>
+            <option value="cat">猫</option>
+          </optgroup>
+          <optgroup label="鸟类">
+            <option value="parrot">鹦鹉</option>
+            <option value="thrush">画眉</option>
+          </optgroup>
+        </select>
+      </label>
+
+      <select name="choice">
+        <option value="first">First Value</option>
+        <option value="second" selected>Second Value</option>
+        <option value="third">Third Value</option>
+      </select>
+
+      <br />
+
+      <label for="ice-cream-choice">冰淇淋：</label>
+      <input type="text" list="ice-cream-flavors" id="ice-cream-choice" name="ice-cream-choice" />
+
+      <datalist id="ice-cream-flavors">
+        <option value="巧克力" label="coc"></option>
+        <option value="椰子"></option>
+        <option value="薄荷"></option>
+        <option value="草莓"></option>
+        <option value="香草"></option>
+      </datalist>
+
+      <br />
+      <input type="number" name="a" value="10" /> + <input type="number" name="b" value="10" /> =
+      <output name="result">20</output>
+
+      <br />
+      <progress id="file" max="100" value="70">70%</progress>
+
+      <br />
+      <p>烤箱的当前温度是<meter min="200" max="500" value="350">350 度</meter>。</p>
+
+      <input type="reset" />
+
+      <input type="checkbox" id="agreement" name="agreement" checked />
+
+      <input type="submit" />
+    </form>
+  </body>
+</html>
