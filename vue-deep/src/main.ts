@@ -6,6 +6,7 @@ type VNode = {
   type: string
   children: string | VNode[]
   props?: { [key: string]: unknown }
+  el: HTMLElement | null
 }
 
 type Container = HTMLElement & { _vnode: VNode | null }
@@ -30,6 +31,8 @@ function createRenderer(options: Options) {
 
   function mountElement(vnode: VNode, container: Container) {
     const el = createElement(vnode.type)
+    // 让 vnode.el 引用真实 DOM 元素
+    vnode.el = el
     if (typeof vnode.children === 'string') {
       setElementText(el, vnode.children)
     } else if (Array.isArray(vnode.children)) {
@@ -47,11 +50,27 @@ function createRenderer(options: Options) {
   }
 
   function patch(oldVNode: VNode | null, newVNode: VNode, container: Container) {
+    
+
     if (!oldVNode) {
       // 挂载操作
       mountElement(newVNode, container)
     } else {
       // 更新操作 打补丁
+      // 判断是否有打补丁的必要
+      if (oldVNode.type !== newVNode.type) {
+        console.log('没有必要打补丁')
+
+        unmount(oldVNode)
+        patch(null, newVNode, container)
+      }
+    }
+  }
+
+  function unmount(vnode: VNode) {
+    const parent = vnode.el?.parentNode
+    if (parent) {
+      parent.removeChild(vnode.el)
     }
   }
 
@@ -63,7 +82,8 @@ function createRenderer(options: Options) {
     } else {
       // 新节点不存在 且 旧节点存在 说明是卸载操作
       if (container._vnode) {
-        container.innerHTML = ''
+        // 卸载操作
+        unmount(container._vnode)
       }
     }
 
@@ -77,14 +97,6 @@ function createRenderer(options: Options) {
 
 const vnode: VNode = {
   type: 'h1',
-  props: {
-    // class: 'foo bar',
-    // class: {
-    //   foo: true,
-    //   bar: false,
-    // },
-    class: ['foo bar', { baz: true }],
-  },
   children: 'Hello Vue',
   // children: [],
 }
@@ -123,5 +135,10 @@ const renderer = createRenderer({
 
 renderer.render(vnode, document.querySelector('#app')!)
 setTimeout(() => {
-  renderer.render(null, document.querySelector('#app')!)
+  const vnode: VNode = {
+    type: 'p',
+    children: 'Hello Vue',
+    // children: [],
+  }
+  renderer.render(vnode, document.querySelector('#app')!)
 }, 2000)
