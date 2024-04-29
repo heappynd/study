@@ -1,8 +1,11 @@
 import { ref, effect } from '@vue/reactivity'
+import './style.css'
+import { normalizeClass } from './shared/normalizeProp'
 
 type VNode = {
   type: string
-  children: string
+  children: string | VNode[]
+  props?: { [key: string]: unknown }
 }
 
 type Container = HTMLElement & { _vnode: VNode | null }
@@ -13,14 +16,32 @@ type Options = {
   insert: (el: HTMLElement, parent: HTMLElement, anchor: HTMLElement | null) => void
 }
 
+function shouldSetAsProps(el: HTMLElement, key, value) {
+  // because input 标签的 form 属性是只读的，所以不能直接设置
+  if (key === 'form' && el.tagName === 'INPUT') {
+    return false
+  }
+  return key in el
+}
+
 // !main
 function createRenderer(options: Options) {
-  const { createElement, setElementText, insert } = options
+  const { createElement, setElementText, insert, patchProps } = options
 
   function mountElement(vnode: VNode, container: Container) {
     const el = createElement(vnode.type)
     if (typeof vnode.children === 'string') {
       setElementText(el, vnode.children)
+    } else if (Array.isArray(vnode.children)) {
+      vnode.children.forEach((child) => {
+        patch(null, child, el)
+      })
+    }
+    if (vnode.props) {
+      for (const key in vnode.props) {
+        const value = vnode.props[key]
+        patchProps(el, key, null, value)
+      }
     }
     insert(el, container, null)
   }
@@ -56,22 +77,16 @@ function createRenderer(options: Options) {
 
 const vnode: VNode = {
   type: 'h1',
+  props: {
+    // class: 'foo bar',
+    // class: {
+    //   foo: true,
+    //   bar: false,
+    // },
+    class: ['foo bar', { baz: true }],
+  },
   children: 'Hello Vue',
-}
-
-const jsonOptions: Options = {
-  createElement(tag) {
-    console.log(`创建元素 ${tag}`)
-    return { tag }
-  },
-  setElementText(el, text) {
-    console.log(`设置元素 ${JSON.stringify(el)} 的文本为 ${text}`)
-    el.text = text
-  },
-  insert(el, parent, anchor = null) {
-    console.log(`插入元素 ${JSON.stringify(el)} 到 ${JSON.stringify(parent)}`)
-    parent.children = el
-  },
+  // children: [],
 }
 
 const renderer = createRenderer({
@@ -84,11 +99,26 @@ const renderer = createRenderer({
   insert(el: HTMLElement, parent: HTMLElement, anchor: HTMLElement | null) {
     parent.insertBefore(el, anchor)
   },
-  ...jsonOptions,
+  // 将属性设置相关操作封装到 patchProps 函数中，并作为渲染器选项传递
+  patchProps(el: HTMLElement, key, prevValue, nextValue) {
+    if (key === 'class') {
+      el.className = normalizeClass(nextValue || '')
+    }
+    // 判断是否在dom props上存在
+    else if (shouldSetAsProps(el, key, nextValue)) {
+      const type = typeof el[key]
+
+      if (type === 'boolean' && nextValue === '') {
+        el[key] = true
+      } else {
+        el[key] = nextValue
+      }
+    } else {
+      console.log('setAttribute', key)
+
+      el.setAttribute(key, nextValue)
+    }
+  },
 })
 
-const jsonContainer = { type: 'root' }
-
-renderer.render(vnode, jsonContainer)
-
-console.log('jsonContainer', jsonContainer)
+renderer.render(vnode, document.querySelector('#app')!)
