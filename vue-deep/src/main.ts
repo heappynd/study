@@ -122,3 +122,6 @@ const renderer = createRenderer({
 })
 
 renderer.render(vnode, document.querySelector('#app')!)
+setTimeout(() => {
+  renderer.render(null, document.querySelector('#app')!)
+}, 2000)
