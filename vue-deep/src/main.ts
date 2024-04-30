@@ -50,20 +50,27 @@ function createRenderer(options: Options) {
   }
 
   function patch(oldVNode: VNode | null, newVNode: VNode, container: Container) {
-    
+    if (oldVNode && oldVNode.type !== newVNode.type) {
+      console.log('新旧节点描述的内容不同，直接卸载旧节点')
+      unmount(oldVNode)
+      oldVNode = null
+    }
+    // 代码运行到这里，证明 n1 和 n2 所描述的内容相同
+    const { type } = newVNode
+    // 如果 n2.type 的值是字符串类型，则它描述的是普通标签元素
+    if (typeof type === 'string') {
+      console.log('新节点描述的是普通标签元素')
 
-    if (!oldVNode) {
-      // 挂载操作
-      mountElement(newVNode, container)
-    } else {
-      // 更新操作 打补丁
-      // 判断是否有打补丁的必要
-      if (oldVNode.type !== newVNode.type) {
-        console.log('没有必要打补丁')
-
-        unmount(oldVNode)
-        patch(null, newVNode, container)
+      if (!oldVNode) {
+        mountElement(newVNode, container)
+      } else {
+        // 更新
+        // patchElement(oldVNode, newVNode)
       }
+    } else if (typeof type === 'object') {
+      // 说明是组件
+    } else if (type === 'xxx') {
+      // 其他类型
     }
   }
 
@@ -95,12 +102,6 @@ function createRenderer(options: Options) {
   }
 }
 
-const vnode: VNode = {
-  type: 'h1',
-  children: 'Hello Vue',
-  // children: [],
-}
-
 const renderer = createRenderer({
   createElement(tag: string) {
     return document.createElement(tag)
@@ -113,7 +114,27 @@ const renderer = createRenderer({
   },
   // 将属性设置相关操作封装到 patchProps 函数中，并作为渲染器选项传递
   patchProps(el: HTMLElement, key, prevValue, nextValue) {
-    if (key === 'class') {
+    if (/^on/.test(key)) {
+      // 处理事件
+      let invoker = el._vei
+      const name = key.slice(2).toLowerCase()
+      if (nextValue) {
+        // 存在处理函数
+        if (!invoker) {
+          invoker = el._vei = (e) => {
+            invoker.value(e)
+          }
+          invoker.value = nextValue
+          el.addEventListener(name, invoker)
+        } else {
+          // 如果存在则更新
+          invoker.value = nextValue
+        }
+      } else if (invoker) {
+        // 如果新的事件绑定函数不存在，但是之前的invoker存在，则移除绑定
+        el.removeEventListener(name, invoker)
+      }
+    } else if (key === 'class') {
       el.className = normalizeClass(nextValue || '')
     }
     // 判断是否在dom props上存在
@@ -133,11 +154,29 @@ const renderer = createRenderer({
   },
 })
 
+// test
+
+const vnode: VNode = {
+  type: 'p',
+  props: {
+    onClick: () => {
+      console.log('click1')
+    },
+  },
+  children: 'Hello Vue',
+  // children: [],
+}
+
 renderer.render(vnode, document.querySelector('#app')!)
 setTimeout(() => {
   const vnode: VNode = {
     type: 'p',
-    children: 'Hello Vue',
+    props: {
+      onClick: () => {
+        console.log('click')
+      },
+    },
+    children: 'Hello React',
     // children: [],
   }
   renderer.render(vnode, document.querySelector('#app')!)
