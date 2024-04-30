@@ -2,11 +2,18 @@ import { ref, effect } from '@vue/reactivity'
 import './style.css'
 import { normalizeClass } from './shared/normalizeProp'
 
+type Invoker = {
+  (e: Event): void
+  value: (e: Event) => void
+}
+
+type VNodeEl = HTMLElement & { _vei?: { [key: string]: Invoker } }
+
 type VNode = {
   type: string
   children: string | VNode[]
   props?: { [key: string]: unknown }
-  el: HTMLElement | null
+  el: VNodeEl | null
 }
 
 type Container = HTMLElement & { _vnode: VNode | null }
@@ -113,16 +120,21 @@ const renderer = createRenderer({
     parent.insertBefore(el, anchor)
   },
   // 将属性设置相关操作封装到 patchProps 函数中，并作为渲染器选项传递
-  patchProps(el: HTMLElement, key, prevValue, nextValue) {
+  patchProps(el: VNodeEl, key, prevValue, nextValue) {
     if (/^on/.test(key)) {
       // 处理事件
-      let invoker = el._vei
+      const invokers = el._vei || (el._vei = {})
+      let invoker = invokers[key]
       const name = key.slice(2).toLowerCase()
       if (nextValue) {
         // 存在处理函数
         if (!invoker) {
-          invoker = el._vei = (e) => {
-            invoker.value(e)
+          invoker = el._vei[key] = (e) => {
+            if (Array.isArray(invoker.value)) {
+              invoker.value.forEach((fn) => fn(e))
+            } else {
+              invoker.value(e)
+            }
           }
           invoker.value = nextValue
           el.addEventListener(name, invoker)
@@ -159,8 +171,16 @@ const renderer = createRenderer({
 const vnode: VNode = {
   type: 'p',
   props: {
-    onClick: () => {
-      console.log('click1')
+    onClick: [
+      () => {
+        console.log('click1')
+      },
+      () => {
+        console.log('click2')
+      },
+    ],
+    onContextmenu: () => {
+      console.log('contextmenu')
     },
   },
   children: 'Hello Vue',
