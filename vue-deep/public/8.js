@@ -4,7 +4,7 @@ function shouldSetAsProps(el, key, value) {
 }
 
 function createRenderer(options) {
-  const { createElement, insert, setElementText, patchProps } = options
+  const { createElement, insert, setElementText, patchProps, createText, setText } = options
 
   function mountElement(vnode, container) {
     const el = (vnode.el = createElement(vnode.type))
@@ -25,6 +25,29 @@ function createRenderer(options) {
     insert(el, container)
   }
 
+  function patchChildren(n1, n2, container) {
+    if (typeof n2.children === 'string') {
+      if (Array.isArray(n1.children)) {
+        n1.children.forEach((c) => unmount(c))
+      }
+      setElementText(container, n2.children)
+    } else if (Array.isArray(n2.children)) {
+      if (Array.isArray(n1.children)) {
+        n1.children.forEach((c) => unmount(c))
+        n2.children.forEach((c) => patch(null, c, container))
+      } else {
+        setElementText(container, '')
+        n2.children.forEach((c) => patch(null, c, container))
+      }
+    } else {
+      if (Array.isArray(n1.children)) {
+        n1.children.forEach((c) => unmount(c))
+      } else if (typeof n1.children === 'string') {
+        setElementText(container, '')
+      }
+    }
+  }
+
   function patchElement(n1, n2) {
     const el = (n2.el = n1.el)
     const oldProps = n1.props
@@ -41,42 +64,14 @@ function createRenderer(options) {
       }
     }
 
-    // 第二步：更新 children
     patchChildren(n1, n2, el)
   }
 
-  function patchChildren(oldVNode, newVNode, container) {
-    // 新 children 是文本节点
-    if (typeof newVNode.children === 'string') {
-      if (Array.isArray(n1.children)) {
-        oldVNode.children.forEach((c) => unmount(c))
-      }
-      setElementText(container, newVNode.children)
-    } else if (Array.isArray(newVNode.children)) {
-      if (Array.isArray(oldVNode.children)) {
-        // 新旧都有 children
-        // diff
-        oldVNode.children.forEach((c) => unmount(c))
-        newVNode.children.forEach((c) => patch(null, c, container))
-      } else {
-        // 旧子节点要么是文本子节点，要么不存在
-        // 但无论哪种情况，我们都只需要将容器清空，然后将新的一组子节点逐个挂
-        // 载
-        setElementText(container, '')
-        newVNode.children.forEach((c) => patch(null, c, container))
-      }
-    } else {
-      // 新子节点不存在
-      if (Array.isArray(oldVNode.children)) {
-        oldVNode.children.forEach((c) => unmount(c))
-      } else if (typeof oldVNode.children === 'string') {
-        setElementText(container, '')
-      }
-      // 如果也没有旧子节点，那么什么都不需要做
-    }
-  }
-
   function unmount(vnode) {
+    if (vnode.type === Fragment) {
+      vnode.children.forEach((c) => unmount(c))
+      return
+    }
     const parent = vnode.el.parentNode
     if (parent) {
       parent.removeChild(vnode.el)
@@ -97,8 +92,22 @@ function createRenderer(options) {
       } else {
         patchElement(n1, n2)
       }
-    } else if (typeof type === 'object') {
-      // 组件
+    } else if (type === Text) {
+      if (!n1) {
+        const el = (n2.el = createText(n2.children))
+        insert(el, container)
+      } else {
+        const el = (n2.el = n1.el)
+        if (n2.children !== n1.children) {
+          setText(el, n2.children)
+        }
+      }
+    } else if (type === Fragment) {
+      if (!n1) {
+        n2.children.forEach((c) => patch(null, c, container))
+      } else {
+        patchChildren(n1, n2, container)
+      }
     }
   }
 
@@ -131,6 +140,12 @@ const renderer = createRenderer({
   insert(el, parent, anchor = null) {
     parent.insertBefore(el, anchor)
   },
+  createText(text) {
+    return document.createTextNode(text)
+  },
+  setText(el, text) {
+    el.nodeValue = text
+  },
   patchProps(el, key, prevValue, nextValue) {
     if (/^on/.test(key)) {
       const invokers = el._vei || (el._vei = {})
@@ -139,9 +154,8 @@ const renderer = createRenderer({
       if (nextValue) {
         if (!invoker) {
           invoker = el._vei[key] = (e) => {
-            // e.timeStamp 是事件发生的时间
-            // 如果事件发生的时间早于事件回调被绑定的时间，则不执行回调
-            console.log('invoker.attached', invoker.attached)
+            console.log(e.timeStamp)
+            console.log(invoker.attached)
             if (e.timeStamp < invoker.attached) return
             if (Array.isArray(invoker.value)) {
               invoker.value.forEach((fn) => fn(e))
@@ -150,7 +164,6 @@ const renderer = createRenderer({
             }
           }
           invoker.value = nextValue
-          // 添加 invoker.attached 属性，存储事件回调被绑定的事件
           invoker.attached = performance.now()
           el.addEventListener(name, invoker)
         } else {
@@ -174,32 +187,38 @@ const renderer = createRenderer({
   },
 })
 
-const { effect, ref } = VueReactivity
+const Fragment = Symbol()
 
-const bol = ref(false)
+const oldVnode = {
+  type: 'div',
+  children: [
+    {
+      type: Fragment,
+      children: [
+        { type: 'p', children: 'text 1' },
+        { type: 'p', children: 'text 2' },
+        { type: 'p', children: 'text 3' },
+        { type: 'p', children: 'text 4' },
+      ],
+    },
+  ],
+}
+renderer.render(oldVnode, document.querySelector('#app'))
 
-effect(() => {
-  const vnode = {
+setTimeout(() => {
+  const newVnode = {
     type: 'div',
-    props: bol.value
-      ? {
-          onClick: () => {
-            console.log('click')
-          },
-        }
-      : {},
     children: [
       {
-        type: 'p',
-        props: {
-          onClick: () => {
-            console.log('child click')
-            bol.value = true
-          },
-        },
-        children: 'text',
+        type: Fragment,
+        children: [
+          { type: 'p', children: 'text 1' },
+          { type: 'p', children: 'text 2' },
+          { type: 'p', children: 'text 3' },
+        ],
       },
+      { type: 'section', children: '分割线' },
     ],
   }
-  renderer.render(vnode, document.querySelector('#app'))
-})
+  renderer.render(newVnode, document.querySelector('#app'))
+}, 2000)
