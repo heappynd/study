@@ -1,15 +1,11 @@
-import { sum } from '@/utils'
+import twoPng from './assets/2.png'
+// import oneSvg from './assets/1.svg'
+import threeTxt from './assets/3.txt'
 
-const square = (x) => x * x
+console.log(twoPng)
+// console.log(oneSvg)
+console.log(threeTxt)
 
-export const TEAM_NUM = 12
+console.log(new URL('./assets/1.svg', import.meta.url))
 
-console.log(sum(1, 22))
-
-if (!PRODUCTION) {
-  console.log('Debug info')
-}
-
-if (PRODUCTION) {
-  console.log('Production log')
-}
+// console.log(__webpack_public_path__)
