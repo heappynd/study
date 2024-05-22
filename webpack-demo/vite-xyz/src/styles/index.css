@@ -1,0 +1,9 @@
+@import url('@/styles/other.css');
+
+:root {
+  --main-bg-color: red;
+}
+
+.text-red-400 {
+  color: red;
+}
