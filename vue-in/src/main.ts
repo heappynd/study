@@ -74,7 +74,15 @@ function createRenderer(options) {
     let newEndVNode = newChildren[newEndIdx]
 
     while (oldStartIdx <= oldEndIdx && newStartIdx <= newEndIdx) {
-      if (newStartVNode.key === oldStartVNode.key) {
+      // 增加两个判断分支，如果头尾部节点为 undefined，则说明该节点已经被处理
+      // 过了，直接跳到下一个位置
+      if (!oldStartVNode) {
+        log('双端DIFF', '头部节点为 undefined，则说明该节点已经被处理')
+        oldStartVNode = oldChildren[++oldStartIdx]
+      } else if (!oldEndVNode) {
+        log('双端DIFF', '尾部节点为 undefined，则说明该节点已经被处理')
+        oldEndVNode = oldChildren[--oldEndIdx]
+      } else if (newStartVNode.key === oldStartVNode.key) {
         log('双端DIFF', '匹配新前 旧前')
 
         patch(oldStartVNode, newStartVNode, container)
@@ -104,16 +112,33 @@ function createRenderer(options) {
         log('双端DIFF', '都没找到')
         const idxInOld = oldChildren.findIndex((vnode) => vnode.key === newStartVNode.key)
         if (idxInOld > 0) {
-          log('双端DIFF', '循环旧节点找到与新头部节点')
+          log('双端DIFF', '循环旧节点找到了与新头部节点')
           const vnodeToMove = oldChildren[idxInOld]
           patch(vnodeToMove, newStartVNode, container)
           const anchor = oldStartVNode.el
           insert(vnodeToMove.el, container, anchor)
           //  由于位置 idxInOld 处的节点所对应的真实 DOM 已经移动到了别处，因此将其设置为 undefined
           oldChildren[idxInOld] = undefined
-
-          newStartVNode = newChildren[++newStartIdx]
+        } else {
+          log('双端DIFF', '循环旧节点没有找到与新头部节点，则挂载新节点')
+          const anchor = oldStartVNode.el
+          patch(null, newStartVNode, container, anchor)
         }
+
+        newStartVNode = newChildren[++newStartIdx]
+      }
+    }
+
+    // 循环结束后 还要检查索引值情况
+    if (oldEndIdx < oldStartIdx && newStartIdx <= newEndIdx) {
+      log('双端DIFF', '如果满足条件，则说明有新的节点遗留，需要挂载它们')
+      for (let i = newStartIdx; i <= newEndIdx; i++) {
+        patch(null, newChildren[i], container, oldStartVNode.el)
+      }
+    } else if (oldStartIdx <= oldEndIdx && newEndIdx < newStartIdx) {
+      log('双端DIFF', '如果满足条件，则说明有旧的节点遗留，需要卸载它们')
+      for (let i = oldStartIdx; i <= oldEndIdx; i++) {
+        unmount(oldChildren[i])
       }
     }
   }
@@ -241,7 +266,7 @@ const oldVnode = {
     { type: 'p', children: '1', key: 1 },
     { type: 'p', children: '2', key: 2 },
     { type: 'p', children: '3', key: 3 },
-    { type: 'p', children: '4', key: 4 },
+    // { type: 'p', children: '4', key: 4 },
   ],
 }
 renderer.render(oldVnode, document.querySelector('#app'))
@@ -255,8 +280,17 @@ const newVnode = {
     // { type: 'p', children: '1', key: 1 },
     // { type: 'p', children: '3', key: 3 },
     // 双端DIFF 不完美例子
-    { type: 'p', children: '2', key: 2 },
-    { type: 'p', children: '4', key: 4 },
+    // { type: 'p', children: '2', key: 2 },
+    // { type: 'p', children: '4', key: 4 },
+    // { type: 'p', children: '1', key: 1 },
+    // { type: 'p', children: '3', key: 3 },
+
+    // 双端DIFF 不完美例子
+    // { type: 'p', children: '4', key: 4 },
+    // { type: 'p', children: '1', key: 1 },
+    // { type: 'p', children: '2', key: 2 },
+    // { type: 'p', children: '3', key: 3 },
+
     { type: 'p', children: '1', key: 1 },
     { type: 'p', children: '3', key: 3 },
   ],
