@@ -1,3 +1,5 @@
+import { effect, reactive, ref, shallowReactive } from '@vue/reactivity'
+
 function lis(arr) {
   const p = arr.slice()
   const result = [0]
@@ -37,6 +39,24 @@ function lis(arr) {
     v = p[v]
   }
   return result
+}
+
+const queue = new Set()
+let isFlushing = false
+const p = Promise.resolve()
+function queueJob(job) {
+  queue.add(job)
+  if (!isFlushing) {
+    isFlushing = true
+    p.then(() => {
+      try {
+        queue.forEach((job) => job())
+      } catch (error) {
+        isFlushing = false
+        queue.clear()
+      }
+    })
+  }
 }
 
 function shouldSetAsProps(el, key, value) {
@@ -277,8 +297,117 @@ function createRenderer(options) {
         patchElement(n1, n2)
       }
     } else if (typeof type === 'object') {
-      // 组件
+      // vnode.type 的值是选项对象，作为组件来处理
+      if (!n1) {
+        mountComponent(n2, container, anchor)
+      } else {
+        patchComponent(n1, n2, anchor)
+      }
     }
+  }
+  // resolveProps 函数用于解析组件 props 和 attrs 数据
+  function resolveProps(options, propsData) {
+    const props = {}
+    const attrs = {}
+    for (const key in propsData) {
+      if (key in options) {
+        props[key] = propsData[key]
+      } else {
+        attrs[key] = propsData[key]
+      }
+    }
+    return [props, attrs]
+  }
+
+  function mountComponent(vnode, container, anchor) {
+    console.log('mountComponent')
+    const componentOptions = vnode.type
+    // 从组件选项对象中取得组件的生命周期函数
+    const {
+      props: propsOption,
+      render,
+      data,
+      beforeCreate,
+      created,
+      beforeMount,
+      mounted,
+      beforeUpdate,
+      updated,
+    } = componentOptions
+
+    beforeCreate && beforeCreate()
+
+    const state = reactive(data())
+    const [props, attrs] = resolveProps(propsOption, vnode.props)
+
+    // 定义组件实例，一个组件实例本质上就是一个对象，它包含与组件有关的状态信息
+    const instance = {
+      state,
+      isMounted: false,
+      // 组件所渲染的内容，即子树（subTree）
+      subTree: null,
+      props: shallowReactive(props),
+    }
+
+    console.log('instance', instance)
+
+    vnode.component = instance
+
+    created && created.call(state)
+
+    // 当组件自身状态发生变化时，我们需要有能力触发组件更新，
+    // 即组件的自更新。为此，我们需要将整个渲染任务包装到一个 effect中
+    effect(
+      () => {
+        const subTree = render.call(state, state)
+        console.log('subTree', subTree)
+        if (!instance.isMounted) {
+          beforeMount && beforeMount.call(state)
+          patch(null, subTree, container, anchor)
+          instance.isMounted = true
+          mounted && mounted.call(state)
+        } else {
+          beforeUpdate && beforeUpdate.call(state)
+          patch(instance.subTree, subTree, container, anchor)
+          updated && updated.call(state)
+        }
+        instance.subTree = subTree
+      },
+      {
+        // scheduler: queueJob,
+      }
+    )
+  }
+  function patchComponent(n1, n2, anchor) {
+    console.log('patchComponent')
+    const instance = (n2.component = n1.component)
+    const { props } = instance
+
+    if (hasPropsChanged(n1.props, n2.props)) {
+      // 调用 resolveProps 函数重新获取 props 数据
+      const [nextProps] = resolveProps(n2.type.props, n2.props)
+      for (const k in nextProps) {
+        props[k] = nextProps[k]
+      }
+      for (const k in props) {
+        if (!(k in nextProps)) delete props[k]
+      }
+    }
+  }
+
+  function hasPropsChanged(prevProps, nextProps) {
+    // debugger
+    const nextKeys = Object.keys(nextProps)
+    if (nextKeys.length !== Object.keys(prevProps).length) {
+      return true
+    }
+    for (let i = 0; i < nextKeys.length; i++) {
+      const key = nextKeys[i]
+      if (nextProps[key] !== prevProps[key]) {
+        return true
+      }
+    }
+    return false
   }
 
   function render(vnode, container) {
@@ -318,8 +447,8 @@ const renderer = createRenderer({
       if (nextValue) {
         if (!invoker) {
           invoker = el._vei[key] = (e) => {
-            console.log(e.timeStamp)
-            console.log(invoker.attached)
+            // console.log(e.timeStamp)
+            // console.log(invoker.attached)
             if (e.timeStamp < invoker.attached) return
             if (Array.isArray(invoker.value)) {
               invoker.value.forEach((fn) => fn(e))
@@ -351,32 +480,63 @@ const renderer = createRenderer({
   },
 })
 
-const oldVnode = {
-  type: 'div',
-  children: [
-    { type: 'p', children: '1', key: 1 },
-    { type: 'p', children: '2', key: 2 },
-    { type: 'p', children: '3', key: 3 },
-    { type: 'p', children: '4', key: 4 },
-    { type: 'p', children: '6', key: 6 },
-    // { type: 'p', children: '8', key: 8 },
-    { type: 'p', children: '5', key: 5 },
-  ],
+const MyComponent = {
+  name: 'MyComponent',
+  props: {
+    title: String,
+  },
+  data() {
+    return {
+      count: 0,
+    }
+  },
+  beforeCreate() {
+    console.log('beforeCreate')
+  },
+  created() {
+    console.log('created')
+  },
+  beforeMount() {
+    console.log('beforeMount')
+  },
+  mounted() {
+    console.log('mounted')
+  },
+  beforeUpdate() {
+    console.log('beforeUpdate')
+  },
+  updated() {
+    console.log('updated')
+  },
+  render() {
+    return {
+      type: 'div',
+      props: {
+        onClick: () => {
+          this.count = this.count + 1
+        },
+      },
+      children: `foo 的值是: ${this.count} ${this.title}`,
+    }
+  },
 }
-renderer.render(oldVnode, document.querySelector('#app'))
 
-const newVnode = {
-  type: 'div',
-  children: [
-    { type: 'p', children: '1', key: 1 },
-    { type: 'p', children: '3', key: 3 },
-    { type: 'p', children: '4', key: 4 },
-    { type: 'p', children: '2', key: 2 },
-    { type: 'p', children: '7', key: 7 },
-    { type: 'p', children: '5', key: 5 },
-  ],
+const CompVNode = {
+  type: MyComponent,
+  props: {
+    title: 'A big Title',
+    other: '1',
+  },
 }
+renderer.render(CompVNode, document.querySelector('#app'))
 
 setTimeout(() => {
-  renderer.render(newVnode, document.querySelector('#app'))
+  const CompVNode = {
+    type: MyComponent,
+    props: {
+      title: 'A big Title',
+      other: '2',
+    },
+  }
+  renderer.render(CompVNode, document.querySelector('#app'))
 }, 1000)
