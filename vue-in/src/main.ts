@@ -1,4 +1,4 @@
-import { effect, reactive, ref, shallowReactive } from '@vue/reactivity'
+import { effect, reactive, ref, shallowReactive, shallowReadonly } from '@vue/reactivity'
 
 function lis(arr) {
   const p = arr.slice()
@@ -39,6 +39,21 @@ function lis(arr) {
     v = p[v]
   }
   return result
+}
+
+// 全局变量，存储当前正在被初始化的组件实例
+let currentInstance = null
+// 该方法接收组件实例作为参数，并将该实例设置为 currentInstance
+function setCurrentInstance(instance) {
+  currentInstance = instance
+}
+
+function onMounted(cb) {
+  if (currentInstance) {
+    currentInstance.mounted.push(cb)
+  } else {
+    console.error('onMounted 函数只能在 setup 中调用')
+  }
 }
 
 const queue = new Set()
@@ -310,7 +325,9 @@ function createRenderer(options) {
     const props = {}
     const attrs = {}
     for (const key in propsData) {
-      if (key in options) {
+      // 以字符串 on 开头的 props，无论是否显式地声明，
+      // 都将其添加到 props数据中，而不是添加到 attrs 中
+      if (key in options || key.startsWith('on')) {
         props[key] = propsData[key]
       } else {
         attrs[key] = propsData[key]
@@ -323,7 +340,7 @@ function createRenderer(options) {
     console.log('mountComponent')
     const componentOptions = vnode.type
     // 从组件选项对象中取得组件的生命周期函数
-    const {
+    let {
       props: propsOption,
       render,
       data,
@@ -333,43 +350,127 @@ function createRenderer(options) {
       mounted,
       beforeUpdate,
       updated,
+      setup,
     } = componentOptions
+
+    // 直接使用编译好的 vnode.children 对象作为 slots 对象即可
+    const slots = vnode.children || {}
 
     beforeCreate && beforeCreate()
 
-    const state = reactive(data())
+    const state = data ? reactive(data()) : null
     const [props, attrs] = resolveProps(propsOption, vnode.props)
 
     // 定义组件实例，一个组件实例本质上就是一个对象，它包含与组件有关的状态信息
     const instance = {
       state,
+      props: shallowReactive(props),
       isMounted: false,
       // 组件所渲染的内容，即子树（subTree）
       subTree: null,
-      props: shallowReactive(props),
+      // 在组件实例中添加 mounted 数组，用来存储通过 onMounted 函数注册的
+      // 生命周期钩子函数
+      mounted: [],
     }
 
     console.log('instance', instance)
 
+    function emit(event, ...payload) {
+      // 根据约定对事件名称进行处理，例如 change --> onChange
+      const eventName = `on${event[0].toUpperCase() + event.slice(1)}`
+      console.log('eventName', eventName)
+      const handler = instance.props[eventName]
+
+      if (handler) {
+        handler(...payload)
+      } else {
+        console.error('事件不存在')
+      }
+    }
+
+    const setupContext = { attrs, emit, slots }
+
+    // 在调用 setup 函数之前，设置当前组件实例
+    setCurrentInstance(instance)
+
+    const setupResult = setup(shallowReadonly(instance.props), setupContext)
+    // 在 setup 函数执行完毕之后，重置当前组件实例
+    setCurrentInstance(null)
+    // setupState 用来存储由 setup 返回的数据
+    let setupState = null
+
+    if (typeof setupResult === 'function') {
+      if (render) {
+        console.error('setup 函数返回渲染函数，render 选项将被忽略')
+      } else {
+        // 将 setupResult 作为渲染函数
+        render = setupResult
+      }
+    } else {
+      // 如果 setup 的返回值不是函数，则作为数据状态赋值给 setupState
+      setupState = setupResult
+    }
+
     vnode.component = instance
 
-    created && created.call(state)
+    const renderContext = new Proxy(instance, {
+      get(target, key, receiver) {
+        const { state, props } = target
+        // 当 k 的值为 $slots 时，直接返回组件实例上的 slots
+        if (key === '$slots') {
+          return slots
+        }
+        // 先尝试读取自身状态数据
+        if (state && key in state) {
+          return state[key]
+        } else if (key in props) {
+          // 如果组件自身没有该数据，则尝试从props 中读取
+          return props[key]
+        } else if (setupState && key in setupState) {
+          return setupState[key]
+        } else {
+          console.error('不存在')
+        }
+      },
+      set(target, key, newValue, receiver) {
+        const { state, props } = target
+        if (state && key in state) {
+          state[key] = newValue
+          return true
+        } else if (key in props) {
+          console.warn(`Attempting to mutate prop "${key}". Propsare readonly.`)
+        } else if (setupState && key in setupState) {
+          setupState[key] = newValue
+          return true
+        } else {
+          console.error('不存在')
+        }
+        return false
+      },
+    })
+
+    created && created.call(renderContext)
 
     // 当组件自身状态发生变化时，我们需要有能力触发组件更新，
     // 即组件的自更新。为此，我们需要将整个渲染任务包装到一个 effect中
     effect(
       () => {
-        const subTree = render.call(state, state)
+        const subTree = render.call(renderContext, renderContext)
         console.log('subTree', subTree)
         if (!instance.isMounted) {
-          beforeMount && beforeMount.call(state)
+          beforeMount && beforeMount.call(renderContext)
           patch(null, subTree, container, anchor)
           instance.isMounted = true
-          mounted && mounted.call(state)
+          mounted && mounted.call(renderContext)
+          // 遍历 instance.mounted 数组并逐个执行即可
+          instance.mounted &&
+            instance.mounted.forEach((hook) => {
+              hook.call(renderContext)
+            })
         } else {
-          beforeUpdate && beforeUpdate.call(state)
+          beforeUpdate && beforeUpdate.call(renderContext)
           patch(instance.subTree, subTree, container, anchor)
-          updated && updated.call(state)
+          updated && updated.call(renderContext)
         }
         instance.subTree = subTree
       },
@@ -483,60 +584,46 @@ const renderer = createRenderer({
 const MyComponent = {
   name: 'MyComponent',
   props: {
-    title: String,
+    foo: String,
   },
-  data() {
-    return {
-      count: 0,
+  setup(props, setupContext) {
+    const { slots, emit, attrs, expose } = setupContext
+
+    console.log('props', props)
+    console.log('setupContext', setupContext)
+
+    emit('change', 1, 2)
+
+    onMounted(() => {
+      console.log(1)
+    })
+
+    onMounted(() => {
+      console.log(2)
+    })
+
+    return () => {
+      return { type: 'div', children: [slots.header(), { type: 'p', children: 'This is a' }] }
     }
   },
-  beforeCreate() {
-    console.log('beforeCreate')
-  },
-  created() {
-    console.log('created')
-  },
-  beforeMount() {
-    console.log('beforeMount')
-  },
-  mounted() {
-    console.log('mounted')
-  },
-  beforeUpdate() {
-    console.log('beforeUpdate')
-  },
-  updated() {
-    console.log('updated')
-  },
-  render() {
-    return {
-      type: 'div',
-      props: {
-        onClick: () => {
-          this.count = this.count + 1
-        },
-      },
-      children: `foo 的值是: ${this.count} ${this.title}`,
-    }
-  },
+  // render() {
+  //   return { type: 'div', children: this.aa + '' }
+  // },
 }
 
 const CompVNode = {
   type: MyComponent,
   props: {
-    title: 'A big Title',
-    other: '1',
+    foo: 'bar',
+    fooAttrs: 'barAttrs',
+    onChange: () => {
+      console.warn('[test]---onChange...')
+    },
+  },
+  children: {
+    header() {
+      return { type: 'div', children: 'header' }
+    },
   },
 }
 renderer.render(CompVNode, document.querySelector('#app'))
-
-setTimeout(() => {
-  const CompVNode = {
-    type: MyComponent,
-    props: {
-      title: 'A big Title',
-      other: '2',
-    },
-  }
-  renderer.render(CompVNode, document.querySelector('#app'))
-}, 1000)
