@@ -292,16 +292,8 @@ function createRenderer(options) {
     log('unmount', vnode)
 
     if (typeof vnode.type === 'object') {
-      if (vnode.shouldKeepAlive) {
-        // vnode.shouldKeepAlive 是一个布尔值，用来标识该组件是否应该被 KeepAlive
-        // 对于需要被 KeepAlive 的组件，我们不应该真的卸载它，而应调用该组件的父组件，
-        // 即 KeepAlive 组件的 _deActivate 函数使其失活
-        vnode.keepAliveInstance._deActivate(vnode)
-      } else {
-        // 对于组件的卸载，本质上是要卸载组件所渲染的内容，即 subTree
-        unmount(vnode.component.subTree)
-      }
-
+      // 对于组件的卸载，本质上是要卸载组件所渲染的内容，即 subTree
+      unmount(vnode.component.subTree)
       return
     }
 
@@ -325,29 +317,10 @@ function createRenderer(options) {
       } else {
         patchElement(n1, n2)
       }
-    } else if (typeof type === 'object' && type.__isTeleport) {
-      // 组件选项中如果存在 __isTeleport 标识，则它是 Teleport 组件，
-      // 调用 Teleport 组件选项中的 process 函数将控制权交接出去
-      // 传递给 process 函数的第五个参数是渲染器的一些内部方法
-      console.log('组件选项中如果存在 __isTeleport 标识，则它是 Teleport 组件，')
-
-      type.process(n1, n2, container, anchor, {
-        patch,
-        patchChildren,
-        unmount,
-        move(vnode, container, anchor) {
-          insert(vnode.component ? vnode.component.subTree.el : vnode.el, container, anchor)
-        },
-      })
     } else if (typeof type === 'object' || typeof type === 'function') {
       // vnode.type 的值是选项对象，作为组件来处理
       if (!n1) {
-        // 如果该组件已经被 KeepAlive，则不会重新挂载它，而是会调用_activate 来激活它
-        if (n2.keptAlive) {
-          n2.keepAliveInstance._activate(n2, container, anchor)
-        } else {
-          mountComponent(n2, container, anchor)
-        }
+        mountComponent(n2, container, anchor)
       } else {
         patchComponent(n1, n2, anchor)
       }
@@ -416,22 +389,9 @@ function createRenderer(options) {
       // 在组件实例中添加 mounted 数组，用来存储通过 onMounted 函数注册的
       // 生命周期钩子函数
       mounted: [],
-      // 只有 KeepAlive 组件的实例下会有 keepAliveCtx 属性
-      keepAliveCtx: null,
     }
 
     console.log('instance', instance)
-
-    const isKeepAlive = vnode.type.__isKeepAlive
-
-    if (isKeepAlive) {
-      instance.keepAliveCtx = {
-        move(vnode, container, anchor) {
-          insert(vnode.component.subTree.el, container, anchor)
-        },
-        createElement,
-      }
-    }
 
     function emit(event, ...payload) {
       // 根据约定对事件名称进行处理，例如 change --> onChange
@@ -741,98 +701,20 @@ function defineAsyncComponent(options) {
   }
 }
 
-const KeepAlive = {
-  // KeepAlive 组件独有的属性，用作标识
-  __isKeepAlive: true,
-  props: {
-    include: RegExp,
-    exclude: RegExp,
-  },
-  setup(props, { slots }) {
-    // 创建一个缓存对象
-    // key: vnode.type
-    // value: vnode
-    const cache = new Map()
-    const instance = currentInstance
-    // 对于 KeepAlive 组件来说，它的实例上存在特殊的 keepAliveCtx 对
-    // 象，该对象由渲染器注入
-    // 该对象会暴露渲染器的一些内部方法，其中 move 函数用来将一段 DOM 移
-    // 动到另一个容器中
-    const { move, createElement } = instance.keepAliveCtx
-    // 创建隐藏容器
-    const storageContainer = createElement('div')
-    // KeepAlive 组件的实例上会被添加两个内部函数，分别是 _deActivate 和 _activate
-    instance._deActivate = (vnode) => {
-      move(vnode, storageContainer)
-    }
-    instance._activate = (vnode, container, anchor) => {
-      move(vnode, container, anchor)
-    }
-
-    return () => {
-      // KeepAlive 的默认插槽就是要被 KeepAlive 的组件
-      let rawVNode = slots.default()
-      // 如果不是组件，直接渲染即可，因为非组件的虚拟节点无法被 KeepAlive
-      if (typeof rawVNode.type !== 'object') {
-        return rawVNode
-      }
-      const name = rawVNode.type.name
-      // 如果 name 无法被 include 匹配  或者被 exclude 匹配
-      if (name && ((props.include && !props.include.test(name)) || (props.exclude && props.exclude.test(name)))) {
-        return rawVNode
-      }
-      // 在挂载时先获取缓存的组件 vnode
-      const cachedVNode = cache.get(rawVNode.type)
-      if (cachedVNode) {
-        // 如果有缓存的内容，则说明不应该执行挂载，而应该执行激活
-        // 继承组件实例
-        rawVNode.component = cachedVNode.component
-        rawVNode.keptAlive = true
-      } else {
-        cache.set(rawVNode.type, rawVNode)
-      }
-      rawVNode.shouldKeepAlive = true
-      rawVNode.keepAliveInstance = instance
-      return rawVNode
-    }
-  },
+function MyFuncComponent(props) {
+  return {
+    type: 'h2',
+    children: props.title,
+  }
 }
-
-const Teleport = {
-  __isTeleport: true,
-  process(n1, n2, container, anchor, internals) {
-    // 通过 internals 参数取得渲染器的内部方法
-    const { patch, patchChildren } = internals
-    // 如果旧 VNode n1 不存在，则是全新的挂载，否则执行更新
-    if (!n1) {
-      // 获取容器，即挂载点
-      const target = typeof n2.props.to === 'string' ? document.querySelector(n2.props.to) : n2.props.to
-
-      // 将 n2.children 渲染到指定挂载点即可
-      n2.children.forEach((c) => patch(null, c, target, anchor))
-    } else {
-      // 更新
-      patchChildren(n1, n2, container)
-      // 如果新旧 to 参数的值不同，则需要对内容进行移动
-      if (n2.props.to !== n1.props.to) {
-        // 获取新的容器
-        const newTarget = typeof n2.props.to === 'string' ? document.querySelector(n2.props.to) : n2.props.to
-        // 移动到新的容器
-        n2.children.forEach((c) => move(c, newTarget))
-      }
-    }
-  },
+MyFuncComponent.props = {
+  title: String,
 }
 
 const CompVNode = {
-  type: Teleport,
+  type: MyFuncComponent,
   props: {
-    to: 'body',
+    title: 'Test Func Title',
   },
-  // 以普通 children 的形式代表被 Teleport 的内容
-  children: [
-    { type: 'h1', children: 'Title' },
-    { type: 'p', children: 'content' },
-  ],
 }
 renderer.render(CompVNode, document.querySelector('#app'))

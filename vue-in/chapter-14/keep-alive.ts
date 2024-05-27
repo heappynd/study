@@ -325,20 +325,6 @@ function createRenderer(options) {
       } else {
         patchElement(n1, n2)
       }
-    } else if (typeof type === 'object' && type.__isTeleport) {
-      // 组件选项中如果存在 __isTeleport 标识，则它是 Teleport 组件，
-      // 调用 Teleport 组件选项中的 process 函数将控制权交接出去
-      // 传递给 process 函数的第五个参数是渲染器的一些内部方法
-      console.log('组件选项中如果存在 __isTeleport 标识，则它是 Teleport 组件，')
-
-      type.process(n1, n2, container, anchor, {
-        patch,
-        patchChildren,
-        unmount,
-        move(vnode, container, anchor) {
-          insert(vnode.component ? vnode.component.subTree.el : vnode.el, container, anchor)
-        },
-      })
     } else if (typeof type === 'object' || typeof type === 'function') {
       // vnode.type 的值是选项对象，作为组件来处理
       if (!n1) {
@@ -798,41 +784,27 @@ const KeepAlive = {
   },
 }
 
-const Teleport = {
-  __isTeleport: true,
-  process(n1, n2, container, anchor, internals) {
-    // 通过 internals 参数取得渲染器的内部方法
-    const { patch, patchChildren } = internals
-    // 如果旧 VNode n1 不存在，则是全新的挂载，否则执行更新
-    if (!n1) {
-      // 获取容器，即挂载点
-      const target = typeof n2.props.to === 'string' ? document.querySelector(n2.props.to) : n2.props.to
-
-      // 将 n2.children 渲染到指定挂载点即可
-      n2.children.forEach((c) => patch(null, c, target, anchor))
-    } else {
-      // 更新
-      patchChildren(n1, n2, container)
-      // 如果新旧 to 参数的值不同，则需要对内容进行移动
-      if (n2.props.to !== n1.props.to) {
-        // 获取新的容器
-        const newTarget = typeof n2.props.to === 'string' ? document.querySelector(n2.props.to) : n2.props.to
-        // 移动到新的容器
-        n2.children.forEach((c) => move(c, newTarget))
-      }
+const Comp1 = {
+  setup() {
+    return () => {
+      return { type: 'p', children: 'p1' }
+    }
+  },
+}
+const Comp2 = {
+  setup() {
+    return () => {
+      return { type: 'p', children: 'p2' }
     }
   },
 }
 
 const CompVNode = {
-  type: Teleport,
-  props: {
-    to: 'body',
+  type: KeepAlive,
+  children: {
+    default() {
+      return { type: Comp1 }
+    },
   },
-  // 以普通 children 的形式代表被 Teleport 的内容
-  children: [
-    { type: 'h1', children: 'Title' },
-    { type: 'p', children: 'content' },
-  ],
 }
 renderer.render(CompVNode, document.querySelector('#app'))
