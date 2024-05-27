@@ -317,7 +317,7 @@ function createRenderer(options) {
       } else {
         patchElement(n1, n2)
       }
-    } else if (typeof type === 'object' || typeof type === 'function') {
+    } else if (typeof type === 'object') {
       // vnode.type 的值是选项对象，作为组件来处理
       if (!n1) {
         mountComponent(n2, container, anchor)
@@ -344,19 +344,7 @@ function createRenderer(options) {
 
   function mountComponent(vnode, container, anchor) {
     console.log('mountComponent')
-
-    const isFunctional = typeof vnode.type === 'function'
-
-    let componentOptions = vnode.type
-
-    if (isFunctional) {
-      // 如果是函数式组件，则将 vnode.type 作为渲染函数，将
-      // vnode.type.props 作为 props 选项定义即可
-      componentOptions = {
-        render: vnode.type,
-        props: vnode.type.props,
-      }
-    }
+    const componentOptions = vnode.type
     // 从组件选项对象中取得组件的生命周期函数
     let {
       props: propsOption,
@@ -406,29 +394,27 @@ function createRenderer(options) {
       }
     }
 
+    const setupContext = { attrs, emit, slots }
+
+    // 在调用 setup 函数之前，设置当前组件实例
+    setCurrentInstance(instance)
+
+    const setupResult = setup(shallowReadonly(instance.props), setupContext)
+    // 在 setup 函数执行完毕之后，重置当前组件实例
+    setCurrentInstance(null)
     // setupState 用来存储由 setup 返回的数据
     let setupState = null
 
-    if (setup) {
-      const setupContext = { attrs, emit, slots }
-      // 在调用 setup 函数之前，设置当前组件实例
-      setCurrentInstance(instance)
-
-      const setupResult = setup(shallowReadonly(instance.props), setupContext)
-      // 在 setup 函数执行完毕之后，重置当前组件实例
-      setCurrentInstance(null)
-
-      if (typeof setupResult === 'function') {
-        if (render) {
-          console.error('setup 函数返回渲染函数，render 选项将被忽略')
-        } else {
-          // 将 setupResult 作为渲染函数
-          render = setupResult
-        }
+    if (typeof setupResult === 'function') {
+      if (render) {
+        console.error('setup 函数返回渲染函数，render 选项将被忽略')
       } else {
-        // 如果 setup 的返回值不是函数，则作为数据状态赋值给 setupState
-        setupState = setupResult
+        // 将 setupResult 作为渲染函数
+        render = setupResult
       }
+    } else {
+      // 如果 setup 的返回值不是函数，则作为数据状态赋值给 setupState
+      setupState = setupResult
     }
 
     vnode.component = instance
@@ -701,20 +687,60 @@ function defineAsyncComponent(options) {
   }
 }
 
-function MyFuncComponent(props) {
-  return {
-    type: 'h2',
-    children: props.title,
-  }
+const MyErrorComp = {
+  props: {
+    error: String,
+  },
+  setup(props) {
+    return () => {
+      return {
+        type: 'h3',
+        children: props.error.toString(),
+      }
+    }
+  },
 }
-MyFuncComponent.props = {
-  title: String,
+
+const loader = () => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve({
+        type: 'p',
+        children: '我是异步组件',
+      })
+    }, 300)
+  })
+}
+
+const CompAsync = defineAsyncComponent({
+  loader,
+  timeout: 2000,
+  errorComponent: MyErrorComp,
+  delay: 200,
+  loadingComponent: {
+    setup() {
+      return () => {
+        return { type: 'h2', children: 'Loading...' }
+      }
+    },
+  },
+})
+
+const MyComponent = {
+  name: 'MyComponent',
+  props: {},
+  setup(props, setupContext) {
+    return () => {
+      return {
+        type: 'div',
+        children: [{ type: 'div', children: 'A' }, { type: CompAsync }],
+      }
+    }
+  },
 }
 
 const CompVNode = {
-  type: MyFuncComponent,
-  props: {
-    title: 'Test Func Title',
-  },
+  type: MyComponent,
+  props: {},
 }
 renderer.render(CompVNode, document.querySelector('#app'))

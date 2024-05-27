@@ -1,4 +1,4 @@
-import { effect, reactive, ref, shallowReactive, shallowReadonly, shallowRef } from '@vue/reactivity'
+import { effect, reactive, ref, shallowReactive, shallowReadonly } from '@vue/reactivity'
 
 function lis(arr) {
   const p = arr.slice()
@@ -291,12 +291,6 @@ function createRenderer(options) {
   function unmount(vnode) {
     log('unmount', vnode)
 
-    if (typeof vnode.type === 'object') {
-      // 对于组件的卸载，本质上是要卸载组件所渲染的内容，即 subTree
-      unmount(vnode.component.subTree)
-      return
-    }
-
     const parent = vnode.el.parentNode
     if (parent) {
       parent.removeChild(vnode.el)
@@ -317,7 +311,7 @@ function createRenderer(options) {
       } else {
         patchElement(n1, n2)
       }
-    } else if (typeof type === 'object' || typeof type === 'function') {
+    } else if (typeof type === 'object') {
       // vnode.type 的值是选项对象，作为组件来处理
       if (!n1) {
         mountComponent(n2, container, anchor)
@@ -344,19 +338,7 @@ function createRenderer(options) {
 
   function mountComponent(vnode, container, anchor) {
     console.log('mountComponent')
-
-    const isFunctional = typeof vnode.type === 'function'
-
-    let componentOptions = vnode.type
-
-    if (isFunctional) {
-      // 如果是函数式组件，则将 vnode.type 作为渲染函数，将
-      // vnode.type.props 作为 props 选项定义即可
-      componentOptions = {
-        render: vnode.type,
-        props: vnode.type.props,
-      }
-    }
+    const componentOptions = vnode.type
     // 从组件选项对象中取得组件的生命周期函数
     let {
       props: propsOption,
@@ -406,29 +388,27 @@ function createRenderer(options) {
       }
     }
 
+    const setupContext = { attrs, emit, slots }
+
+    // 在调用 setup 函数之前，设置当前组件实例
+    setCurrentInstance(instance)
+
+    const setupResult = setup(shallowReadonly(instance.props), setupContext)
+    // 在 setup 函数执行完毕之后，重置当前组件实例
+    setCurrentInstance(null)
     // setupState 用来存储由 setup 返回的数据
     let setupState = null
 
-    if (setup) {
-      const setupContext = { attrs, emit, slots }
-      // 在调用 setup 函数之前，设置当前组件实例
-      setCurrentInstance(instance)
-
-      const setupResult = setup(shallowReadonly(instance.props), setupContext)
-      // 在 setup 函数执行完毕之后，重置当前组件实例
-      setCurrentInstance(null)
-
-      if (typeof setupResult === 'function') {
-        if (render) {
-          console.error('setup 函数返回渲染函数，render 选项将被忽略')
-        } else {
-          // 将 setupResult 作为渲染函数
-          render = setupResult
-        }
+    if (typeof setupResult === 'function') {
+      if (render) {
+        console.error('setup 函数返回渲染函数，render 选项将被忽略')
       } else {
-        // 如果 setup 的返回值不是函数，则作为数据状态赋值给 setupState
-        setupState = setupResult
+        // 将 setupResult 作为渲染函数
+        render = setupResult
       }
+    } else {
+      // 如果 setup 的返回值不是函数，则作为数据状态赋值给 setupState
+      setupState = setupResult
     }
 
     vnode.component = instance
@@ -601,120 +581,49 @@ const renderer = createRenderer({
   },
 })
 
-function defineAsyncComponent(options) {
-  if (typeof options === 'function') {
-    options = {
-      loader: options,
-    }
-  }
+const MyComponent = {
+  name: 'MyComponent',
+  props: {
+    foo: String,
+  },
+  setup(props, setupContext) {
+    const { slots, emit, attrs, expose } = setupContext
 
-  const { loader } = options
+    console.log('props', props)
+    console.log('setupContext', setupContext)
 
-  let InnerComp = null
-  // 记录重试次数
-  let retries = 0
+    emit('change', 1, 2)
 
-  function load() {
-    return loader().catch((err) => {
-      if (options.onError) {
-        return new Promise((resolve, reject) => {
-          const retry = () => {
-            resolve(load())
-            retries++
-          }
-          const fail = () => {
-            reject(err)
-          }
-          options.onError(retry, fail, retries)
-        })
-      } else {
-        throw err
-      }
+    onMounted(() => {
+      console.log(1)
     })
-  }
 
-  return {
-    name: 'AsyncComponentWrapper',
-    setup() {
-      // 异步组件是否加载成功
-      const loaded = ref(false)
-      // 定义 error，当错误发生时，用来存储错误对象
-      const error = shallowRef(null)
-      // 代表是否超时，默认为 false，即没有超时
-      const timeout = ref(false)
-      // 一个标志，代表是否正在加载，默认为 false
-      const loading = ref(false)
-      let loadingTimer = null
-      // 如果配置项中存在 delay，则开启一个定时器计时，当延迟到时后将
-      // loading.value 设置为 true
-      if (options.delay) {
-        loadingTimer = setTimeout(() => {
-          loading.value = true
-        }, options.delay)
-      } else {
-        loading.value = true
-      }
+    onMounted(() => {
+      console.log(2)
+    })
 
-      load()
-        .then((c) => {
-          InnerComp = c
-          loaded.value = true
-        })
-        .catch((err) => {
-          error.value = err
-        })
-        .finally(() => {
-          loading.value = false
-          clearTimeout(loadingTimer)
-          clearTimeout(timer)
-        })
-
-      let timer = null
-      if (options.timeout) {
-        timer = setTimeout(() => {
-          timeout.value = true
-          // 超时后创建一个错误对象，并复制给 error.value
-          const err = new Error(`Async component timed out after ${options.timeout}ms.`)
-          error.value = err
-        }, options.timeout)
-      }
-      // 包装组件被卸载时清除定时器
-      // onUmounted(() => clearTimeout(timer))
-
-      const placeholder = {
-        type: 'div',
-        children: 'placeholder',
-      }
-
-      return () => {
-        if (loaded.value) {
-          return { type: InnerComp }
-        } else if (error.value && options.errorComponent) {
-          // 只有当错误存在且用户配置了 errorComponent 时才展示 Error组件，同时将 error 作为 props 传递
-          return { type: options.errorComponent, props: { error: error.value } }
-        } else if (loading.value && options.loadingComponent) {
-          return { type: options.loadingComponent }
-        }
-        return placeholder
-      }
-    },
-  }
-}
-
-function MyFuncComponent(props) {
-  return {
-    type: 'h2',
-    children: props.title,
-  }
-}
-MyFuncComponent.props = {
-  title: String,
+    return () => {
+      return { type: 'div', children: [slots.header(), { type: 'p', children: 'This is a' }] }
+    }
+  },
+  // render() {
+  //   return { type: 'div', children: this.aa + '' }
+  // },
 }
 
 const CompVNode = {
-  type: MyFuncComponent,
+  type: MyComponent,
   props: {
-    title: 'Test Func Title',
+    foo: 'bar',
+    fooAttrs: 'barAttrs',
+    onChange: () => {
+      console.warn('[test]---onChange...')
+    },
+  },
+  children: {
+    header() {
+      return { type: 'div', children: 'header' }
+    },
   },
 }
 renderer.render(CompVNode, document.querySelector('#app'))
