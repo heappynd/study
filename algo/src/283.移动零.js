@@ -10,23 +10,16 @@
  * @return {void} Do not return anything, modify nums in-place instead.
  */
 var moveZeroes = function (nums) {
-  function removeElement(nums, val) {
-    let slow = 0
-    let fast = 0
-    while (fast < nums.length) {
-      if (nums[fast] !== val) {
-        nums[slow] = nums[fast]
-        slow++
-      }
-      fast++
-    }
-    return slow
-  }
+  const len = nums.length
+  let slow = 0,
+    fast = 0
 
-  let p = removeElement(nums, 0)
-  while (p < nums.length) {
-    nums[p] = 0
-    p++
+  while (fast < len) {
+    if (nums[fast] !== 0) {
+      ;[nums[slow], nums[fast]] = [nums[fast], nums[slow]]
+      slow++
+    }
+    fast++
   }
 }
 // @lc code=end

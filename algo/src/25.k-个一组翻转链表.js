@@ -18,45 +18,36 @@
  * @return {ListNode}
  */
 var reverseKGroup = function (head, k) {
-  if (!head) {
-    return head
+  // 求链表长度
+  let n = 0
+  let cur = head
+  while (cur) {
+    n++
+    cur = cur.next
   }
+  const dummy = new ListNode(0, head)
+  let pre = null
+  p0 = dummy
+  cur = dummy.next
 
-  let a = head
-  let b = head
+  // 剩余长度 大于 K
+  while (n >= k) {
+    n -= k
 
-  for (let i = 0; i < k; i++) {
-    if (b == null) {
-      return head
-    }
-    b = b.next
-  }
-
-  let newHead = reverse(a, k)
-  a.next = reverseKGroup(b, k)
-  return newHead
-
-  // 反转前N个
-  function reverse(head, k) {
-    if (!head) {
-      return head
-    }
-    let count = 1
-    let prev = null
-    let next = null
-    let curr = head
-    while (curr) {
-      if (k === count) {
-        break
-      }
-      next = curr.next
-      curr.next = prev
-      prev = curr
-      curr = next
+    for (let i = 0; i < k; i++) {
+      const nxt = cur.next
+      cur.next = pre
+      pre = cur
+      cur = nxt
     }
 
-    // head.next = next
-    return prev
+    // 记录它 因为下次循环 它是需要反转链表的上一个节点
+    const nxt = p0.next
+    p0.next.next = cur
+    p0.next = pre
+    p0 = nxt
   }
+
+  return dummy.next
 }
 // @lc code=end

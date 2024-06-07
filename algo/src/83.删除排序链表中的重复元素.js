@@ -20,13 +20,12 @@ var deleteDuplicates = function (head) {
   if (!head) {
     return head
   }
-
-  let curr = head
-  while (curr.next) {
-    if (curr.val === curr.next.val) {
-      curr.next = curr.next.next
+  let cur = head
+  while (cur.next) {
+    if (cur.val === cur.next.val) {
+      cur.next = cur.next.next
     } else {
-      curr = curr.next
+      cur = cur.next
     }
   }
 

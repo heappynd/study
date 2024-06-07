@@ -17,18 +17,16 @@
  * @return {ListNode}
  */
 var deleteDuplicates = function (head) {
-  const dummy = new ListNode(-1)
-  dummy.next = head
-  let curr = dummy
-
-  while (curr.next && curr.next.next) {
-    const val = curr.next.val
-    if (curr.next.next.val === val) {
-      while (curr.next && curr.next.val === val) {
-        curr.next = curr.next.next
+  const dummy = new ListNode(undefined, head)
+  let cur = dummy
+  while (cur.next && cur.next.next) {
+    const val = cur.next.val
+    if (cur.next.next.val === val) {
+      while (cur.next && cur.next.val === val) {
+        cur.next = cur.next.next
       }
     } else {
-      curr = curr.next
+      cur = cur.next
     }
   }
 

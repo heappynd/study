@@ -12,58 +12,56 @@
 var threeSum = function (nums) {
   nums.sort((a, b) => a - b)
 
-  const len = nums.length
-  const res = []
+  const ans = []
+  const n = nums.length
 
-  // 穷举 threeSum 的第一个数
-  for (let i = 0; i < len; i++) {
-    // 对 target - nums[i] 计算 twoSum
-    const tuples = twoSumTarget(nums, i + 1, 0 - nums[i])
-    // const tuples = twoSumTarget(nums, i + 1, target - nums[i])
-    // 如果存在满足条件的二元组，再加上 nums[i] 就是结果三元组
-    for (let j = 0; j < tuples.length; j++) {
-      const tuple = tuples[j]
-      tuple.push(nums[i])
-      res.push(tuple)
+  // n - 2 因为要留两个数 给 j 和 k ，n-2 n-1
+  // [0, n-2)
+  for (let i = 0; i < n - 2; i++) {
+    const x = nums[i]
+
+    if (i > 0 && x === nums[i - 1]) {
+      // 当前枚举的数和上一个数是相同的，就跳过
+      // 因为不能有重复的三元组
+      continue
     }
-    // 跳过第一个数字重复的情况，否则会出现重复结果
-    while (i < len - 1 && nums[i] === nums[i + 1]) {
-      i++
+    // 优化1
+    if (x + nums[i + 1] + nums[i + 2] > 0) {
+      // 如果他们都大于0了，那么后面的自然也是大于0的，那就不用继续了
+      break
     }
-  }
+    // 优化2
+    if (x + nums[n - 2] + nums[n - 1] < 0) {
+      // 如果 x 和 当前最大的两个加起来都小于0， 那么前面的自然也是小于0的，
+      // 那就直接枚举下一个x, 因为后面x还有机会变大
+      continue
+    }
 
-  return res
-
-  function twoSumTarget(nums, start, target) {
-    // nums.sort((a, b) => a - b)
-    let res = []
-    let lo = start,
-      hi = nums.length - 1
-    while (lo < hi) {
-      let sum = nums[lo] + nums[hi]
-      let leftVal = nums[lo]
-      let rightVal = nums[hi]
-      // 根据 sum 和 target 的比较，移动左右指针
-      // Move left and right pointers based on the comparison between sum and target
-      if (sum < target) {
-        while (lo < hi && nums[lo] === leftVal) {
-          lo++
-        }
-      } else if (sum > target) {
-        while (lo < hi && nums[hi] === rightVal) {
-          hi--
-        }
+    // 一左一右 ，一大一小
+    let j = i + 1
+    let k = n - 1
+    while (j < k) {
+      // 算出三个数的和
+      s = x + nums[j] + nums[k]
+      if (s > 0) {
+        k--
+      } else if (s < 0) {
+        j++
       } else {
-        res.push([leftVal, rightVal])
-        while (lo < hi && nums[lo] === leftVal) {
-          lo++
+        ans.push([x, nums[j], nums[k]])
+        // 这里还需要把j和k的重复也跳过，跳过方式和nums[i]是一样的
+        j++
+        while (j < k && nums[j] === nums[j - 1]) {
+          j++
         }
-        while (lo < hi && nums[hi] === rightVal) {
-          hi--
+        k--
+        while (j < k && nums[j] === nums[k + 1]) {
+          k--
         }
       }
     }
-    return res
   }
+
+  return ans
 }
 // @lc code=end
