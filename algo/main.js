@@ -1,23 +1,25 @@
-/**
- * @param {number} target
- * @param {number[]} nums
- * @return {number}
- */
-var minSubArrayLen = function (target, nums) {
-  let minLen = nums.length + 1
-  for (let i = 0; i < nums.length; i++) {
-    // console.log('--------i', i)
-    let j = i
-    let sum = 0
-    debugger
-    while (j < nums.length && sum < target) {
-      sum += nums[j]
-      j++
-    }
-    // console.log(sum, i, j)
-    minLen = Math.min(minLen, j - i + 1)
+var combine = function (n, k) {
+  if (n === 1) {
+    return [[1]]
   }
-  return minLen === nums.length + 1 ? 0 : minLen
+  let ans = []
+  let paths = []
+  debugger
+
+  function dfs(n, k, startIdx) {
+    if (paths.length === k) {
+      ans.push(paths.slice())
+      return
+    }
+    for (let i = startIdx; i <= n; i++) {
+      paths.push(i)
+      dfs(n, k, i + 1)
+      paths.pop()
+    }
+  }
+
+  dfs(n, k, 1)
+  return ans
 }
 
-console.log(minSubArrayLen(1, [1, 4, 4]))
+console.log(combine(4, 2))
