@@ -1,5 +1,10 @@
-import { cloneDeep } from 'lodash-es'
+/*
+ * @lc app=leetcode.cn id=51 lang=javascript
+ *
+ * [51] N 皇后
+ */
 
+// @lc code=start
 /**
  * @param {number} n
  * @return {string[][]}
@@ -46,5 +51,4 @@ var solveNQueens = function (n) {
   backtrack(0) // 从第 0 行开始回溯
   return solutions // 返回所有解决方案
 }
-
-console.log(solveNQueens(4))
+// @lc code=end

@@ -13,20 +13,18 @@ var subsets = function (nums) {
   let ans = []
   let path = []
   let n = nums.length
-  function dfs(i) {
-    if (i === n) {
-      ans.push([...path])
-      return
+
+  function backtrack(start) {
+    ans.push([...path])
+
+    for (let i = start; i < n; i++) {
+      path.push(nums[i])
+      backtrack(i + 1)
+      path.pop()
     }
-    // 不选
-    dfs(i + 1)
-    // 选
-    path.push(nums[i])
-    dfs(i + 1)
-    path.pop()
   }
 
-  dfs(0)
+  backtrack(0)
 
   return ans
 }

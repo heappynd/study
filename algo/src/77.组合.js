@@ -19,7 +19,7 @@ var combine = function (n, k) {
       ans.push([...path])
       return
     }
-    for (let i = startIdx; i <= n; i++) {
+    for (let i = startIdx; i <= n - (k - path.length) + 1; i++) {
       path.push(i)
       dfs(i + 1)
       path.pop()
