@@ -1,8 +1,20 @@
+/*
+ * @lc app=leetcode.cn id=1005 lang=javascript
+ *
+ * [1005] K 次取反后最大化的数组和
+ */
+
+// @lc code=start
+/**
+ * @param {number[]} nums
+ * @param {number} k
+ * @return {number}
+ */
 var largestSumAfterKNegations = function (nums, k) {
   // 按绝对值排序
   nums.sort((a, b) => Math.abs(b) - Math.abs(a))
 
-  console.log(nums)
+  // console.log(nums)
 
   for (let i = 0; i < nums.length; i++) {
     if (nums[i] < 0 && k > 0) {
@@ -20,5 +32,4 @@ var largestSumAfterKNegations = function (nums, k) {
 
   return nums.reduce((sum, curr) => sum + curr)
 }
-
-console.log(largestSumAfterKNegations([2, -3, -1, 5, -4], 2))
+// @lc code=end
