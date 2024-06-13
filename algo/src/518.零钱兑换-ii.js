@@ -1,4 +1,17 @@
+/*
+ * @lc app=leetcode.cn id=518 lang=javascript
+ *
+ * [518] 零钱兑换 II
+ */
+
+// @lc code=start
+/**
+ * @param {number} amount
+ * @param {number[]} coins
+ * @return {number}
+ */
 var change = function (amount, coins) {
+  // 可以凑成总金额j的硬币组合数
   // 可以凑成总金额j的硬币组合数
   const dp = new Array(amount + 1).fill(0)
   dp[0] = 1
@@ -11,5 +24,4 @@ var change = function (amount, coins) {
 
   return dp[amount]
 }
-
-console.log(change(5, [1, 2, 5]))
+// @lc code=end
