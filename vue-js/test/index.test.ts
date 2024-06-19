@@ -407,4 +407,16 @@ describe('4', () => {
     effect(fn1)
     effect(fn2)
   })
+
+  it.skip('5-8 Map Set', () => {
+    const proxy = reactive(new Map([['key', 1]]))
+    const fn = vi.fn(() => {
+      proxy.get('key')
+    })
+    effect(fn)
+
+    proxy.set('key', 2) // 修改键为 key 的值，应该触发响应
+
+    expect(fn).toHaveBeenCalledTimes(2)
+  })
 })

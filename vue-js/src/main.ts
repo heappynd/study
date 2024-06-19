@@ -136,6 +136,7 @@ function createReactive(obj, isShallow = false, isReadonly = false) {
       if (key === 'raw') {
         return target
       }
+
       // 如果操作的目标对象是数组，并且 key 存在于arrayInstrumentations 上，
       // 那么返回定义在 arrayInstrumentations 上的值
       if (Array.isArray(target) && arrayInstrumentations.hasOwnProperty(key)) {
@@ -245,6 +246,63 @@ export function readonly(obj) {
 }
 export function shallowReadonly(obj) {
   return createReactive(obj, true, true)
+}
+
+export function ref(val) {
+  // 在 ref 函数内部创建包裹对象
+  const wrapper = {
+    value: val,
+  }
+  // 使用 Object.defineProperty 在 wrapper 对象上定义一个不可枚举的属性 __v_isRef，并且值为 true
+  Object.defineProperty(wrapper, '__v_isRef', {
+    value: true,
+  })
+  // 将包裹对象变成响应式数据
+  return reactive(wrapper)
+}
+
+export function toRef(obj, key) {
+  const wrapper = {
+    get value() {
+      return obj[key]
+    },
+    set value(val) {
+      obj[key] = val
+    },
+  }
+  Object.defineProperty(wrapper, '__v_isRef', {
+    value: true,
+  })
+  return wrapper
+}
+
+export function toRefs(obj) {
+  const ret = {}
+  for (const key in obj) {
+    ret[key] = toRef(obj, key)
+  }
+  return ret
+}
+
+function proxyRefs(target) {
+  return new Proxy(target, {
+    get(target, key, receiver) {
+      // 代理对象的作用是拦截 get 操作，
+      // 当读取的属性是一个 ref 时，则直接返回该 ref 的 value 属性值，这样就实现了自动脱 ref：
+      const value = Reflect.get(target, key, receiver)
+      return value.__v_isRef ? value.value : value
+    },
+    set(target, key, newValue, receiver) {
+      // 通过 target 读取真实值
+      const value = target[key]
+      // 如果值是 Ref，则设置其对应的 value 属性值
+      if (value.__v_isRef) {
+        value.value = newValue
+        return true
+      }
+      return Reflect.set(target, key, newValue, receiver)
+    },
+  })
 }
 
 let activeEffect = null
