@@ -1,0 +1,14 @@
+:root {
+  --primary-color: blue;
+}
+
+p {
+  color: var(--primary-color);
+}
+
+.box1 {
+  display: flex;
+  width: 200px;
+  height: 200px;
+  background-size: cover;
+}
