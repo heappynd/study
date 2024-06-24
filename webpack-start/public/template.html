@@ -1,9 +1,13 @@
 <!DOCTYPE html>
-<html lang="">
+<html lang="zh">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
+    <%=require('raw-loader!../src/inline/meta.html').default %>
+    <script>
+      <%=require('raw-loader!../src/inline/compat.js').default %>
+    </script>
   </head>
   <body>
     <div id="app"></div>
