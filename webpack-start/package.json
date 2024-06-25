@@ -7,7 +7,9 @@
     "dev": "webpack serve --config config/webpack.dev.js",
     "build": "webpack --config config/webpack.prod.js",
     "build:code-split": "webpack --config code-split/webpack.config.js",
-    "build:loader": "webpack --config webpack.loader.js"
+    "build:loader": "webpack --config webpack.loader.js",
+    "build:plugin": "webpack --config webpack.plugin.js",
+    "debug": "node --inspect-brk ./node_modules/webpack-cli/bin/cli.js -- --config webpack.plugin.js"
   },
   "keywords": [],
   "author": "",
