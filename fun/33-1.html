@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      body {
+        margin: 10px;
+        border: 10px solid #000;
+      }
+      #div1 {
+        background: lightblue;
+        padding: 100px;
+        margin: 100px;
+        height: 100px;
+        width: 100px;
+        overflow: auto;
+        border: 100px solid salmon;
+      }
+      #div2 {
+        height: 1000px;
+        background: lightskyblue;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="div1">
+      我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我我
+    </div>
+    <div id="div2">2</div>
+
+    <script>
+      const div1 = document.getElementById('div1')
+      const div2 = document.getElementById('div2')
+
+      console.log(div1.offsetParent)
+      // offsetParent.marginTop 
+      // + offsetParent.borderTop 
+      // + offsetParent.paddingTop 
+      // + div1.marginTop
+      console.log(div1.offsetTop)
+      console.log(div1.offsetLeft)
+      // 仅针对显示的元素计算几何属性。
+      // contentWidth + padding + border + 滚动条
+      console.log(div1.offsetWidth)
+      console.log(div1.offsetHeight)
+      // 左边框宽度
+      // 但准确地说 —— 这些属性不是边框的 width/height，而是内侧与外侧的相对坐标。
+      console.log(div1.clientTop)
+      console.log(div1.clientLeft)
+
+      // content width + padding 不包含滚动条
+      // 在某些浏览器中，滚动条会占用内容的空间 （chrome）
+      // 当没有 padding 时，我们可以使用 clientWidth/clientHeight 来获取内容区域的大小
+      console.log(div1.clientWidth)
+      console.log(div1.clientHeight)
+
+      // 这些属性就像 clientWidth/clientHeight，
+      // 但它们还包括滚动出（隐藏）的部分
+      console.log(div1.scrollWidth)
+      console.log(div1.scrollHeight)
+
+      // 属性 scrollLeft/scrollTop 是元素的隐藏、
+      // 滚动部分的 width/height。 ！ 可修改
+      console.log(div1.scrollTop)
+      console.log(div1.scrollLeft)
+    </script>
+  </body>
+</html>

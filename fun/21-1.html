@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      img[data-src] {
+        display: block;
+        margin-bottom: 50px;
+      }
+    </style>
+  </head>
+  <body>
+    <img src="https://placehold.co/600x400?text=Loading..." alt="x" data-src="https://placehold.co/600x400?text=1" />
+    <img src="https://placehold.co/600x400?text=Loading..." alt="x" data-src="https://placehold.co/600x400?text=2" />
+    <img src="https://placehold.co/600x400?text=Loading..." alt="x" data-src="https://placehold.co/600x400?text=3" />
+    <img src="https://placehold.co/600x400?text=Loading..." alt="x" data-src="https://placehold.co/600x400?text=4" />
+    <img src="https://placehold.co/600x400?text=Loading..." alt="x" data-src="https://placehold.co/600x400?text=5" />
+    <img src="https://placehold.co/600x400?text=Loading..." alt="x" data-src="https://placehold.co/600x400?text=6" />
+    <img src="https://placehold.co/600x400?text=Loading..." alt="x" data-src="https://placehold.co/600x400?text=7" />
+    <img src="https://placehold.co/600x400?text=Loading..." alt="x" data-src="https://placehold.co/600x400?text=8" />
+
+    <script>
+      function lazyload() {
+        //获取可视区高度，兼容不同浏览器
+        const viewHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
+        console.log('viewHeight', viewHeight)
+
+        const imgs = document.querySelectorAll('img[data-src]')
+        imgs.forEach((img, index) => {
+          if (img.dataset.src === '') {
+            return
+          }
+          const rect = img.getBoundingClientRect()
+          if (rect.bottom >= 0 && rect.top < viewHeight) {
+            img.src = img.dataset.src
+            img.removeAttribute('data-src')
+          }
+        })
+      }
+      // TODO: 节流包装
+      window.onscroll = function () {
+        lazyload()
+      }
+    </script>
+  </body>
+</html>

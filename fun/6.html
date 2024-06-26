@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script>
+      const obj = {
+        a: '123',
+        b: '234',
+
+        [Symbol.iterator]() {
+          let index = 0
+          const keys = Object.keys(this)
+          return {
+            next() {
+              if (index < keys.length) {
+                return {
+                  value: obj[keys[index++]],
+                  done: false,
+                }
+              }
+              return { value: undefined, done: true }
+            },
+          }
+        },
+      }
+
+      const [a, b] = obj
+      console.log('a', a)
+      console.log('b', b)
+
+      // const array = [1, 2, 3]
+      // const iterator = array[Symbol.iterator]()
+      // console.log(iterator);
+      // // {value: any, done: boolean}
+      // console.log(iterator.next());
+      // console.log(iterator.next());
+      // console.log(iterator.next());
+      // console.log(iterator.next());
+
+      // const [a, b, c] = array
+      // const iter = array[Symbol.iterator]()
+      // const a = iter.next().value
+      // const b = iter.next().value
+      // const c = iter.next().value
+    </script>
+  </body>
+</html>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div>
+      <button id="sendBtn">send</button>
+    </div>
+
+    <script>
+      const sendBtn = document.getElementById('sendBtn')
+      sendBtn.onclick = function () {
+        const num = Math.floor(Math.random() * 99 + 1)
+        localStorage.setItem('tab', num)
+      }
+      window.addEventListener('storage', (e) => {
+        console.log(e.key)
+        console.log(e.newValue, e.oldValue)
+      })
+    </script>
+  </body>
+</html>

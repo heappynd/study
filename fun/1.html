@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      #parent {
+        width: 200px;
+        height: 200px;
+        background: pink;
+        overflow: auto;
+      }
+      #child {
+        height: 1000px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="parent">
+      <input id="child" />
+    </div>
+
+    <script>
+      const parent = document.querySelector('#parent')
+      const child = document.querySelector('#child')
+      // focus blur focusin focusout
+      // load 会在整个页面加载完成（包括所有依赖的资源，样式表，脚本，iframes, 图片）
+      // DOMContentLoaded 在页面DOM加载完成后立即触发，而不会等待资源完成加载
+      // unload 事件会在卸载文档或子资源时触发。
+      // stop audio video 相关 停止播放时触发
+      // readystatechange 当 document 的 readyState 改变时触发。这通常在页面加载时使用。
+      // scroll
+      child.addEventListener('focusin', () => {
+        console.log('child')
+      })
+
+      parent.addEventListener('focusin', () => {
+        console.log('parent')
+      })
+
+      parent.addEventListener('scroll', (e) => {
+        console.log(e)
+      })
+
+      window.addEventListener('scroll', (e) => {
+        console.log('window scroll')
+      })
+
+      document.addEventListener('readystatechange', (e) => {
+        console.log(e)
+        console.log(document.readyState)
+      })
+
+      window.onunload = function () {
+        localStorage.setItem('uisx', '001')
+      }
+    </script>
+  </body>
+</html>

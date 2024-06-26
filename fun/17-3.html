@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script>
+      function Person(name) {
+        this.name = name
+      }
+      Person.prototype.getName = function () {
+        return this.name
+      }
+      function Student() {
+        // 构造函数继承
+        Person.apply(this, arguments)
+      }
+      Student.prototype = new Person()
+      Student.prototype.constructor = Student
+
+      const student = new Student('Back_kk')
+      console.log(student) // Back_kk
+      console.log(student.getName()) // Back_kk
+
+      const s = new Student('Back_ss')
+    </script>
+  </body>
+</html>

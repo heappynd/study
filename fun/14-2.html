@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div>
+      <button id="sendBtn">send</button>
+    </div>
+
+    <script>
+      const bc = new BroadcastChannel('test_channel')
+      const sendBtn = document.getElementById('sendBtn')
+      sendBtn.onclick = function () {
+        const num = Math.floor(Math.random() * 99 + 1)
+        bc.postMessage('我发送消息了' + num)
+      }
+      bc.onmessage = (e) => {
+        console.log(e.data)
+      }
+    </script>
+  </body>
+</html>

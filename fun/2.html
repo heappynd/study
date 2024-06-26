@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      .box {
+        height: 200px;
+        background: salmon;
+        display: flex;
+      }
+      .box1 {
+        flex: 1;
+        height: 200px;
+        background: silver;
+      }
+      .box2 {
+        flex: 1;
+        height: 200px;
+        background: gold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="box">
+      <div class="box1"></div>
+      <div class="box2"></div>
+    </div>
+
+    <script>
+      const box = document.querySelector('.box')
+      box.addEventListener('mouseenter', (e) => {
+        console.log(e)
+      })
+      box.addEventListener('mouseover', (e) => {
+        console.log('over', e)
+      })
+    </script>
+  </body>
+</html>

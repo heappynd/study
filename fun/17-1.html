@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script>
+      function Person() {
+        this.name = 'Back_kk'
+      }
+      Person.prototype.getName = function () {
+        return this.name
+      }
+
+      function Student() {}
+      // 原型链继承
+      Student.prototype = new Person()
+      // 根据原型链的规则,顺便绑定一下constructor, 这一步不影响继承, 只是在用到constructor时会需要
+      // 原型的实例等于自身
+      Student.prototype.constructor = Student
+
+      const student = new Student()
+      console.log(student.name) // Back_kk
+      console.log(student.getName()) // Back_kk
+    </script>
+  </body>
+</html>

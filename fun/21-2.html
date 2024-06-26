@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      img[data-src] {
+        display: block;
+        margin-bottom: 50px;
+        width: 600px;
+        height: 400px;
+      }
+    </style>
+  </head>
+  <body>
+    <img src="https://placehold.co/600x400?text=Loading..." alt="x" data-src="https://placehold.co/600x400?text=1" />
+    <img src="https://placehold.co/600x400?text=Loading..." alt="x" data-src="https://placehold.co/600x400?text=2" />
+    <img src="https://placehold.co/600x400?text=Loading..." alt="x" data-src="https://placehold.co/600x400?text=3" />
+    <img src="https://placehold.co/600x400?text=Loading..." alt="x" data-src="https://placehold.co/600x400?text=4" />
+    <img src="https://placehold.co/600x400?text=Loading..." alt="x" data-src="https://placehold.co/600x400?text=5" />
+    <img src="https://placehold.co/600x400?text=Loading..." alt="x" data-src="https://placehold.co/600x400?text=6" />
+    <img src="https://placehold.co/600x400?text=Loading..." alt="x" data-src="https://placehold.co/600x400?text=7" />
+    <img src="https://placehold.co/600x400?text=Loading..." alt="x" data-src="https://placehold.co/600x400?text=8" />
+
+    <script>
+      // 观察两个元素交叉情况
+      const ob = new IntersectionObserver(
+        (entries, self) => {
+          // console.log(entries.map((item) => item.target.dataset.src))
+          // console.log(entries.map((item) => item.isIntersecting))
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              console.log(entry.target.dataset.src, '交叉了')
+              entry.target.src = entry.target.dataset.src
+              ob.unobserve(entry.target)
+            }
+          }
+        },
+        {
+          // 扩散或收缩
+          // rootMargin: '0px',
+          // 阈值 交叉多少 0 - 1
+          threshold: 0,
+          // 判断交叉的对象 默认为视口
+          // root: null,
+        }
+      )
+
+      const imgs = document.querySelectorAll('img[data-src]')
+      imgs.forEach((img) => {
+        ob.observe(img)
+      })
+    </script>
+  </body>
+</html>

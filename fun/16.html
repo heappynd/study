@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script>
+      // 定义构造函数 Person
+      function Person(firstName, lastName) {
+        // 该属性一般用在构造函数中，返回new命令作用的那个函数
+        // 如果构造函数不是new或者Reflect.construct()调用的，就会返回undefined
+        // console.log(new.target)
+        // console.log(this);
+        // if (!(this instanceof Person)) {
+        //   throw new TypeError('Function constructor A cannot be invoked without "new"')
+        // }
+        // new.target 实现抽象类 子类继承父类时，new.target会返回子类
+        if (!new.target) {
+          throw new TypeError('Function constructor A cannot be invoked without "new"')
+        }
+        this.firstName = firstName
+        this.lastName = lastName
+        this.fullName = this.firstName + this.lastName
+      }
+      // 使用 new 调用
+      console.log(new Person('战场', '小包'))
+      // 当作普通函数调用
+      // console.log(Person('战场', '小包'))
+      const p = new Person()
+      Person.call(p, 'x', 'y')
+      console.log('p', p)
+    </script>
+  </body>
+</html>
