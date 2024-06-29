@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+      }
+      /* 父子元素的外边距重叠 */
+      /* 这种情况存在父元素与其第一个或最后一个子元素之间（嵌套元素）。 */
+      /* 如果在父元素与其第一个/最后一个子元素之间
+      不存在边框、内边距、行内内容，
+      也没有创建块格式化上下文、或者清除浮动将两者的外边距分开，
+      此时子元素的外边距会“溢出”到父元素的外面。 */
+      #parent {
+        /* border: 10px solid #000; */
+        overflow: hidden;
+        width: 200px;
+        height: 200px;
+        background-color: green;
+        margin-top: 20px;
+      }
+      #child {
+        width: 100px;
+        height: 100px;
+        background-color: red;
+        margin-top: 30px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="parent">
+      <div id="child"></div>
+    </div>
+  </body>
+</html>

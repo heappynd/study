@@ -1,0 +1,16 @@
+.a {
+  /* animation: name duration timing-function delay iteration-count direction fill-mode; */
+  animation-name: ke;
+  animation-duration: 2s;
+  animation-timing-function: ease;
+  animation-delay: 2s;
+  animation-iteration-count: 2;
+  animation-direction: reverse;
+  animation-fill-mode: both;
+}
+
+.t {
+  transition: all 2s ease 2s;
+
+  transform: scale(1);
+}
